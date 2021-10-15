@@ -1,0 +1,21 @@
+{
+  "headers": {
+    "x-amz-id-2": "0a50+cyM5rAZWlGYlV4B/Wl/q0JIfVbz1hcBkBxoqmF2n635kh6cg67noeZqjtjVHmoIbagtZtw=",
+    "connection": "keep-alive",
+    "content-type": "application/typescript; charset=utf-8",
+    "last-modified": "Mon, 04 Oct 2021 22:06:40 GMT",
+    "cf-ray": "69ec1514cd033317-CDG",
+    "cf-cache-status": "DYNAMIC",
+    "access-control-allow-origin": "*",
+    "date": "Fri, 15 Oct 2021 21:18:51 GMT",
+    "x-amz-version-id": "UbYG8ZNWgVBr82T.vX7WGiqrf1sbtp_B",
+    "server": "cloudflare",
+    "content-length": "8365",
+    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+    "etag": "\"afe6c763968329b128a664d5fedd3bd7\"",
+    "alt-svc": "h3=\":443\"; ma=86400, h3-29=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-27=\":443\"; ma=86400",
+    "cache-control": "public, max-age=31536000, immutable",
+    "x-amz-request-id": "FAKXQ1QE6MDZMHBQ"
+  },
+  "url": "https://deno.land/std@0.110.0/io/buffer.ts"
+}

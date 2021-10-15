@@ -1,0 +1,21 @@
+{
+  "headers": {
+    "content-length": "2712",
+    "date": "Fri, 15 Oct 2021 21:18:51 GMT",
+    "alt-svc": "h3=\":443\"; ma=86400, h3-29=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-27=\":443\"; ma=86400",
+    "etag": "\"5ee62926da00509af6fc1dc1fe6b2801\"",
+    "x-amz-id-2": "0e/qtpFSAd/HAB7SxgwxkKLZ8JMyQsrprCgj+YbGgqHQzaQsCjgiZsqlHu425IHqpZJ4jz/eM9k=",
+    "content-type": "application/typescript; charset=utf-8",
+    "cf-cache-status": "DYNAMIC",
+    "access-control-allow-origin": "*",
+    "cache-control": "public, max-age=31536000, immutable",
+    "x-amz-version-id": "zC3Up4XcbKRKjC6wtnY0CmNG6uLP9ESV",
+    "last-modified": "Mon, 04 Oct 2021 22:06:40 GMT",
+    "x-amz-request-id": "FAKV3TZBZ9SD9QX4",
+    "server": "cloudflare",
+    "connection": "keep-alive",
+    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+    "cf-ray": "69ec1514da58a879-CDG"
+  },
+  "url": "https://deno.land/std@0.110.0/io/ioutil.ts"
+}

@@ -1,0 +1,21 @@
+# Velociraptor is a script runner for Deno: https://velociraptor.run/docs/installation/
+
+scripts:
+  test: deno test -A
+
+  test-watch: deno test -A --watch --unstable
+
+  lint: deno lint --ignore=.DENO_DIR,dist
+
+  fmt: deno fmt --ignore=.DENO_DIR,dist,.lock.json
+
+  bundle: deno bundle mod.ts dist/mod.js
+
+  bak-dep: DENO_DIR=./.DENO_DIR deno cache --lock=.lock.json --lock-write mod.ts deps.ts test_deps.ts
+
+  gen-cov:
+    - rm -rf .cov_profile
+    - deno test --coverage=.cov_profile -A
+    - deno coverage .cov_profile --lcov > .cov_profile/cov_profile.lcov
+    - genhtml -o .cov_profile/html .cov_profile/cov_profile.lcov
+
