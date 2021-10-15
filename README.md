@@ -7,7 +7,10 @@ It has zero 3rd party dependencies and don't internally run sh or bash commands.
 ## Quick exemples
 
 ```typescript
-import { FromRun, FromFile } from "https://deno.land/x/shell_stream@v0.1.0/mod.ts";
+import {
+  FromFile,
+  FromRun,
+} from "https://deno.land/x/shell_stream@v0.1.0/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.110.0/fmt/colors.ts";
 
 let res = await FromRun("cat /etc/passwd").run("grep /root").toString();
