@@ -29,6 +29,21 @@ console.log(res); // → deno 1.15.1 (release, x86_64-unknown-linux-gnu)
 
 console.log(await FromRun(["deno", "--version"]).tail(2).toArray());
 // → ["v8 9.5.172.19", "typescript 4.4.2"]
+
+// exit codes of processes can be retrieved :
+const closeRes = await FromRun([
+  Deno.execPath(),
+  "eval",
+  'console.log("foo"); Deno.exit(13)',
+])
+  .run("cat")
+  .run("cat")
+  .close();
+const exitCodes = closeRes.statuses.map((s) => s?.code);
+console.log(
+  `success=${closeRes.success} codes=${exitCodes} out=${closeRes.out}`,
+);
+// → "success=false codes=13,0,0 out=foo"
 ```
 
 See more examples in `example.ts` file.

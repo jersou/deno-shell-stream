@@ -144,5 +144,27 @@ res = new TextDecoder().decode(await process2.output());
 process2.close();
 console.log(res); // → root:x:0:0:root:/root:/bin/bash
 
+console.log(bgRed("-FromRun-run-run-----------------------------------------"));
+// exit codes of processes can be retrieved :
+closeRes = await FromRun([
+  Deno.execPath(),
+  "eval",
+  'console.log("foo"); Deno.exit(13)',
+])
+  .run("cat")
+  .run("cat")
+  .close();
+const codes = closeRes.statuses.map((s) => s?.code);
+console.log(`success=${closeRes.success} codes=${codes} out=${closeRes.out}`);
+// → "success=false codes=13,0,0 out=foo"
+// → "success=false; exit codes = 13,0,0"
+console.log(closeRes);
+// closeRes === {
+//   success: false,
+//   statuses: [ { success: false, code: 1, cmd: [...] },
+//               { success: true, code: 0, cmd: [ "cat" ] } ],
+//   out: [ "foo" ]
+// }
+
 // check : all ressources are closed and ops completed
 sanitize();
