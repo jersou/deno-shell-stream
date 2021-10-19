@@ -2,24 +2,16 @@ import { ShellStream } from "../shell_stream.ts";
 import { EndOperator } from "../types.ts";
 import { closeProcess } from "../operators/run.ts";
 
-export type CloseRes = {
-  success: boolean;
-  statuses: ((Deno.ProcessStatus & { cmd: string[] }) | undefined)[];
-  out: string[];
-};
-
 export type CloseOptions = {
   processes: "KILL" | "AWAIT" | "KEEP";
 };
 
-export const close: EndOperator<CloseRes> = (
-  opt: CloseOptions = { processes: "AWAIT" },
-) =>
+export const close: EndOperator<CloseRes> =
+  (opt: CloseOptions = { processes: "AWAIT" }) =>
   async (shellStream: ShellStream): Promise<CloseRes> => {
-    const generator = await shellStream.generator;
     const out = [];
     // consume the generator
-    for await (const line of generator!) {
+    for await (const line of shellStream.generator!) {
       out.push(line);
     }
     if (opt.processes === "AWAIT") {
@@ -35,7 +27,11 @@ export const close: EndOperator<CloseRes> = (
           } catch (_e) {
             // ignore error
           }
-          stream.processStatus = await stream.process.status();
+          try {
+            stream.processStatus = await stream.process.status();
+          } catch (_) {
+            // ignore error
+          }
           try {
             stream.process.close();
           } catch (_) {
@@ -79,5 +75,16 @@ export const close: EndOperator<CloseRes> = (
       );
     });
     const success = !statuses.some((s) => s && !s.success);
-    return { success, statuses, out };
+    return new CloseRes(success, statuses, out);
   };
+
+export class CloseRes {
+  constructor(
+    public success: boolean,
+    public statuses: ((Deno.ProcessStatus & { cmd: string[] }) | undefined)[],
+    public out: string[]
+  ) {}
+  tostring() {
+    return this.out.join("\n");
+  }
+}
