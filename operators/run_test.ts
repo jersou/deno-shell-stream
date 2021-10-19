@@ -75,3 +75,36 @@ Deno.test("run-KILL", async () => {
   assertEquals(res.statuses[0]?.code, 130);
   assertEquals(res.statuses[1]?.code, 2);
 });
+
+Deno.test("run-out", async () => {
+  const res = await FromRun([
+    Deno.execPath(),
+    "eval",
+    "console.log('aa');console.log('bb');",
+  ]).close();
+  assert(res.success);
+  assertEquals(res.out, ["aa", "bb"]);
+});
+
+Deno.test("run-single-line", async () => {
+  const res = await FromRun([
+    Deno.execPath(),
+    "eval",
+    "console.log('aa')",
+  ]).close();
+  assert(res.success);
+  assertEquals(res.out, ["aa"]);
+});
+
+Deno.test("run-long-line", async () => {
+  const length = 5000;
+  const longLine = "x".repeat(length);
+
+  const res = await FromRun([
+    Deno.execPath(),
+    "eval",
+    `console.log('x'.repeat(${length}))`,
+  ]).close();
+  assert(res.success);
+  assertEquals(res.out, [longLine]);
+});
