@@ -31,31 +31,6 @@ function copy(src, dst, off = 0) {
     dst.set(src, off);
     return src.byteLength;
 }
-const { Deno  } = globalThis;
-typeof Deno?.noColor === "boolean" ? Deno.noColor : true;
-new RegExp([
-    "[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)",
-    "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))", 
-].join("|"), "g");
-var DiffType;
-(function(DiffType) {
-    DiffType["removed"] = "removed";
-    DiffType["common"] = "common";
-    DiffType["added"] = "added";
-})(DiffType || (DiffType = {
-}));
-async function writeAll(w, arr) {
-    let nwritten = 0;
-    while(nwritten < arr.length){
-        nwritten += await w.write(arr.subarray(nwritten));
-    }
-}
-function writeAllSync(w, arr) {
-    let nwritten = 0;
-    while(nwritten < arr.length){
-        nwritten += w.writeSync(arr.subarray(nwritten));
-    }
-}
 const DEFAULT_BUF_SIZE = 4096;
 const MIN_BUF_SIZE = 16;
 const CR = "\r".charCodeAt(0);
@@ -210,6 +185,7 @@ class BufReader {
             if (!(err instanceof BufferFullError)) {
                 throw err;
             }
+            partial = err.partial;
             if (!this.eof && partial && partial.byteLength > 0 && partial[partial.byteLength - 1] === CR) {
                 assert(this.r > 0, "bufio: tried to rewind past start of buffer");
                 this.r--;
@@ -357,7 +333,11 @@ class BufWriter extends AbstractBufBase {
         if (this.err !== null) throw this.err;
         if (this.usedBufferBytes === 0) return;
         try {
-            await writeAll(this.writer, this.buf.subarray(0, this.usedBufferBytes));
+            const p = this.buf.subarray(0, this.usedBufferBytes);
+            let nwritten = 0;
+            while(nwritten < p.length){
+                nwritten += await this.writer.write(p.subarray(nwritten));
+            }
         } catch (e) {
             if (e instanceof Error) {
                 this.err = e;
@@ -418,7 +398,11 @@ class BufWriterSync extends AbstractBufBase {
         if (this.err !== null) throw this.err;
         if (this.usedBufferBytes === 0) return;
         try {
-            writeAllSync(this.writer, this.buf.subarray(0, this.usedBufferBytes));
+            const p = this.buf.subarray(0, this.usedBufferBytes);
+            let nwritten = 0;
+            while(nwritten < p.length){
+                nwritten += this.writer.writeSync(p.subarray(nwritten));
+            }
         } catch (e) {
             if (e instanceof Error) {
                 this.err = e;
@@ -476,6 +460,19 @@ async function* readLines(reader, decoderOpts) {
         }
     }
 }
+const { Deno: Deno1  } = globalThis;
+typeof Deno1?.noColor === "boolean" ? Deno1.noColor : true;
+new RegExp([
+    "[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)",
+    "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))", 
+].join("|"), "g");
+var DiffType;
+(function(DiffType) {
+    DiffType["removed"] = "removed";
+    DiffType["common"] = "common";
+    DiffType["added"] = "added";
+})(DiffType || (DiffType = {
+}));
 BigInt(Number.MAX_SAFE_INTEGER);
 new TextDecoder();
 const osType = (()=>{
@@ -599,7 +596,7 @@ function resolve(...pathSegments) {
             if (typeof Deno?.env?.get !== "function" || typeof Deno?.cwd !== "function") {
                 throw new TypeError("Resolved a relative path without a CWD.");
             }
-            path = Deno.env.get(`=${resolvedDevice}`) || Deno.cwd();
+            path = Deno.cwd();
             if (path === undefined || path.slice(0, 3).toLowerCase() !== `${resolvedDevice.toLowerCase()}\\`) {
                 path = `${resolvedDevice}\\`;
             }
@@ -1632,9 +1629,8 @@ function closeProcess1(process) {
 const close1 = (opt = {
     processes: "AWAIT"
 })=>async (shellStream)=>{
-        const generator = await shellStream.generator;
         const out = [];
-        for await (const line of generator){
+        for await (const line of shellStream.generator){
             out.push(line);
         }
         if (opt.processes === "AWAIT") {
@@ -1648,10 +1644,13 @@ const close1 = (opt = {
                         stream.process.stdout.close();
                     } catch (_e1) {
                     }
-                    stream.processStatus = await stream.process.status();
+                    try {
+                        stream.processStatus = await stream.process.status();
+                    } catch (_) {
+                    }
                     try {
                         stream.process.close();
-                    } catch (_) {
+                    } catch (_1) {
                     }
                 }
             }
@@ -1686,11 +1685,7 @@ const close1 = (opt = {
         });
         const success = !statuses.some((s)=>s && !s.success
         );
-        return {
-            success,
-            statuses,
-            out
-        };
+        return new CloseRes(success, statuses, out);
     }
 ;
 const toString1 = ()=>async (shellStream)=>(await close1()(shellStream)).out.join("\n")
@@ -1904,6 +1899,19 @@ const Pipe1 = ShellStream1.pipe;
 const FromFile1 = ShellStream1.fromFile;
 const FromRun1 = ShellStream1.fromRun;
 const FromArray1 = ShellStream1.fromArray;
+class CloseRes {
+    success;
+    statuses;
+    out;
+    constructor(success, statuses, out){
+        this.success = success;
+        this.statuses = statuses;
+        this.out = out;
+    }
+    tostring() {
+        return this.out.join("\n");
+    }
+}
 export { FromArray1 as FromArray, FromFile1 as FromFile, FromRun1 as FromRun, Pipe1 as Pipe, ShellStream1 as ShellStream };
 export { fromArray1 as fromArray };
 export { fromRun1 as fromRun };
