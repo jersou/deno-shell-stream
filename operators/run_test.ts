@@ -18,7 +18,7 @@ Deno.test("parseCmdString", () => {
 
 Deno.test("run", async () => {
   const denoSh = `
-import { copy } from "https://deno.land/std@0.110.0/io/util.ts";
+import { copy } from "https://deno.land/std@0.112.0/io/util.ts";
 await copy(Deno.stdin, Deno.stdout);`;
   const out = await FromArray(["line1"])
     .run([Deno.execPath(), "eval", denoSh])

@@ -6,8 +6,9 @@ export type CloseOptions = {
   processes: "KILL" | "AWAIT" | "KEEP";
 };
 
-export const close: EndOperator<CloseRes> =
-  (opt: CloseOptions = { processes: "AWAIT" }) =>
+export const close: EndOperator<CloseRes> = (
+  opt: CloseOptions = { processes: "AWAIT" },
+) =>
   async (shellStream: ShellStream): Promise<CloseRes> => {
     const out = [];
     // consume the generator
@@ -82,7 +83,7 @@ export class CloseRes {
   constructor(
     public success: boolean,
     public statuses: ((Deno.ProcessStatus & { cmd: string[] }) | undefined)[],
-    public out: string[]
+    public out: string[],
   ) {}
   tostring() {
     return this.out.join("\n");
