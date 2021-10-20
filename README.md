@@ -10,7 +10,7 @@ It has zero 3rd party dependencies and don't internally run sh or bash commands.
 import {
   FromFile,
   FromRun,
-} from "https://deno.land/x/shell_stream@v0.1.4/mod.ts";
+} from "https://deno.land/x/shell_stream@v0.1.5/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.112.0/fmt/colors.ts";
 
 let res = await FromRun("cat /etc/passwd").run("grep /root").toString();
@@ -121,7 +121,8 @@ All these operators close the stream and return a Promise :
   write to the `converted` file.
 - `close(opt?: CloseOptions = { processes: "AWAIT" }):Promise<CloseRes>` : close
   all ressources and wait end of operators (includes processes end)
-- `success():Promise<boolean>` :  the stream is closed and CloseRes.success is returned
+- `success():Promise<boolean>` : the stream is closed and CloseRes.success is
+  returned
 
 ```typescript
 export type CloseRes = {
@@ -137,13 +138,13 @@ export type CloseRes = {
 
 ## RunOptions
 
+Extends [Deno.RunOptions](https://doc.deno.land/builtin/stable#Deno.RunOptions)
+
 ```
-export type RunOptions = {
+export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
   throwIfRunFail?: boolean;
   exitCodeIfRunFail?: number;
   streamStdErr?: boolean;
-  stdout?: "inherit" | "piped" | "null" | number;
-  stderr?: "inherit" | "piped" | "null" | number;
 };
 ```
 

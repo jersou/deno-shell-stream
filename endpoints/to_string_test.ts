@@ -1,4 +1,4 @@
-import { FromArray, FromFile } from "../shell_stream.ts";
+import { FromArray } from "../shell_stream.ts";
 import { assertEquals } from "../test_deps.ts";
 
 Deno.test("toFile", async () => {

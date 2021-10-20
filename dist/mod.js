@@ -1565,15 +1565,16 @@ const run1 = (cmdOrStr, opt)=>(stream)=>{
             stream.processCmd = parseCmdString1(cmdOrStr);
             stream.process = Deno.run({
                 cmd: stream.processCmd,
+                ...opt,
                 stdout: opt?.stdout || (opt?.streamStdErr ? "inherit" : "piped"),
                 stderr: opt?.stderr || (opt?.streamStdErr ? "piped" : "inherit"),
                 stdin: "piped"
             });
-            redirectGeneratorToStdin(stream);
+            redirectGeneratorToStdin(stream).then();
             (async ()=>{
                 stream.processStatus = await stream.process.status();
                 closeProcess1(stream.process);
-            })();
+            })().then();
             try {
                 for await (const line of readLines(opt?.streamStdErr ? stream.process.stderr : stream.process.stdout)){
                     yield line;
@@ -1692,6 +1693,8 @@ const toString1 = ()=>async (shellStream)=>(await close1()(shellStream)).out.joi
 ;
 const toArray1 = ()=>async (shellStream)=>(await close1()(shellStream)).out
 ;
+const success1 = ()=>async (shellStream)=>(await close1()(shellStream)).success
+;
 class ShellStream1 {
     parents;
     generator;
@@ -1740,6 +1743,8 @@ class ShellStream1 {
     toString = async ()=>await toString1()(this)
     ;
     toArray = async ()=>await toArray1()(this)
+    ;
+    success = async ()=>await success1()(this)
     ;
     static builder(generator, inputStream) {
         return new ShellStream1(inputStream ? [

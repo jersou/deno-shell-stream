@@ -2,29 +2,29 @@ import { ShellStream } from "../shell_stream.ts";
 import { readLines } from "../deps.ts";
 import { Operator } from "../types.ts";
 
-export type RunOptions = {
+export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
   throwIfRunFail?: boolean;
   exitCodeIfRunFail?: number;
   streamStdErr?: boolean;
-  stdout?: "inherit" | "piped" | "null" | number;
-  stderr?: "inherit" | "piped" | "null" | number;
 };
 
 export const run: Operator = (cmdOrStr: string[] | string, opt?: RunOptions) =>
   (stream: ShellStream) => {
     const generator = (async function* () {
       stream.processCmd = parseCmdString(cmdOrStr);
+
       stream.process = Deno.run({
         cmd: stream.processCmd,
+        ...opt,
         stdout: opt?.stdout || (opt?.streamStdErr ? "inherit" : "piped"),
         stderr: opt?.stderr || (opt?.streamStdErr ? "piped" : "inherit"),
         stdin: "piped",
       });
-      redirectGeneratorToStdin(stream);
+      redirectGeneratorToStdin(stream).then();
       (async () => {
         stream.processStatus = await stream.process!.status();
         closeProcess(stream.process!);
-      })();
+      })().then();
 
       try {
         for await (

@@ -108,3 +108,11 @@ Deno.test("run-long-line", async () => {
   assert(res.success);
   assertEquals(res.out, [longLine]);
 });
+
+Deno.test("run-env", async () => {
+  const denoSh = `console.log('aaa='+Deno.env.get('aaa'))`;
+  const out = await FromRun([Deno.execPath(), "eval", denoSh], {
+    env: { aaa: "bbb" },
+  }).toString();
+  assertEquals(out, "aaa=bbb");
+});

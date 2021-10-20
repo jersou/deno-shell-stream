@@ -30,7 +30,7 @@ export class ShellStream {
 
   private constructor(
     public parents: ShellStream[],
-    public generator: Generator
+    public generator: Generator,
   ) {}
 
   run = (cmd: string[] | string, opt?: RunOptions): ShellStream =>
@@ -64,7 +64,7 @@ export class ShellStream {
   static builder(generator: Generator, inputStream?: ShellStream): ShellStream {
     return new ShellStream(
       inputStream ? [...inputStream.parents, inputStream] : [],
-      generator
+      generator,
     );
   }
   static empty(): ShellStream {
