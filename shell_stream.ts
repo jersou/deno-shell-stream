@@ -20,6 +20,7 @@ import { fromRun } from "./startpoints/from_run.ts";
 import { tail } from "./operators/tail.ts";
 import { head } from "./operators/head.ts";
 import { logWithTimestamp } from "./operators/logWithTimestamp.ts";
+import { success } from "./endpoints/success.ts";
 
 export class ShellStream {
   process?: Deno.Process;
@@ -29,7 +30,7 @@ export class ShellStream {
 
   private constructor(
     public parents: ShellStream[],
-    public generator: Generator,
+    public generator: Generator
   ) {}
 
   run = (cmd: string[] | string, opt?: RunOptions): ShellStream =>
@@ -58,11 +59,12 @@ export class ShellStream {
     await close(opt)(this);
   toString = async () => await toString()(this);
   toArray = async () => await toArray()(this);
+  success = async () => await success()(this);
 
   static builder(generator: Generator, inputStream?: ShellStream): ShellStream {
     return new ShellStream(
       inputStream ? [...inputStream.parents, inputStream] : [],
-      generator,
+      generator
     );
   }
   static empty(): ShellStream {
