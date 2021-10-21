@@ -1,13 +1,18 @@
+import { fromString } from "./startpoints/from_string.ts";
+
 export {
   FromArray,
   FromFile,
   FromRun,
+  FromString,
   Pipe,
   ShellStream,
 } from "./shell_stream.ts";
 
 export { fromArray } from "./startpoints/from_array.ts";
 export { fromRun } from "./startpoints/from_run.ts";
+export { fromFile } from "./startpoints/from_file.ts";
+export { fromString } from "./startpoints/from_string.ts";
 
 export { cut } from "./operators/cut.ts";
 export { filter } from "./operators/filter.ts";
@@ -21,10 +26,11 @@ export { tap } from "./operators/tap.ts";
 export { tee } from "./operators/tee.ts";
 export { timestamp } from "./operators/timestamp.ts";
 
+export { close } from "./endpoints/close.ts";
+export { success } from "./endpoints/success.ts";
 export { toArray } from "./endpoints/to_array.ts";
 export { toFile } from "./endpoints/to_file.ts";
 export { toString } from "./endpoints/to_string.ts";
-export { close } from "./endpoints/close.ts";
 
 export { sanitize } from "./sanitize.ts";
 
