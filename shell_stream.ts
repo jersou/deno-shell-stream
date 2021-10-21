@@ -17,6 +17,7 @@ import { tee } from "./operators/tee.ts";
 import { fromFile } from "./startpoints/from_file.ts";
 import { fromArray } from "./startpoints/from_array.ts";
 import { fromRun } from "./startpoints/from_run.ts";
+import { fromString } from "./startpoints/from_string.ts";
 import { tail } from "./operators/tail.ts";
 import { head } from "./operators/head.ts";
 import { logWithTimestamp } from "./operators/logWithTimestamp.ts";
@@ -73,12 +74,44 @@ export class ShellStream {
   }
   static fromFile = (path: string) => fromFile(path)();
   static fromArray = (lines: string[]) => fromArray(lines)();
+  static fromString = (line: string) => fromString(line)();
   static fromRun = (cmd: string[] | string, opt?: RunOptions) =>
     fromRun(cmd, opt)();
   static pipe = (...op: OperatorFunc[]) => pipe(...op)(ShellStream.empty());
+
+  static processCount = 0;
+  static processDone = 0;
+  static processEventListener: ProcessEventListener[] = [];
+  static subscribeProcessEvent(listener: ProcessEventListener) {
+    ShellStream.processEventListener.push(listener);
+  }
+  static unsubscribeProcessEvent(listener: ProcessEventListener) {
+    ShellStream.processEventListener = ShellStream.processEventListener.filter(
+      (l) => l !== listener,
+    );
+  }
+  static sendProcessEvent() {
+    ShellStream.processEventListener.forEach((listener: ProcessEventListener) =>
+      listener({
+        processCount: ShellStream.processCount,
+        processDone: ShellStream.processDone,
+      })
+    );
+  }
+  static incProcessCount() {
+    ShellStream.processCount++;
+    ShellStream.sendProcessEvent();
+  }
+  static incProcessDone() {
+    ShellStream.processDone++;
+    ShellStream.sendProcessEvent();
+  }
 }
+export type ProcessEvent = { processCount: number; processDone: number };
+export type ProcessEventListener = (event: ProcessEvent) => unknown;
 
 export const Pipe = ShellStream.pipe;
 export const FromFile = ShellStream.fromFile;
 export const FromRun = ShellStream.fromRun;
 export const FromArray = ShellStream.fromArray;
+export const FromString = ShellStream.fromString;

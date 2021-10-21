@@ -20,9 +20,11 @@ export const run: Operator = (cmdOrStr: string[] | string, opt?: RunOptions) =>
         stderr: opt?.stderr || (opt?.streamStdErr ? "piped" : "inherit"),
         stdin: "piped",
       });
+      ShellStream.incProcessCount();
       redirectGeneratorToStdin(stream).then();
       (async () => {
         stream.processStatus = await stream.process!.status();
+        ShellStream.incProcessDone();
         closeProcess(stream.process!);
       })().then();
 

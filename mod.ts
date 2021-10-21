@@ -36,3 +36,4 @@ export { sanitize } from "./sanitize.ts";
 
 export type { OperatorFunc } from "./types.ts";
 export type { RunOptions } from "./operators/run.ts";
+export type { ProcessEvent, ProcessEventListener } from "./shell_stream.ts";
