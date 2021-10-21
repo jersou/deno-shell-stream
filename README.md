@@ -102,7 +102,7 @@ These operators return a ShellStream :
 - `replace(v: string | RegExp, r: Replacer)` : transform the stream with the
   replace result.
 - `cut(delim: string, indexes: number[], sep = " ")` : transform the stream with
-  the part ordered by indexes, split the line by `sep`.
+  the part ordered by indexes, split the line by `delim`.
 - `filter(filterFunction: FilterFunction)` : transform the stream, keep only
   lines that return true in filterFunction.
 - `grep(regex: RegExp)` : transform the stream, keep only lines that match the
