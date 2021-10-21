@@ -1586,9 +1586,11 @@ const run1 = (cmdOrStr, opt)=>(stream)=>{
                 stderr: opt?.stderr || (opt?.streamStdErr ? "piped" : "inherit"),
                 stdin: "piped"
             });
+            ShellStream1.incProcessCount();
             redirectGeneratorToStdin(stream).then();
             (async ()=>{
                 stream.processStatus = await stream.process.status();
+                ShellStream1.incProcessDone();
                 closeProcess1(stream.process);
             })().then();
             try {
@@ -1777,11 +1779,49 @@ class ShellStream1 {
     ;
     static fromArray = (lines)=>fromArray1(lines)()
     ;
+    static fromString = (line)=>fromString1(line)()
+    ;
     static fromRun = (cmd, opt)=>fromRun1(cmd, opt)()
     ;
     static pipe = (...op)=>pipe1(...op)(ShellStream1.empty())
     ;
+    static processCount = 0;
+    static processDone = 0;
+    static processEventListener = [];
+    static subscribeProcessEvent(listener) {
+        ShellStream1.processEventListener.push(listener);
+    }
+    static unsubscribeProcessEvent(listener) {
+        ShellStream1.processEventListener = ShellStream1.processEventListener.filter((l)=>l !== listener
+        );
+    }
+    static sendProcessEvent() {
+        ShellStream1.processEventListener.forEach((listener)=>listener({
+                processCount: ShellStream1.processCount,
+                processDone: ShellStream1.processDone
+            })
+        );
+    }
+    static incProcessCount() {
+        ShellStream1.processCount++;
+        ShellStream1.sendProcessEvent();
+    }
+    static incProcessDone() {
+        ShellStream1.processDone++;
+        ShellStream1.sendProcessEvent();
+    }
 }
+const fromArray1 = (lines)=>()=>{
+        const generator = async function*() {
+            for await (const line of lines){
+                yield line;
+            }
+        }();
+        return ShellStream1.builder(generator);
+    }
+;
+const fromString1 = (line)=>fromArray1(line.split("\n"))
+;
 const tap1 = (tapFunction)=>(shellStream)=>{
         const generator = async function*() {
             for await (const line of shellStream.generator){
@@ -1838,12 +1878,6 @@ const replace1 = (searchValue, replacer)=>(shellStream)=>{
         })(shellStream);
     }
 ;
-const cut1 = (delim, indexes, sep = " ")=>(shellStream)=>map1((line)=>{
-            const parts = line.split(delim);
-            return indexes.map((i)=>parts[i]
-            ).join(sep);
-        })(shellStream)
-;
 const tee1 = (outputPath)=>(stream)=>{
         const generator = async function*() {
             stream.file = await Deno.open(outputPath, {
@@ -1867,15 +1901,6 @@ const fromFile1 = (path)=>()=>{
                 yield line;
             }
             file.close();
-        }();
-        return ShellStream1.builder(generator);
-    }
-;
-const fromArray1 = (lines)=>()=>{
-        const generator = async function*() {
-            for await (const line of lines){
-                yield line;
-            }
         }();
         return ShellStream1.builder(generator);
     }
@@ -1912,6 +1937,12 @@ const head1 = (count = 1)=>(shellStream)=>{
         return ShellStream1.builder(generator, shellStream);
     }
 ;
+const cut1 = (delim, indexes, sep = " ")=>(shellStream)=>map1((line)=>{
+            const parts = line.split(delim);
+            return indexes.map((i)=>parts[i]
+            ).join(sep);
+        })(shellStream)
+;
 const logWithTimestamp1 = ()=>(shellStream)=>tap1((line)=>{
             console.log(`${new Date().toISOString()} ${line}`);
         })(shellStream)
@@ -1920,6 +1951,7 @@ const Pipe1 = ShellStream1.pipe;
 const FromFile1 = ShellStream1.fromFile;
 const FromRun1 = ShellStream1.fromRun;
 const FromArray1 = ShellStream1.fromArray;
+const FromString1 = ShellStream1.fromString;
 class CloseRes {
     success;
     statuses;
@@ -1939,14 +1971,18 @@ const stdRes = [
     "stdout"
 ];
 function checkResources() {
+    let noOpenedRessource = true;
     const res = Deno.resources();
     if (Object.keys(res).length !== 3 && Object.values(res).filter((v)=>!stdRes.includes(v)
     ).length > 0) {
         console.log(bgRed("Some resources are not closed except stdin/stderr/stdout :"));
         console.log(res);
+        noOpenedRessource = false;
     }
+    return noOpenedRessource;
 }
 function checkOps() {
+    let noOpsInProgress = true;
     const metrics = Deno.metrics();
     const opsMetricsNameGroups = [
         [
@@ -1971,20 +2007,25 @@ function checkOps() {
         ], 
     ];
     opsMetricsNameGroups.forEach((group)=>{
-        const dispached = group[0];
+        const dispatched = group[0];
         const completed = group[1];
-        if (metrics[dispached] !== metrics[completed]) {
-            console.log(bgRed(`${metrics[dispached]} ${dispached} ` + `!== ${metrics[completed]} ${completed}`));
+        if (metrics[dispatched] !== metrics[completed]) {
+            console.log(bgRed(`${metrics[dispatched]} ${dispatched} ` + `!== ${metrics[completed]} ${completed}`));
+            noOpsInProgress = false;
         }
     });
+    return noOpsInProgress;
 }
 function sanitize1() {
-    checkResources();
-    checkOps();
+    const noOpenedRessource = checkResources();
+    const noOpsInProgress = checkOps();
+    return noOpenedRessource && noOpsInProgress;
 }
-export { FromArray1 as FromArray, FromFile1 as FromFile, FromRun1 as FromRun, Pipe1 as Pipe, ShellStream1 as ShellStream };
+export { FromArray1 as FromArray, FromFile1 as FromFile, FromRun1 as FromRun, FromString1 as FromString, Pipe1 as Pipe, ShellStream1 as ShellStream };
 export { fromArray1 as fromArray };
 export { fromRun1 as fromRun };
+export { fromFile1 as fromFile };
+export { fromString1 as fromString };
 export { cut1 as cut };
 export { filter1 as filter };
 export { grep1 as grep };
@@ -1996,8 +2037,9 @@ export { closeProcess1 as closeProcess, parseCmdString1 as parseCmdString, run1 
 export { tap1 as tap };
 export { tee1 as tee };
 export { timestamp1 as timestamp };
+export { close1 as close };
+export { success1 as success };
 export { toArray1 as toArray };
 export { toFile1 as toFile };
 export { toString1 as toString };
-export { close1 as close };
 export { sanitize1 as sanitize };
