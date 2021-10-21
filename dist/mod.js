@@ -461,7 +461,23 @@ async function* readLines(reader, decoderOpts) {
     }
 }
 const { Deno: Deno1  } = globalThis;
-typeof Deno1?.noColor === "boolean" ? Deno1.noColor : true;
+const noColor = typeof Deno1?.noColor === "boolean" ? Deno1.noColor : true;
+let enabled = !noColor;
+function code(open, close) {
+    return {
+        open: `\x1b[${open.join(";")}m`,
+        close: `\x1b[${close}m`,
+        regexp: new RegExp(`\\x1b\\[${close}m`, "g")
+    };
+}
+function run2(str, code) {
+    return enabled ? `${code.open}${str.replace(code.regexp, code.open)}${code.close}` : str;
+}
+function bgRed(str) {
+    return run2(str, code([
+        41
+    ], 49));
+}
 new RegExp([
     "[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)",
     "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))", 
@@ -1917,6 +1933,55 @@ class CloseRes {
         return this.out.join("\n");
     }
 }
+const stdRes = [
+    "stdin",
+    "stderr",
+    "stdout"
+];
+function checkResources() {
+    const res = Deno.resources();
+    if (Object.keys(res).length !== 3 && Object.values(res).filter((v)=>!stdRes.includes(v)
+    ).length > 0) {
+        console.log(bgRed("Some resources are not closed except stdin/stderr/stdout :"));
+        console.log(res);
+    }
+}
+function checkOps() {
+    const metrics = Deno.metrics();
+    const opsMetricsNameGroups = [
+        [
+            "opsDispatched",
+            "opsCompleted"
+        ],
+        [
+            "opsDispatched",
+            "opsCompleted"
+        ],
+        [
+            "opsDispatchedSync",
+            "opsCompletedSync"
+        ],
+        [
+            "opsDispatchedAsync",
+            "opsCompletedAsync"
+        ],
+        [
+            "opsDispatchedAsyncUnref",
+            "opsCompletedAsyncUnref"
+        ], 
+    ];
+    opsMetricsNameGroups.forEach((group)=>{
+        const dispached = group[0];
+        const completed = group[1];
+        if (metrics[dispached] !== metrics[completed]) {
+            console.log(bgRed(`${metrics[dispached]} ${dispached} ` + `!== ${metrics[completed]} ${completed}`));
+        }
+    });
+}
+function sanitize1() {
+    checkResources();
+    checkOps();
+}
 export { FromArray1 as FromArray, FromFile1 as FromFile, FromRun1 as FromRun, Pipe1 as Pipe, ShellStream1 as ShellStream };
 export { fromArray1 as fromArray };
 export { fromRun1 as fromRun };
@@ -1935,3 +2000,4 @@ export { toArray1 as toArray };
 export { toFile1 as toFile };
 export { toString1 as toString };
 export { close1 as close };
+export { sanitize1 as sanitize };

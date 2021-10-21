@@ -10,7 +10,7 @@ It has zero 3rd party dependencies and don't internally run sh or bash commands.
 import {
   FromFile,
   FromRun,
-} from "https://deno.land/x/shell_stream@v0.1.5/mod.ts";
+} from "https://deno.land/x/shell_stream@v0.1.6/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.112.0/fmt/colors.ts";
 
 let res = await FromRun("cat /etc/passwd").run("grep /root").toString();

@@ -26,5 +26,7 @@ export { toFile } from "./endpoints/to_file.ts";
 export { toString } from "./endpoints/to_string.ts";
 export { close } from "./endpoints/close.ts";
 
+export { sanitize } from "./sanitize.ts";
+
 export type { OperatorFunc } from "./types.ts";
 export type { RunOptions } from "./operators/run.ts";
