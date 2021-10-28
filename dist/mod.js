@@ -1564,8 +1564,10 @@ const path = isWindows ? mod : mod1;
 const { join: join2 , normalize: normalize2  } = path;
 const path1 = isWindows ? mod : mod1;
 const { basename: basename2 , delimiter: delimiter2 , dirname: dirname2 , extname: extname2 , format: format2 , fromFileUrl: fromFileUrl2 , isAbsolute: isAbsolute2 , join: join3 , normalize: normalize3 , parse: parse2 , relative: relative2 , resolve: resolve2 , sep: sep2 , toFileUrl: toFileUrl2 , toNamespacedPath: toNamespacedPath2 ,  } = path1;
-const toFile1 = (outputPath)=>(stream)=>{
-        return stream.tee(outputPath).close();
+const toFile1 = (outputPath)=>async (stream)=>{
+        const closeRes = await stream.close();
+        await Deno.writeTextFile(outputPath, closeRes.out.join("\n"));
+        return closeRes;
     }
 ;
 const pipe1 = (...operators)=>(shellStream)=>{
@@ -1752,6 +1754,8 @@ class ShellStream1 {
     ;
     tail = (count = 1)=>tail1(count)(this)
     ;
+    sponge = ()=>sponge1()(this)
+    ;
     pipe = (start, ...operators)=>pipe1(start, ...operators)(this)
     ;
     close = async (opt = {
@@ -1775,7 +1779,7 @@ class ShellStream1 {
         }();
         return new ShellStream1([], emptyGenerator);
     }
-    static fromFile = (path)=>fromFile1(path)()
+    static fromFile = (path, opt)=>fromFile1(path, opt)()
     ;
     static fromArray = (lines)=>fromArray1(lines)()
     ;
@@ -1885,8 +1889,14 @@ const tee1 = (outputPath)=>(stream)=>{
                 create: true
             });
             const encoder = new TextEncoder();
+            let start = true;
             for await (const line of stream.generator){
-                await Deno.write(stream.file.rid, encoder.encode(line + "\n"));
+                if (start) {
+                    await Deno.write(stream.file.rid, encoder.encode(line));
+                    start = false;
+                } else {
+                    await Deno.write(stream.file.rid, encoder.encode("\n" + line));
+                }
                 yield line;
             }
             stream.file.close();
@@ -1894,13 +1904,20 @@ const tee1 = (outputPath)=>(stream)=>{
         return ShellStream1.builder(generator, stream);
     }
 ;
-const fromFile1 = (path)=>()=>{
+const fromFile1 = (path, opt)=>()=>{
         const generator = async function*() {
-            const file = await Deno.open(path);
-            for await (const line of readLines(file)){
-                yield line;
+            if (opt?.closeBeforeStream) {
+                const fileContent = await Deno.readTextFile(path);
+                for await (const line of fileContent.split("\n")){
+                    yield line;
+                }
+            } else {
+                const file = await Deno.open(path);
+                for await (const line of readLines(file)){
+                    yield line;
+                }
+                file.close();
             }
-            file.close();
         }();
         return ShellStream1.builder(generator);
     }
@@ -1932,6 +1949,19 @@ const head1 = (count = 1)=>(shellStream)=>{
                 if (i >= count) {
                     break;
                 }
+            }
+        }();
+        return ShellStream1.builder(generator, shellStream);
+    }
+;
+const sponge1 = ()=>(shellStream)=>{
+        const generator = async function*() {
+            const out = [];
+            for await (const line of shellStream.generator){
+                out.push(line);
+            }
+            for await (const line1 of out){
+                yield line1;
             }
         }();
         return ShellStream1.builder(generator, shellStream);
@@ -2034,6 +2064,7 @@ export { map1 as map };
 export { pipe1 as pipe };
 export { replace1 as replace };
 export { closeProcess1 as closeProcess, parseCmdString1 as parseCmdString, run1 as run };
+export { sponge1 as sponge };
 export { tap1 as tap };
 export { tee1 as tee };
 export { timestamp1 as timestamp };
