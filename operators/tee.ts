@@ -9,8 +9,14 @@ export const tee: Operator = (outputPath: string) =>
         create: true,
       });
       const encoder = new TextEncoder();
+      let start = true;
       for await (const line of stream.generator) {
-        await Deno.write(stream.file.rid, encoder.encode(line + "\n"));
+        if (start) {
+          await Deno.write(stream.file.rid, encoder.encode(line));
+          start = false;
+        } else {
+          await Deno.write(stream.file.rid, encoder.encode("\n" + line));
+        }
         yield line;
       }
       stream.file.close();
