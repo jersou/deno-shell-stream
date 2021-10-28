@@ -43,6 +43,17 @@ Deno.test("FromFile", async () => {
   assertEquals(res, "2");
 });
 
+Deno.test("FromFile/closeBeforeStream", async () => {
+  const tmpPath = await Deno.makeTempFile();
+  await FromArray(["line1", "line2"]).toFile(tmpPath);
+  await FromFile(tmpPath, { closeBeforeStream: true })
+    .map((line) => "mod-> " + line)
+    .toFile(tmpPath);
+  const res = await FromFile(tmpPath).toArray();
+  await Deno.remove(tmpPath);
+  assertEquals(res, ["mod-> line1", "mod-> line2"]);
+});
+
 Deno.test("FromRun", async () => {
   const out = await FromRun([
     Deno.execPath(),
@@ -73,9 +84,7 @@ Deno.test("Pipe", async () => {
   const res = await Pipe(
     fromArray(["line1", "line2"]),
     map((line: string) => line + ">"),
-    log((l: string) => "LOG " + l),
     map((line: string) => "<" + line),
-    log(),
   ).toArray();
   assertEquals(res, ["<line1>", "<line2>"]);
 });

@@ -14,7 +14,7 @@ import { toString } from "./endpoints/to_string.ts";
 import { toArray } from "./endpoints/to_array.ts";
 import { pipe } from "./operators/pipe.ts";
 import { tee } from "./operators/tee.ts";
-import { fromFile } from "./startpoints/from_file.ts";
+import { fromFile, FromFileOpt } from "./startpoints/from_file.ts";
 import { fromArray } from "./startpoints/from_array.ts";
 import { fromRun } from "./startpoints/from_run.ts";
 import { fromString } from "./startpoints/from_string.ts";
@@ -72,7 +72,7 @@ export class ShellStream {
     const emptyGenerator: Generator = (async function* () {})();
     return new ShellStream([], emptyGenerator);
   }
-  static fromFile = (path: string) => fromFile(path)();
+  static fromFile = (path: string, opt?: FromFileOpt) => fromFile(path, opt)();
   static fromArray = (lines: string[]) => fromArray(lines)();
   static fromString = (line: string) => fromString(line)();
   static fromRun = (cmd: string[] | string, opt?: RunOptions) =>
