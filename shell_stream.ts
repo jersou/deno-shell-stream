@@ -22,6 +22,7 @@ import { tail } from "./operators/tail.ts";
 import { head } from "./operators/head.ts";
 import { logWithTimestamp } from "./operators/logWithTimestamp.ts";
 import { success } from "./endpoints/success.ts";
+import { sponge } from "./operators/sponge.ts";
 
 export class ShellStream {
   process?: Deno.Process;
@@ -49,6 +50,7 @@ export class ShellStream {
   cut = (delim: string, i: number[], sep = " ") => cut(delim, i, sep)(this);
   head = (count = 1) => head(count)(this);
   tail = (count = 1) => tail(count)(this);
+  sponge = () => sponge()(this);
 
   pipe = (
     start: StartOperatorFunc | OperatorFunc,

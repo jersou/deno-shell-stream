@@ -10,7 +10,7 @@ It has zero 3rd party dependencies and don't internally run sh or bash commands.
 import {
   FromFile,
   FromRun,
-} from "https://deno.land/x/shell_stream@v0.1.7/mod.ts";
+} from "https://deno.land/x/shell_stream@v0.1.8/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.112.0/fmt/colors.ts";
 
 let res = await FromRun("cat /etc/passwd").run("grep /root").toString();
@@ -111,6 +111,7 @@ These operators return a ShellStream :
   regex.
 - `head(count = 1)` : transform the stream, keep only first `count` lines.
 - `tail(count = 1)` :transform the stream, keep only last `count` lines.
+- `sponge()` : keep stream unchanged, soaks up all its input before re-emit all.
 - `pipe(...operators: OperatorFunc[])` : [see bellow "Pipe chapter"](#Pipe).
 
 ### Endpoint Operators

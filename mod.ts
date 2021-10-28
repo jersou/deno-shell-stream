@@ -22,6 +22,7 @@ export { map } from "./operators/map.ts";
 export { pipe } from "./operators/pipe.ts";
 export { replace } from "./operators/replace.ts";
 export { closeProcess, parseCmdString, run } from "./operators/run.ts";
+export { sponge } from "./operators/sponge.ts";
 export { tap } from "./operators/tap.ts";
 export { tee } from "./operators/tee.ts";
 export { timestamp } from "./operators/timestamp.ts";
