@@ -43,6 +43,15 @@ Deno.test("FromFile", async () => {
   assertEquals(res, "2");
 });
 
+Deno.test("toFile/FromFile", async () => {
+  const tmpPath = await Deno.makeTempFile();
+  await FromString("line1\nline2").toFile(tmpPath);
+  await FromFile(tmpPath).toFile(tmpPath);
+  const res = await FromFile(tmpPath).toString();
+  await Deno.remove(tmpPath);
+  assertEquals(res, "line1\nline2");
+});
+
 Deno.test("FromFile/closeBeforeStream", async () => {
   const tmpPath = await Deno.makeTempFile();
   await FromArray(["line1", "line2"]).toFile(tmpPath);

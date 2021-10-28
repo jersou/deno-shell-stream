@@ -3,6 +3,8 @@ import { EndOperator } from "../types.ts";
 import { CloseRes } from "./close.ts";
 
 export const toFile: EndOperator<CloseRes> = (outputPath: string) =>
-  (stream: ShellStream) => {
-    return stream.tee(outputPath).close();
+  async (stream: ShellStream) => {
+    const closeRes = await stream.close();
+    await Deno.writeTextFile(outputPath, closeRes.out.join("\n"));
+    return closeRes;
   };
