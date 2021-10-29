@@ -10,7 +10,7 @@ It has zero 3rd party dependencies and don't internally run sh or bash commands.
 import {
   FromFile,
   FromRun,
-} from "https://deno.land/x/shell_stream@v0.1.8/mod.ts";
+} from "https://deno.land/x/shell_stream@v0.1.9/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.112.0/fmt/colors.ts";
 
 let res = await FromRun("cat /etc/passwd").run("grep /root").toString();
@@ -64,8 +64,8 @@ These operators return a ShellStream :
 - `FromRun(cmd: string[] | string, opt?:` [RunOptions](#RunOptions) `)` →
   generate a stream from each line of the stdout of the process. If cmd is a
   string, it will be parsed to array.
-- `FromFile(path: string, opt?: { closeBeforeStream?: boolean })` → generate a
-  stream from each line of the file.
+- `FromFile(path: string, opt?: { closeBeforeStreaming?: boolean })` → generate
+  a stream from each line of the file.
 - `FromArray(lines: string[])` → generate a stream from each element of the
   array.
 - `FromString(line: string)` → generate a stream from line.
@@ -75,7 +75,7 @@ The startpoint are also available from static method of ShellStream :
 
 ```typescript
 ShellStream.fromRun(cmd: string[] | string, opt?: RunOptions);
-ShellStream.fromFile(path: string, opt?: { closeBeforeStream?: boolean });
+ShellStream.fromFile(path: string, opt?: { closeBeforeStreaming?: boolean });
 ShellStream.fromArray(lines: string[]);
 ShellStream.pipe(...operators: OperatorFunc[]);
 ```

@@ -8,7 +8,6 @@ import {
   Pipe,
 } from "./shell_stream.ts";
 import { fromArray } from "./startpoints/from_array.ts";
-import { log } from "./operators/log.ts";
 
 Deno.test("pipe", async () => {
   const res = await FromArray(["line1", "line2"])
@@ -52,10 +51,10 @@ Deno.test("toFile/FromFile", async () => {
   assertEquals(res, "line1\nline2");
 });
 
-Deno.test("FromFile/closeBeforeStream", async () => {
+Deno.test("FromFile/closeBeforeStreaming", async () => {
   const tmpPath = await Deno.makeTempFile();
   await FromArray(["line1", "line2"]).toFile(tmpPath);
-  await FromFile(tmpPath, { closeBeforeStream: true })
+  await FromFile(tmpPath, { closeBeforeStreaming: true })
     .map((line) => "mod-> " + line)
     .toFile(tmpPath);
   const res = await FromFile(tmpPath).toArray();

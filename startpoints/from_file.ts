@@ -2,11 +2,11 @@ import { ShellStream } from "../shell_stream.ts";
 import { readLines } from "../deps.ts";
 import { StartOperator } from "../types.ts";
 
-export type FromFileOpt = { closeBeforeStream?: boolean };
+export type FromFileOpt = { closeBeforeStreaming?: boolean };
 export const fromFile: StartOperator = (path: string, opt?: FromFileOpt) =>
   () => {
     const generator = (async function* () {
-      if (opt?.closeBeforeStream) {
+      if (opt?.closeBeforeStreaming) {
         const fileContent = await Deno.readTextFile(path);
         for await (const line of fileContent.split("\n")) {
           yield line;
