@@ -8,7 +8,7 @@ import { replace, Replacer } from "./operators/replace.ts";
 import { map, MapFunction } from "./operators/map.ts";
 import { filter, FilterFunction } from "./operators/filter.ts";
 import { cut } from "./operators/cut.ts";
-import { Generator, OperatorFunc, StartOperatorFunc } from "./types.ts";
+import { Generator, OperatorFunc } from "./types.ts";
 import { close, CloseOptions } from "./endpoints/close.ts";
 import { toString } from "./endpoints/to_string.ts";
 import { toArray } from "./endpoints/to_array.ts";
@@ -52,10 +52,7 @@ export class ShellStream {
   tail = (count = 1) => tail(count)(this);
   sponge = () => sponge()(this);
 
-  pipe = (
-    start: StartOperatorFunc | OperatorFunc,
-    ...operators: OperatorFunc[]
-  ) => pipe(start, ...operators)(this);
+  pipe = (...operators: OperatorFunc[]) => pipe(...operators)(this);
 
   // EndOperators
   close = async (opt: CloseOptions = { processes: "AWAIT" }) =>
