@@ -8,10 +8,10 @@ This folder is the Node version of The lib, build by [dnt](https://github.com/de
 
 ## Usage (with NodeJS)
 
-Install from npm : `npm install shell-stream`
+Install from npm : `npm install sh-stream`
 
 ```javascript
-const shstr = require("shell-stream");
+const shstr = require("sh-stream");
 
 shstr.FromArray(["line1", "line2"]).log().close();
 shstr.FromRun("echo toto").log().close();

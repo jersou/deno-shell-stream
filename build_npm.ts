@@ -6,7 +6,7 @@ await build({
   typeCheck: false, // TODO remove
   package: {
     // package.json properties
-    name: "shell-stream",
+    name: "sh-stream",
     version: "0.1.10",
     description: "Mix I/O stream API and Shell pipe/redirects",
     license: "MIT",
