@@ -2,3 +2,5 @@
 /tmp*
 /.DENO_DIR/gen/
 /.cov_profile
+/.idea/checkstyle-idea.xml
+/npm/node_modules/

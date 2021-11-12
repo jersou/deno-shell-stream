@@ -34,11 +34,13 @@ Deno.test("tap", async () => {
 });
 
 Deno.test("FromFile", async () => {
-  // TEST DATA=2
-  const res = await FromFile("./shell_stream_test.ts")
-    .grep(/\/\/ TEST DATA/)
+  const path = await Deno.makeTempFile();
+  await FromArray(["line1", "TEST DATA=2", "line3"]).toFile(path);
+  const res = await FromFile(path)
+    .grep(/TEST DATA/)
     .cut("=", [1])
     .toString();
+  await Deno.remove(path);
   assertEquals(res, "2");
 });
 

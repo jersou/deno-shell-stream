@@ -1,15 +1,17 @@
 # Velociraptor is a script runner for Deno: https://velociraptor.run/docs/installation/
 
 scripts:
-  test: deno test -A
+  test: deno test -A  --ignore=".DENO_DIR,dist,npm"
 
-  test-watch: deno test -A --watch --unstable
+  test-watch: deno test -A --watch --unstable --ignore=".DENO_DIR,dist,npm"
 
-  lint: deno lint --ignore=.DENO_DIR,dist
+  lint: deno lint --ignore=.DENO_DIR,dist,npm
 
-  fmt: deno fmt --ignore=.DENO_DIR,dist,.lock.json
+  fmt: deno fmt --ignore=.DENO_DIR,dist,.lock.json,npm
 
   bundle: deno bundle mod.ts dist/mod.js
+
+  build-npm: deno run -A build_npm.ts
 
   bak-dep: DENO_DIR=./.DENO_DIR deno cache --lock=.lock.json --lock-write mod.ts deps.ts test_deps.ts
 

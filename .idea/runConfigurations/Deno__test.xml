@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Deno: test" type="DenoConfigurationType" inputPath="." programParameters="test -A">
+  <configuration default="false" name="Deno: test" type="DenoConfigurationType" inputPath="." programParameters="test -A --ignore=&quot;.DENO_DIR,dist,npm&quot;">
     <method v="2" />
   </configuration>
 </component>

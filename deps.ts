@@ -1,5 +1,3 @@
-export { exists } from "https://deno.land/std@0.112.0/fs/exists.ts";
-
 export {
   Buffer,
   copy,
