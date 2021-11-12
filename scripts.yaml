@@ -1,7 +1,7 @@
 # Velociraptor is a script runner for Deno: https://velociraptor.run/docs/installation/
 
 scripts:
-  test: deno test -A  --ignore=".DENO_DIR,dist,npm"
+  test: deno test -A --ignore=".DENO_DIR,dist,npm"
 
   test-watch: deno test -A --watch --unstable --ignore=".DENO_DIR,dist,npm"
 

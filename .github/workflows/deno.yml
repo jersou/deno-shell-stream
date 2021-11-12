@@ -28,10 +28,10 @@ jobs:
           deno-version: v1.15.1
 
       - name: Verify formatting
-        run: deno fmt --check --ignore=".DENO_DIR,dist,.lock.json"
+        run: deno fmt --check --ignore=".DENO_DIR,dist,.lock.json,npm"
 
       - name: Run linter
-        run: deno lint --ignore=".DENO_DIR,dist"
+        run: deno lint --ignore=".DENO_DIR,dist,npm"
 
       - name: Run tests
-        run: deno test --allow-read --allow-write --allow-run
+        run: deno test --allow-read --allow-write --allow-run --ignore=".DENO_DIR,dist,npm"
