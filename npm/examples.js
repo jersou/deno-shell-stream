@@ -18,28 +18,28 @@ const {
 
 (async function () {
   console.log(
-    bgRed("-FromRun-run-head---------------------------------------"),
+    bgRed("-FromRun-run-head---------------------------------------")
   );
 
   let res = await FromRun("node -h").head(1).toString();
   console.log(res); // → Usage: node [options] [ script.js ] [arguments]
 
   console.log(
-    bgRed("-FromRun-run-tail---------------------------------------"),
+    bgRed("-FromRun-run-tail---------------------------------------")
   );
 
   console.log(await FromRun(["node", "-h"]).tail(2).toArray());
   // → [ '', 'Documentation can be found at https://nodejs.org/' ]
 
   console.log(
-    bgRed("-FromRun-run--------------------------------------------"),
+    bgRed("-FromRun-run--------------------------------------------")
   );
 
   res = await FromRun("cat /etc/passwd").run("grep /root").toString();
   console.log(res); // → root:x:0:0:root:/root:/bin/bash
 
   console.log(
-    bgRed("-FromFile-log-grep-log----------------------------------"),
+    bgRed("-FromFile-log-grep-log----------------------------------")
   );
 
   // the same example without run cat & grep :
@@ -51,7 +51,7 @@ const {
   console.log({ res }); // → res = "root:x:0:0:root:/root:/bin/bash"
 
   console.log(
-    bgRed("-FromRun-run-toFile-------------------------------------"),
+    bgRed("-FromRun-run-toFile-------------------------------------")
   );
 
   await FromRun("uname -a").run("cut -d' ' -f1").toFile("/tmp/out.txt");
@@ -59,7 +59,7 @@ const {
   console.log(await FromFile("/tmp/out.txt").toString());
 
   console.log(
-    bgRed("-FromRun-log-timestamp-log------------------------------"),
+    bgRed("-FromRun-log-timestamp-log------------------------------")
   );
 
   await FromRun(["bash", "-c", "echo 1;sleep 0.4;echo 2"])
@@ -69,7 +69,7 @@ const {
     .close();
 
   console.log(
-    bgRed("-FromRun-log-logWithTimestamp-log-----------------------"),
+    bgRed("-FromRun-log-logWithTimestamp-log-----------------------")
   );
 
   await FromRun(["bash", "-c", "echo 1;sleep 0.4;echo 2"])
@@ -79,7 +79,7 @@ const {
     .close();
 
   console.log(
-    bgRed("-FromArray-filter-run-log-------------------------------"),
+    bgRed("-FromArray-filter-run-log-------------------------------")
   );
 
   let closeRes = await FromArray(["1", "2", "3"])
@@ -90,14 +90,14 @@ const {
     .close();
 
   console.log(
-    bgRed("-Pipe-fromArray-filter-run-log-----pipe API version-----"),
+    bgRed("-Pipe-fromArray-filter-run-log-----pipe API version-----")
   );
   // The "pipe" API version :
   closeRes = await Pipe(
     fromArray(["1", "2", "3"]),
     filter((l) => parseInt(l) > 1), // keep ["2", "3"],
     run("wc -l"), // "wc -l" count input lines
-    log(), // log "2"
+    log() // log "2"
   ).close(); // close the stream and return "2" in "out" property
   console.log({ closeRes });
   // closeRes: CloseRes {
@@ -107,19 +107,19 @@ const {
   // }
 
   console.log(
-    bgRed("-FromArray-filter-pipe-run-log--------------------------"),
+    bgRed("-FromArray-filter-pipe-run-log--------------------------")
   );
 
   await FromArray(["1", "2", "3"])
     .filter((l) => parseInt(l) > 1) // keep ["2", "3"]
     .pipe(
       run("wc -l"), // "wc -l" count input lines
-      log(), // log "2"
+      log() // log "2"
     )
     .close();
 
   console.log(
-    bgRed("-FromArray-tee-replace-tap-map-log----------------------"),
+    bgRed("-FromArray-tee-replace-tap-map-log----------------------")
   );
 
   await FromArray(["--foo--"])
@@ -131,7 +131,7 @@ const {
     .close();
 
   console.log(
-    bgRed("-FromRun-run-run-----------------------------------------"),
+    bgRed("-FromRun-run-run-----------------------------------------")
   );
   // exit codes of processes can be retrieved :
   closeRes = await FromRun([
