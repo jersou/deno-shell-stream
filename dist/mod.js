@@ -1564,6 +1564,87 @@ const path = isWindows ? mod : mod1;
 const { join: join2 , normalize: normalize2  } = path;
 const path1 = isWindows ? mod : mod1;
 const { basename: basename2 , delimiter: delimiter2 , dirname: dirname2 , extname: extname2 , format: format2 , fromFileUrl: fromFileUrl2 , isAbsolute: isAbsolute2 , join: join3 , normalize: normalize3 , parse: parse2 , relative: relative2 , resolve: resolve2 , sep: sep2 , toFileUrl: toFileUrl2 , toNamespacedPath: toNamespacedPath2 ,  } = path1;
+async function _createWalkEntry(path) {
+    path = normalize3(path);
+    const name = basename2(path);
+    const info = await Deno.stat(path);
+    return {
+        path,
+        name,
+        isFile: info.isFile,
+        isDirectory: info.isDirectory,
+        isSymlink: info.isSymlink
+    };
+}
+function include(path, exts, match, skip) {
+    if (exts && !exts.some((ext)=>path.endsWith(ext)
+    )) {
+        return false;
+    }
+    if (match && !match.some((pattern)=>!!path.match(pattern)
+    )) {
+        return false;
+    }
+    if (skip && skip.some((pattern)=>!!path.match(pattern)
+    )) {
+        return false;
+    }
+    return true;
+}
+function wrapErrorWithRootPath(err, root) {
+    if (err instanceof Error && "root" in err) return err;
+    const e = new Error();
+    e.root = root;
+    e.message = err instanceof Error ? `${err.message} for path "${root}"` : `[non-error thrown] for path "${root}"`;
+    e.stack = err instanceof Error ? err.stack : undefined;
+    e.cause = err instanceof Error ? err.cause : undefined;
+    return e;
+}
+async function* walk(root, { maxDepth =Infinity , includeFiles =true , includeDirs =true , followSymlinks =false , exts =undefined , match =undefined , skip =undefined  } = {
+}) {
+    if (maxDepth < 0) {
+        return;
+    }
+    if (includeDirs && include(root, exts, match, skip)) {
+        yield await _createWalkEntry(root);
+    }
+    if (maxDepth < 1 || !include(root, undefined, undefined, skip)) {
+        return;
+    }
+    try {
+        for await (const entry of Deno.readDir(root)){
+            assert(entry.name != null);
+            let path = join3(root, entry.name);
+            if (entry.isSymlink) {
+                if (followSymlinks) {
+                    path = await Deno.realPath(path);
+                } else {
+                    continue;
+                }
+            }
+            if (entry.isFile) {
+                if (includeFiles && include(path, exts, match, skip)) {
+                    yield {
+                        path,
+                        ...entry
+                    };
+                }
+            } else {
+                yield* walk(path, {
+                    maxDepth: maxDepth - 1,
+                    includeFiles,
+                    includeDirs,
+                    followSymlinks,
+                    exts,
+                    match,
+                    skip
+                });
+            }
+        }
+    } catch (err) {
+        throw wrapErrorWithRootPath(err, normalize3(root));
+    }
+}
 const toFile1 = (outputPath)=>async (stream)=>{
         const closeRes = await stream.close();
         await Deno.writeTextFile(outputPath, closeRes.out.join("\n"));
@@ -1756,7 +1837,11 @@ class ShellStream1 {
     ;
     sponge = ()=>sponge1()(this)
     ;
-    pipe = (start, ...operators)=>pipe1(start, ...operators)(this)
+    sort = ()=>sort1()(this)
+    ;
+    uniq = ()=>uniq1()(this)
+    ;
+    pipe = (...operators)=>pipe1(...operators)(this)
     ;
     close = async (opt = {
         processes: "AWAIT"
@@ -1779,7 +1864,13 @@ class ShellStream1 {
         }();
         return new ShellStream1([], emptyGenerator);
     }
+    static from = (iterable)=>from1(iterable)()
+    ;
     static fromFile = (path, opt)=>fromFile1(path, opt)()
+    ;
+    static fromDir = (path)=>fromDir1(path)()
+    ;
+    static fromWalk = (path, opt)=>fromWalk1(path, opt)()
     ;
     static fromArray = (lines)=>fromArray1(lines)()
     ;
@@ -1904,9 +1995,18 @@ const tee1 = (outputPath)=>(stream)=>{
         return ShellStream1.builder(generator, stream);
     }
 ;
+const from1 = (iterable)=>()=>{
+        const generator = async function*() {
+            for await (const str of iterable){
+                yield str;
+            }
+        }();
+        return ShellStream1.builder(generator);
+    }
+;
 const fromFile1 = (path, opt)=>()=>{
         const generator = async function*() {
-            if (opt?.closeBeforeStream) {
+            if (opt?.closeBeforeStreaming) {
                 const fileContent = await Deno.readTextFile(path);
                 for await (const line of fileContent.split("\n")){
                     yield line;
@@ -1967,6 +2067,50 @@ const sponge1 = ()=>(shellStream)=>{
         return ShellStream1.builder(generator, shellStream);
     }
 ;
+const fromDir1 = (path)=>()=>{
+        const generator = async function*() {
+            for await (const dirEntry of Deno.readDir(path)){
+                yield dirEntry.name;
+            }
+        }();
+        return ShellStream1.builder(generator);
+    }
+;
+const fromWalk1 = (path, opt)=>()=>{
+        const generator = async function*() {
+            for await (const dirEntry of walk(path, opt)){
+                yield dirEntry.path;
+            }
+        }();
+        return ShellStream1.builder(generator);
+    }
+;
+const sort1 = ()=>(shellStream)=>{
+        const generator = async function*() {
+            const out = [];
+            for await (const line of shellStream.generator){
+                out.push(line);
+            }
+            for await (const line1 of out.sort()){
+                yield line1;
+            }
+        }();
+        return ShellStream1.builder(generator, shellStream);
+    }
+;
+const uniq1 = ()=>(shellStream)=>{
+        const generator = async function*() {
+            let lastEmit;
+            for await (const line of shellStream.generator){
+                if (lastEmit !== line) {
+                    lastEmit = line;
+                    yield line;
+                }
+            }
+        }();
+        return ShellStream1.builder(generator, shellStream);
+    }
+;
 const cut1 = (delim, indexes, sep = " ")=>(shellStream)=>map1((line)=>{
             const parts = line.split(delim);
             return indexes.map((i)=>parts[i]
@@ -1978,7 +2122,10 @@ const logWithTimestamp1 = ()=>(shellStream)=>tap1((line)=>{
         })(shellStream)
 ;
 const Pipe1 = ShellStream1.pipe;
+const From1 = ShellStream1.from;
 const FromFile1 = ShellStream1.fromFile;
+const FromDir1 = ShellStream1.fromDir;
+const FromWalk1 = ShellStream1.fromWalk;
 const FromRun1 = ShellStream1.fromRun;
 const FromArray1 = ShellStream1.fromArray;
 const FromString1 = ShellStream1.fromString;
@@ -2051,10 +2198,13 @@ function sanitize1() {
     const noOpsInProgress = checkOps();
     return noOpenedRessource && noOpsInProgress;
 }
-export { FromArray1 as FromArray, FromFile1 as FromFile, FromRun1 as FromRun, FromString1 as FromString, Pipe1 as Pipe, ShellStream1 as ShellStream };
+export { From1 as From, FromArray1 as FromArray, FromDir1 as FromDir, FromFile1 as FromFile, FromRun1 as FromRun, FromString1 as FromString, FromWalk1 as FromWalk, Pipe1 as Pipe, ShellStream1 as ShellStream };
+export { from1 as from };
 export { fromArray1 as fromArray };
 export { fromRun1 as fromRun };
 export { fromFile1 as fromFile };
+export { fromDir1 as fromDir };
+export { fromWalk1 as fromWalk };
 export { fromString1 as fromString };
 export { cut1 as cut };
 export { filter1 as filter };
@@ -2064,10 +2214,12 @@ export { map1 as map };
 export { pipe1 as pipe };
 export { replace1 as replace };
 export { closeProcess1 as closeProcess, parseCmdString1 as parseCmdString, run1 as run };
+export { sort1 as sort };
 export { sponge1 as sponge };
 export { tap1 as tap };
 export { tee1 as tee };
 export { timestamp1 as timestamp };
+export { uniq1 as uniq };
 export { close1 as close };
 export { success1 as success };
 export { toArray1 as toArray };
