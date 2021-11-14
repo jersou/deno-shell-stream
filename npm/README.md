@@ -4,7 +4,8 @@ ShellStream mix I/O stream API and Shell pipe/redirects.
 
 It has zero 3rd party dependencies and don't internally run sh or bash commands.
 
-This package is the Node version of The deno ShellStream lib, build in Node by [dnt](https://github.com/denoland/dnt).
+This package is the Node version of The deno ShellStream lib, build in Node by
+[dnt](https://github.com/denoland/dnt).
 
 ## Quick exemples (with NodeJS)
 
@@ -70,7 +71,10 @@ These operators return a ShellStream :
 - `FromArray(lines: string[])` → generate a stream from each element of the
   array.
 - `FromString(line: string)` → generate a stream from line.
-- Pipe: [see bellow "Pipe chapter"](#Pipe)
+- `FromDir(path: string)` → generate a stream of file name from dir.
+- `FromWalk(path: string, opt?: WalkOptions)` → generate a stream of file path
+  from dir, using [walk](https://deno.land/std/fs#walk).
+- Pipe: [see bellow "Pipe chapter"](#Pipe).
 
 The startpoint are also available from static method of ShellStream :
 
@@ -113,6 +117,8 @@ These operators return a ShellStream :
 - `head(count = 1)` : transform the stream, keep only first `count` lines.
 - `tail(count = 1)` :transform the stream, keep only last `count` lines.
 - `sponge()` : keep stream unchanged, soaks up all its input before re-emit all.
+- `sort()` : transform the stream, sort the stream.
+- `uniq()` : transform the stream, keep only lines that are different from previous line.
 - `pipe(...operators: OperatorFunc[])` : [see bellow "Pipe chapter"](#Pipe).
 
 ### Endpoint Operators
@@ -194,4 +200,3 @@ await FromArray(["1", "2", "3"])
   )
   .close();
 ```
-
