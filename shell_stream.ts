@@ -24,6 +24,7 @@ import { head } from "./operators/head.ts";
 import { logWithTimestamp } from "./operators/logWithTimestamp.ts";
 import { success } from "./endpoints/success.ts";
 import { sponge } from "./operators/sponge.ts";
+import { fromDir } from "./startpoints/from_dir.ts";
 
 export class ShellStream {
   process?: Deno.Process;
@@ -76,6 +77,7 @@ export class ShellStream {
   static from = (iterable: AsyncIterable<string> | Iterable<string>) =>
     from(iterable)();
   static fromFile = (path: string, opt?: FromFileOpt) => fromFile(path, opt)();
+  static fromDir = (path: string) => fromDir(path)();
   static fromArray = (lines: string[]) => fromArray(lines)();
   static fromString = (line: string) => fromString(line)();
   static fromRun = (cmd: string[] | string, opt?: RunOptions) =>
@@ -116,6 +118,7 @@ export type ProcessEventListener = (event: ProcessEvent) => unknown;
 export const Pipe = ShellStream.pipe;
 export const From = ShellStream.from;
 export const FromFile = ShellStream.fromFile;
+export const FromDir = ShellStream.fromDir;
 export const FromRun = ShellStream.fromRun;
 export const FromArray = ShellStream.fromArray;
 export const FromString = ShellStream.fromString;

@@ -3,6 +3,7 @@ import { map } from "./operators/map.ts";
 import {
   From,
   FromArray,
+  FromDir,
   FromFile,
   FromRun,
   FromString,
@@ -116,4 +117,19 @@ Deno.test("From", async () => {
   }
   const res = await From(genAsync()).toArray();
   assertEquals(res, ["line1async", "line2async"]);
+});
+
+async function touch(path: string) {
+  const file = await Deno.open(path, { create: true, write: true });
+  file.close();
+}
+
+Deno.test("FromDir", async () => {
+  const path = await Deno.makeTempDir();
+  await touch(`${path}/file1`);
+  await touch(`${path}/file2`);
+  const res = await FromDir(path).toArray();
+  console.log(path);
+  await Deno.remove(path, { recursive: true });
+  assertEquals(res.sort(), ["file1", "file2"]);
 });
