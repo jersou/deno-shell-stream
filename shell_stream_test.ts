@@ -1,6 +1,7 @@
 import { assertEquals } from "./test_deps.ts";
 import { map } from "./operators/map.ts";
 import {
+  From,
   FromArray,
   FromFile,
   FromRun,
@@ -97,4 +98,22 @@ Deno.test("Pipe", async () => {
     map((line: string) => "<" + line),
   ).toArray();
   assertEquals(res, ["<line1>", "<line2>"]);
+});
+
+Deno.test("From", async () => {
+  function* gen() {
+    yield "line1";
+    yield "line2";
+  }
+  const res = await From(gen()).toArray();
+  assertEquals(res, ["line1", "line2"]);
+});
+
+Deno.test("From", async () => {
+  async function* genAsync() {
+    yield "line1async";
+    yield "line2async";
+  }
+  const res = await From(genAsync()).toArray();
+  assertEquals(res, ["line1async", "line2async"]);
 });

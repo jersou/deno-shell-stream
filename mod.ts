@@ -1,4 +1,5 @@
 import { fromString } from "./startpoints/from_string.ts";
+import { from } from "./startpoints/from.ts";
 
 export {
   FromArray,
@@ -9,6 +10,7 @@ export {
   ShellStream,
 } from "./shell_stream.ts";
 
+export { from } from "./startpoints/from.ts";
 export { fromArray } from "./startpoints/from_array.ts";
 export { fromRun } from "./startpoints/from_run.ts";
 export { fromFile } from "./startpoints/from_file.ts";

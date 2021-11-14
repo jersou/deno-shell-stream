@@ -14,6 +14,7 @@ import { toString } from "./endpoints/to_string.ts";
 import { toArray } from "./endpoints/to_array.ts";
 import { pipe } from "./operators/pipe.ts";
 import { tee } from "./operators/tee.ts";
+import { from } from "./startpoints/from.ts";
 import { fromFile, FromFileOpt } from "./startpoints/from_file.ts";
 import { fromArray } from "./startpoints/from_array.ts";
 import { fromRun } from "./startpoints/from_run.ts";
@@ -71,6 +72,9 @@ export class ShellStream {
     const emptyGenerator: Generator = (async function* () {})();
     return new ShellStream([], emptyGenerator);
   }
+
+  static from = (iterable: AsyncIterable<string> | Iterable<string>) =>
+    from(iterable)();
   static fromFile = (path: string, opt?: FromFileOpt) => fromFile(path, opt)();
   static fromArray = (lines: string[]) => fromArray(lines)();
   static fromString = (line: string) => fromString(line)();
@@ -110,6 +114,7 @@ export type ProcessEvent = { processCount: number; processDone: number };
 export type ProcessEventListener = (event: ProcessEvent) => unknown;
 
 export const Pipe = ShellStream.pipe;
+export const From = ShellStream.from;
 export const FromFile = ShellStream.fromFile;
 export const FromRun = ShellStream.fromRun;
 export const FromArray = ShellStream.fromArray;
