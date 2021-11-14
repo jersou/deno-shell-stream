@@ -260,8 +260,8 @@ the stream is not text.
 
 ## NodeJS ShellStream : [sh-stream NPM package](https://www.npmjs.com/package/sh-stream)
 
-sh-stream NPM package is the NodeJS version of The deno ShellStream lib, build in Node by
-[dnt](https://github.com/denoland/dnt).
+sh-stream NPM package is the NodeJS version of The deno ShellStream lib, build
+in Node by [dnt](https://github.com/denoland/dnt).
 
 ## Development
 
