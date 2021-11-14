@@ -25,6 +25,8 @@ import { logWithTimestamp } from "./operators/logWithTimestamp.ts";
 import { success } from "./endpoints/success.ts";
 import { sponge } from "./operators/sponge.ts";
 import { fromDir } from "./startpoints/from_dir.ts";
+import { fromWalk } from "./startpoints/from_walk.ts";
+import { WalkOptions } from "./deps.ts";
 
 export class ShellStream {
   process?: Deno.Process;
@@ -78,6 +80,7 @@ export class ShellStream {
     from(iterable)();
   static fromFile = (path: string, opt?: FromFileOpt) => fromFile(path, opt)();
   static fromDir = (path: string) => fromDir(path)();
+  static fromWalk = (path: string, opt?: WalkOptions) => fromWalk(path, opt)();
   static fromArray = (lines: string[]) => fromArray(lines)();
   static fromString = (line: string) => fromString(line)();
   static fromRun = (cmd: string[] | string, opt?: RunOptions) =>
@@ -119,6 +122,7 @@ export const Pipe = ShellStream.pipe;
 export const From = ShellStream.from;
 export const FromFile = ShellStream.fromFile;
 export const FromDir = ShellStream.fromDir;
+export const FromWalk = ShellStream.fromWalk;
 export const FromRun = ShellStream.fromRun;
 export const FromArray = ShellStream.fromArray;
 export const FromString = ShellStream.fromString;

@@ -7,6 +7,7 @@ import {
   FromFile,
   FromRun,
   FromString,
+  FromWalk,
   Pipe,
 } from "./shell_stream.ts";
 import { fromArray } from "./startpoints/from_array.ts";
@@ -110,7 +111,7 @@ Deno.test("From", async () => {
   assertEquals(res, ["line1", "line2"]);
 });
 
-Deno.test("From", async () => {
+Deno.test("From-async", async () => {
   async function* genAsync() {
     yield "line1async";
     yield "line2async";
@@ -132,4 +133,31 @@ Deno.test("FromDir", async () => {
   console.log(path);
   await Deno.remove(path, { recursive: true });
   assertEquals(res.sort(), ["file1", "file2"]);
+});
+
+Deno.test("FromWalk", async () => {
+  const path = await Deno.makeTempDir();
+  await touch(`${path}/file1`);
+  await Deno.mkdir(`${path}/dir`);
+  await touch(`${path}/dir/file2`);
+  const res = await FromWalk(path).toArray();
+  console.log(path);
+  await Deno.remove(path, { recursive: true });
+  assertEquals(res.sort(), [
+    path,
+    `${path}/dir`,
+    `${path}/dir/file2`,
+    `${path}/file1`,
+  ]);
+});
+
+Deno.test("FromWalk-no-dir", async () => {
+  const path = await Deno.makeTempDir();
+  await touch(`${path}/file1`);
+  await Deno.mkdir(`${path}/dir`);
+  await touch(`${path}/dir/file2`);
+  const res = await FromWalk(path, { includeDirs: false }).toArray();
+  console.log(path);
+  await Deno.remove(path, { recursive: true });
+  assertEquals(res.sort(), [`${path}/dir/file2`, `${path}/file1`]);
 });
