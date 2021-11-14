@@ -3,13 +3,13 @@ export {
   copy,
   readerFromStreamReader,
   readLines,
-} from "https://deno.land/std@0.112.0/io/mod.ts";
+} from "https://deno.land/std@0.114.0/io/mod.ts";
 
-export { basename, join } from "https://deno.land/std@0.112.0/path/mod.ts";
+export { basename, join } from "https://deno.land/std@0.114.0/path/mod.ts";
 
 export {
   bgBlue,
   bgGreen,
   bgRed,
   yellow,
-} from "https://deno.land/std@0.112.0/fmt/colors.ts";
+} from "https://deno.land/std@0.114.0/fmt/colors.ts";
