@@ -7,7 +7,7 @@ await build({
   package: {
     // package.json properties
     name: "sh-stream",
-    version: "0.1.10",
+    version: "0.1.11",
     description: "Mix I/O stream API and Shell pipe/redirects",
     license: "MIT",
     repository: {
