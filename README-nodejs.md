@@ -13,7 +13,7 @@ Install from npm : `npm install sh-stream`
 
 ```javascript
 const { FromFile, FromRun } = require("sh-stream");
-const { bgBlue } = require("./umd/deps/deno_land_std_0_112_0/fmt/colors.js");
+const { bgBlue } = require("./umd/deps/deno_land_std_0_114_0/fmt/colors.js");
 
 let res = await FromRun("cat /etc/passwd").run("grep /root").toString();
 console.log(res); // → root:x:0:0:root:/root:/bin/bash

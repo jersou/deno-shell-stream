@@ -13,7 +13,7 @@ Install from npm : `npm install sh-stream`
 
 ```javascript
 const { FromFile, FromRun } = require("sh-stream");
-const { bgBlue } = require("./umd/deps/deno_land_std_0_112_0/fmt/colors.js");
+const { bgBlue } = require("./umd/deps/deno_land_std_0_114_0/fmt/colors.js");
 
 let res = await FromRun("cat /etc/passwd").run("grep /root").toString();
 console.log(res); // → root:x:0:0:root:/root:/bin/bash
@@ -118,7 +118,8 @@ These operators return a ShellStream :
 - `tail(count = 1)` :transform the stream, keep only last `count` lines.
 - `sponge()` : keep stream unchanged, soaks up all its input before re-emit all.
 - `sort()` : transform the stream, sort the stream.
-- `uniq()` : transform the stream, keep only lines that are different from previous line.
+- `uniq()` : transform the stream, keep only lines that are different from
+  previous line.
 - `pipe(...operators: OperatorFunc[])` : [see bellow "Pipe chapter"](#Pipe).
 
 ### Endpoint Operators

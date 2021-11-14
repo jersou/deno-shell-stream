@@ -11,7 +11,7 @@ import {
   FromFile,
   FromRun,
 } from "https://deno.land/x/shell_stream@v0.1.11/mod.ts";
-import { bgBlue } from "https://deno.land/std@0.112.0/fmt/colors.ts";
+import { bgBlue } from "https://deno.land/std@0.114.0/fmt/colors.ts";
 
 let res = await FromRun("cat /etc/passwd").run("grep /root").toString();
 console.log(res); // → root:x:0:0:root:/root:/bin/bash

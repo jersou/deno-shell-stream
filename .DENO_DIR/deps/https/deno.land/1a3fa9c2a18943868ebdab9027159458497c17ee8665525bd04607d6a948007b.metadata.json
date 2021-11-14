@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "date": "Sun, 14 Nov 2021 10:30:20 GMT",
+    "etag": "\"c54231ea5533d821ff3a5663af22f2a9\"",
+    "cache-control": "public, max-age=31536000, immutable",
+    "last-modified": "Tue, 09 Nov 2021 13:56:03 GMT",
+    "server": "deploy/europe-west1-b",
+    "x-amz-request-id": "WPKFY26RSC6XD7ZR",
+    "content-type": "application/typescript; charset=utf-8",
+    "x-amz-id-2": "wnexIkmOLPBS5zc3NlDs+qguzRFbf3LUYj27bigD82eYKxpjunfV3l1IPXwMQ2s1okWCp7881cw=",
+    "x-amz-version-id": "nEYLjjwA0sxGnIfZ8s0YWafugSaU7IaV",
+    "access-control-allow-origin": "*",
+    "content-length": "11804"
+  },
+  "url": "https://deno.land/std@0.114.0/fmt/colors.ts"
+}

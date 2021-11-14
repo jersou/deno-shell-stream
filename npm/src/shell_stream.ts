@@ -15,6 +15,7 @@ import { toString } from "./endpoints/to_string.js";
 import { toArray } from "./endpoints/to_array.js";
 import { pipe } from "./operators/pipe.js";
 import { tee } from "./operators/tee.js";
+import { from } from "./startpoints/from.js";
 import { fromFile, FromFileOpt } from "./startpoints/from_file.js";
 import { fromArray } from "./startpoints/from_array.js";
 import { fromRun } from "./startpoints/from_run.js";
@@ -24,6 +25,11 @@ import { head } from "./operators/head.js";
 import { logWithTimestamp } from "./operators/logWithTimestamp.js";
 import { success } from "./endpoints/success.js";
 import { sponge } from "./operators/sponge.js";
+import { fromDir } from "./startpoints/from_dir.js";
+import { fromWalk } from "./startpoints/from_walk.js";
+import { WalkOptions } from "./deps.js";
+import { sort } from "./operators/sort.js";
+import { uniq } from "./operators/uniq.js";
 
 export class ShellStream {
   process?: denoShim.Deno.Process;
@@ -52,6 +58,8 @@ export class ShellStream {
   head = (count = 1) => head(count)(this);
   tail = (count = 1) => tail(count)(this);
   sponge = () => sponge()(this);
+  sort = () => sort()(this);
+  uniq = () => uniq()(this);
 
   pipe = (...operators: OperatorFunc[]) => pipe(...operators)(this);
 
@@ -72,7 +80,12 @@ export class ShellStream {
     const emptyGenerator: Generator = (async function* () {})();
     return new ShellStream([], emptyGenerator);
   }
+
+  static from = (iterable: AsyncIterable<string> | Iterable<string>) =>
+    from(iterable)();
   static fromFile = (path: string, opt?: FromFileOpt) => fromFile(path, opt)();
+  static fromDir = (path: string) => fromDir(path)();
+  static fromWalk = (path: string, opt?: WalkOptions) => fromWalk(path, opt)();
   static fromArray = (lines: string[]) => fromArray(lines)();
   static fromString = (line: string) => fromString(line)();
   static fromRun = (cmd: string[] | string, opt?: RunOptions) =>
@@ -111,7 +124,10 @@ export type ProcessEvent = { processCount: number; processDone: number };
 export type ProcessEventListener = (event: ProcessEvent) => unknown;
 
 export const Pipe = ShellStream.pipe;
+export const From = ShellStream.from;
 export const FromFile = ShellStream.fromFile;
+export const FromDir = ShellStream.fromDir;
+export const FromWalk = ShellStream.fromWalk;
 export const FromRun = ShellStream.fromRun;
 export const FromArray = ShellStream.fromArray;
 export const FromString = ShellStream.fromString;

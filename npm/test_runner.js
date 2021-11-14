@@ -14,9 +14,11 @@ const filePaths = [
   "operators/map_test.js",
   "operators/replace_test.js",
   "operators/run_test.js",
+  "operators/sort_test.js",
   "operators/sponge_test.js",
   "operators/tail_test.js",
   "operators/timestamp_test.js",
+  "operators/uniq_test.js",
   "shell_stream_test.js",
 ];
 

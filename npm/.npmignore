@@ -21,12 +21,16 @@ esm/operators/replace_test.js
 umd/operators/replace_test.js
 esm/operators/run_test.js
 umd/operators/run_test.js
+esm/operators/sort_test.js
+umd/operators/sort_test.js
 esm/operators/sponge_test.js
 umd/operators/sponge_test.js
 esm/operators/tail_test.js
 umd/operators/tail_test.js
 esm/operators/timestamp_test.js
 umd/operators/timestamp_test.js
+esm/operators/uniq_test.js
+umd/operators/uniq_test.js
 esm/shell_stream_test.js
 umd/shell_stream_test.js
 esm/test_deps.js

@@ -28,7 +28,7 @@
     });
     denoShim.Deno.test("run", async () => {
         const denoSh = `
-import { copy } from "https://deno.land/std@0.112.0/io/util.ts";
+import { copy } from "https://deno.land/std@0.114.0/io/util.ts";
 await copy(Deno.stdin, Deno.stdout);`;
         const out = await (0, shell_stream_js_1.FromArray)(["line1"])
             .run([denoShim.Deno.execPath(), "eval", denoSh])

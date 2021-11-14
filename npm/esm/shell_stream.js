@@ -13,6 +13,7 @@ import { toString } from "./endpoints/to_string.js";
 import { toArray } from "./endpoints/to_array.js";
 import { pipe } from "./operators/pipe.js";
 import { tee } from "./operators/tee.js";
+import { from } from "./startpoints/from.js";
 import { fromFile } from "./startpoints/from_file.js";
 import { fromArray } from "./startpoints/from_array.js";
 import { fromRun } from "./startpoints/from_run.js";
@@ -22,6 +23,10 @@ import { head } from "./operators/head.js";
 import { logWithTimestamp } from "./operators/logWithTimestamp.js";
 import { success } from "./endpoints/success.js";
 import { sponge } from "./operators/sponge.js";
+import { fromDir } from "./startpoints/from_dir.js";
+import { fromWalk } from "./startpoints/from_walk.js";
+import { sort } from "./operators/sort.js";
+import { uniq } from "./operators/uniq.js";
 export class ShellStream {
     constructor(parents, generator) {
         Object.defineProperty(this, "parents", {
@@ -150,6 +155,18 @@ export class ShellStream {
             writable: true,
             value: () => sponge()(this)
         });
+        Object.defineProperty(this, "sort", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: () => sort()(this)
+        });
+        Object.defineProperty(this, "uniq", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: () => uniq()(this)
+        });
         Object.defineProperty(this, "pipe", {
             enumerable: true,
             configurable: true,
@@ -210,11 +227,29 @@ export class ShellStream {
         ShellStream.sendProcessEvent();
     }
 }
+Object.defineProperty(ShellStream, "from", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: (iterable) => from(iterable)()
+});
 Object.defineProperty(ShellStream, "fromFile", {
     enumerable: true,
     configurable: true,
     writable: true,
     value: (path, opt) => fromFile(path, opt)()
+});
+Object.defineProperty(ShellStream, "fromDir", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: (path) => fromDir(path)()
+});
+Object.defineProperty(ShellStream, "fromWalk", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: (path, opt) => fromWalk(path, opt)()
 });
 Object.defineProperty(ShellStream, "fromArray", {
     enumerable: true,
@@ -259,7 +294,10 @@ Object.defineProperty(ShellStream, "processEventListener", {
     value: []
 });
 export const Pipe = ShellStream.pipe;
+export const From = ShellStream.from;
 export const FromFile = ShellStream.fromFile;
+export const FromDir = ShellStream.fromDir;
+export const FromWalk = ShellStream.fromWalk;
 export const FromRun = ShellStream.fromRun;
 export const FromArray = ShellStream.fromArray;
 export const FromString = ShellStream.fromString;

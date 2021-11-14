@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "cache-control": "public, max-age=31536000, immutable",
+    "server": "deploy/europe-west1-b",
+    "x-amz-request-id": "WPKD2KQQDJGX0M4Q",
+    "access-control-allow-origin": "*",
+    "date": "Sun, 14 Nov 2021 10:30:20 GMT",
+    "x-amz-version-id": "N4E3UmoxV59c8nLkGIKcpscO_uk6cVat",
+    "x-amz-id-2": "yhBF4pq9xlZjXnGSLhCzK8dEf0Sq/91xWMv6htu/0eQMIrq4fdafcYgt028FSDkRgqosiyIxPXo=",
+    "etag": "\"225a08566317278f52eac51e91ddca10\"",
+    "content-type": "application/typescript; charset=utf-8",
+    "content-length": "5341",
+    "last-modified": "Tue, 09 Nov 2021 13:56:03 GMT"
+  },
+  "url": "https://deno.land/std@0.114.0/fs/walk.ts"
+}

@@ -4,11 +4,11 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./operators/log.js", "./endpoints/to_file.js", "./operators/run.js", "./operators/grep.js", "./operators/timestamp.js", "./operators/tap.js", "./operators/replace.js", "./operators/map.js", "./operators/filter.js", "./operators/cut.js", "./endpoints/close.js", "./endpoints/to_string.js", "./endpoints/to_array.js", "./operators/pipe.js", "./operators/tee.js", "./startpoints/from_file.js", "./startpoints/from_array.js", "./startpoints/from_run.js", "./startpoints/from_string.js", "./operators/tail.js", "./operators/head.js", "./operators/logWithTimestamp.js", "./endpoints/success.js", "./operators/sponge.js"], factory);
+        define(["require", "exports", "./operators/log.js", "./endpoints/to_file.js", "./operators/run.js", "./operators/grep.js", "./operators/timestamp.js", "./operators/tap.js", "./operators/replace.js", "./operators/map.js", "./operators/filter.js", "./operators/cut.js", "./endpoints/close.js", "./endpoints/to_string.js", "./endpoints/to_array.js", "./operators/pipe.js", "./operators/tee.js", "./startpoints/from.js", "./startpoints/from_file.js", "./startpoints/from_array.js", "./startpoints/from_run.js", "./startpoints/from_string.js", "./operators/tail.js", "./operators/head.js", "./operators/logWithTimestamp.js", "./endpoints/success.js", "./operators/sponge.js", "./startpoints/from_dir.js", "./startpoints/from_walk.js", "./operators/sort.js", "./operators/uniq.js"], factory);
     }
 })(function (require, exports) {
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.FromString = exports.FromArray = exports.FromRun = exports.FromFile = exports.Pipe = exports.ShellStream = void 0;
+    exports.FromString = exports.FromArray = exports.FromRun = exports.FromWalk = exports.FromDir = exports.FromFile = exports.From = exports.Pipe = exports.ShellStream = void 0;
     const log_js_1 = require("./operators/log.js");
     const to_file_js_1 = require("./endpoints/to_file.js");
     const run_js_1 = require("./operators/run.js");
@@ -24,6 +24,7 @@
     const to_array_js_1 = require("./endpoints/to_array.js");
     const pipe_js_1 = require("./operators/pipe.js");
     const tee_js_1 = require("./operators/tee.js");
+    const from_js_1 = require("./startpoints/from.js");
     const from_file_js_1 = require("./startpoints/from_file.js");
     const from_array_js_1 = require("./startpoints/from_array.js");
     const from_run_js_1 = require("./startpoints/from_run.js");
@@ -33,6 +34,10 @@
     const logWithTimestamp_js_1 = require("./operators/logWithTimestamp.js");
     const success_js_1 = require("./endpoints/success.js");
     const sponge_js_1 = require("./operators/sponge.js");
+    const from_dir_js_1 = require("./startpoints/from_dir.js");
+    const from_walk_js_1 = require("./startpoints/from_walk.js");
+    const sort_js_1 = require("./operators/sort.js");
+    const uniq_js_1 = require("./operators/uniq.js");
     class ShellStream {
         constructor(parents, generator) {
             Object.defineProperty(this, "parents", {
@@ -161,6 +166,18 @@
                 writable: true,
                 value: () => (0, sponge_js_1.sponge)()(this)
             });
+            Object.defineProperty(this, "sort", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: () => (0, sort_js_1.sort)()(this)
+            });
+            Object.defineProperty(this, "uniq", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: () => (0, uniq_js_1.uniq)()(this)
+            });
             Object.defineProperty(this, "pipe", {
                 enumerable: true,
                 configurable: true,
@@ -222,11 +239,29 @@
         }
     }
     exports.ShellStream = ShellStream;
+    Object.defineProperty(ShellStream, "from", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: (iterable) => (0, from_js_1.from)(iterable)()
+    });
     Object.defineProperty(ShellStream, "fromFile", {
         enumerable: true,
         configurable: true,
         writable: true,
         value: (path, opt) => (0, from_file_js_1.fromFile)(path, opt)()
+    });
+    Object.defineProperty(ShellStream, "fromDir", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: (path) => (0, from_dir_js_1.fromDir)(path)()
+    });
+    Object.defineProperty(ShellStream, "fromWalk", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: (path, opt) => (0, from_walk_js_1.fromWalk)(path, opt)()
     });
     Object.defineProperty(ShellStream, "fromArray", {
         enumerable: true,
@@ -271,7 +306,10 @@
         value: []
     });
     exports.Pipe = ShellStream.pipe;
+    exports.From = ShellStream.from;
     exports.FromFile = ShellStream.fromFile;
+    exports.FromDir = ShellStream.fromDir;
+    exports.FromWalk = ShellStream.fromWalk;
     exports.FromRun = ShellStream.fromRun;
     exports.FromArray = ShellStream.fromArray;
     exports.FromString = ShellStream.fromString;

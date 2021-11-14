@@ -14,5 +14,5 @@ export {
   yellow,
 } from "https://deno.land/std@0.114.0/fmt/colors.ts";
 
-export { walk } from "https://deno.land/std@0.114.0/fs/mod.ts";
-export type { WalkOptions } from "https://deno.land/std@0.114.0/fs/mod.ts";
+export { walk } from "https://deno.land/std@0.114.0/fs/walk.ts";
+export type { WalkOptions } from "https://deno.land/std@0.114.0/fs/walk.ts";

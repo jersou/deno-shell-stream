@@ -86,4 +86,58 @@
         const res = await (0, shell_stream_js_1.Pipe)((0, from_array_js_1.fromArray)(["line1", "line2"]), (0, map_js_1.map)((line) => line + ">"), (0, map_js_1.map)((line) => "<" + line)).toArray();
         (0, test_deps_js_1.assertEquals)(res, ["<line1>", "<line2>"]);
     });
+    denoShim.Deno.test("From", async () => {
+        function* gen() {
+            yield "line1";
+            yield "line2";
+        }
+        const res = await (0, shell_stream_js_1.From)(gen()).toArray();
+        (0, test_deps_js_1.assertEquals)(res, ["line1", "line2"]);
+    });
+    denoShim.Deno.test("From-async", async () => {
+        async function* genAsync() {
+            yield "line1async";
+            yield "line2async";
+        }
+        const res = await (0, shell_stream_js_1.From)(genAsync()).toArray();
+        (0, test_deps_js_1.assertEquals)(res, ["line1async", "line2async"]);
+    });
+    async function touch(path) {
+        const file = await denoShim.Deno.open(path, { create: true, write: true });
+        file.close();
+    }
+    denoShim.Deno.test("FromDir", async () => {
+        const path = await denoShim.Deno.makeTempDir();
+        await touch(`${path}/file1`);
+        await touch(`${path}/file2`);
+        const res = await (0, shell_stream_js_1.FromDir)(path).toArray();
+        console.log(path);
+        await denoShim.Deno.remove(path, { recursive: true });
+        (0, test_deps_js_1.assertEquals)(res.sort(), ["file1", "file2"]);
+    });
+    denoShim.Deno.test("FromWalk", async () => {
+        const path = await denoShim.Deno.makeTempDir();
+        await touch(`${path}/file1`);
+        await denoShim.Deno.mkdir(`${path}/dir`);
+        await touch(`${path}/dir/file2`);
+        const res = await (0, shell_stream_js_1.FromWalk)(path).toArray();
+        console.log(path);
+        await denoShim.Deno.remove(path, { recursive: true });
+        (0, test_deps_js_1.assertEquals)(res.sort(), [
+            path,
+            `${path}/dir`,
+            `${path}/dir/file2`,
+            `${path}/file1`,
+        ]);
+    });
+    denoShim.Deno.test("FromWalk-no-dir", async () => {
+        const path = await denoShim.Deno.makeTempDir();
+        await touch(`${path}/file1`);
+        await denoShim.Deno.mkdir(`${path}/dir`);
+        await touch(`${path}/dir/file2`);
+        const res = await (0, shell_stream_js_1.FromWalk)(path, { includeDirs: false }).toArray();
+        console.log(path);
+        await denoShim.Deno.remove(path, { recursive: true });
+        (0, test_deps_js_1.assertEquals)(res.sort(), [`${path}/dir/file2`, `${path}/file1`]);
+    });
 });

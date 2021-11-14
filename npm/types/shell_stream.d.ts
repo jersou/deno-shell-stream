@@ -8,6 +8,7 @@ import { FilterFunction } from "./operators/filter.js";
 import { Generator, OperatorFunc } from "./types.js";
 import { CloseOptions } from "./endpoints/close.js";
 import { FromFileOpt } from "./startpoints/from_file.js";
+import { WalkOptions } from "./deps.js";
 export declare class ShellStream {
     parents: ShellStream[];
     generator: Generator;
@@ -31,6 +32,8 @@ export declare class ShellStream {
     head: (count?: number) => ShellStream;
     tail: (count?: number) => ShellStream;
     sponge: () => ShellStream;
+    sort: () => ShellStream;
+    uniq: () => ShellStream;
     pipe: (...operators: OperatorFunc[]) => ShellStream;
     close: (opt?: CloseOptions) => Promise<import("./endpoints/close.js").CloseRes>;
     toString: () => Promise<string>;
@@ -38,7 +41,10 @@ export declare class ShellStream {
     success: () => Promise<boolean>;
     static builder(generator: Generator, inputStream?: ShellStream): ShellStream;
     static empty(): ShellStream;
+    static from: (iterable: AsyncIterable<string> | Iterable<string>) => ShellStream;
     static fromFile: (path: string, opt?: FromFileOpt | undefined) => ShellStream;
+    static fromDir: (path: string) => ShellStream;
+    static fromWalk: (path: string, opt?: WalkOptions | undefined) => ShellStream;
     static fromArray: (lines: string[]) => ShellStream;
     static fromString: (line: string) => ShellStream;
     static fromRun: (cmd: string[] | string, opt?: RunOptions | undefined) => ShellStream;
@@ -58,7 +64,10 @@ export declare type ProcessEvent = {
 };
 export declare type ProcessEventListener = (event: ProcessEvent) => unknown;
 export declare const Pipe: (...op: OperatorFunc[]) => ShellStream;
+export declare const From: (iterable: AsyncIterable<string> | Iterable<string>) => ShellStream;
 export declare const FromFile: (path: string, opt?: FromFileOpt | undefined) => ShellStream;
+export declare const FromDir: (path: string) => ShellStream;
+export declare const FromWalk: (path: string, opt?: WalkOptions | undefined) => ShellStream;
 export declare const FromRun: (cmd: string[] | string, opt?: RunOptions | undefined) => ShellStream;
 export declare const FromArray: (lines: string[]) => ShellStream;
 export declare const FromString: (line: string) => ShellStream;

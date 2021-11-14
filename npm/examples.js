@@ -14,7 +14,7 @@ const {
   bgGreen,
   bgRed,
   copy,
-} = require("./npm/umd/deps/deno_land_std_0_112_0/fmt/colors.js");
+} = require("./npm/umd/deps/deno_land_std_0_114_0/fmt/colors.js");
 
 (async function () {
   console.log(
