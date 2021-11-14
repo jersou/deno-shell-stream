@@ -4,7 +4,7 @@ ShellStream is a lib for Deno that mix I/O stream API and Shell pipe/redirects.
 
 It has zero 3rd party dependencies and don't internally run sh or bash commands.
 
-## Quick exemples
+## Quick examples
 
 ```typescript
 import {

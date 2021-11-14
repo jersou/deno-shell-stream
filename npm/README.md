@@ -7,45 +7,45 @@ It has zero 3rd party dependencies and don't internally run sh or bash commands.
 This package is the Node version of The deno ShellStream lib, build in Node by
 [dnt](https://github.com/denoland/dnt).
 
-## Quick exemples (with NodeJS)
+## Quick examples (with NodeJS)
 
 Install from npm : `npm install sh-stream`
 
 ```javascript
 const { FromFile, FromRun } = require("sh-stream");
-const { bgBlue } = require("./umd/deps/deno_land_std_0_114_0/fmt/colors.js");
 
-let res = await FromRun("cat /etc/passwd").run("grep /root").toString();
-console.log(res); // → root:x:0:0:root:/root:/bin/bash
+(async function () {
+  let res = await FromRun("cat /etc/passwd").run("grep /root").toString();
+  console.log(res); // → root:x:0:0:root:/root:/bin/bash
 
-// the same example without run cat & grep command :
-res = await FromFile("/etc/passwd")
-  .log(bgBlue) // → log the entire file with blue background
-  .grep(/\/root/) // keep lines that contain /root
-  .log() // → log "root:x:0:0:root:/root:/bin/bash"
-  .toString();
-console.log(res); // → res = "root:x:0:0:root:/root:/bin/bash"
+  // the same example without run cat & grep command :
+  res = await FromFile("/etc/passwd")
+    .grep(/\/root/) // keep lines that contain /root
+    .log() // → log "root:x:0:0:root:/root:/bin/bash"
+    .toString();
+  console.log(res); // → res = "root:x:0:0:root:/root:/bin/bash"
 
-res = await FromRun("node -h").head(1).toString();
-console.log(res); // → Usage: node [options] [ script.js ] [arguments]
+  res = await FromRun("node -h").head(1).toString();
+  console.log(res); // → Usage: node [options] [ script.js ] [arguments]
 
-console.log(await FromRun(["node", "-h"]).tail(2).toArray());
-// → [ '', 'Documentation can be found at https://nodejs.org/' ]
+  console.log(await FromRun(["node", "-h"]).tail(2).toArray());
+  // → [ '', 'Documentation can be found at https://nodejs.org/' ]
 
-// exit codes of processes can be retrieved :
-const closeRes = await FromRun([
-  "node",
-  "eval",
-  'console.log("foo"); process.exit(13)',
-])
-  .run("cat")
-  .run("cat")
-  .close();
-const exitCodes = closeRes.statuses.map((s) => s?.code);
-console.log(
-  `success=${closeRes.success} codes=${exitCodes} out=${closeRes.out}`,
-);
-// → "success=false codes=13,0,0 out=foo"
+  // exit codes of processes can be retrieved :
+  const closeRes = await FromRun([
+    "node",
+    "eval",
+    'console.log("foo"); process.exit(13)',
+  ])
+    .run("cat")
+    .run("cat")
+    .close();
+  const exitCodes = closeRes.statuses.map((s) => s?.code);
+  console.log(
+    `success=${closeRes.success} codes=${exitCodes} out=${closeRes.out}`,
+  );
+  // → "success=false codes=13,0,0 out=foo"
+})();
 ```
 
 See more examples in `example.js` file.
