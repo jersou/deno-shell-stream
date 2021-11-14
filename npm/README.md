@@ -1,4 +1,4 @@
-# Node ShellStream (sh-stream NPM package)
+# Node ShellStream : [sh-stream NPM package](https://www.npmjs.com/package/sh-stream)
 
 ShellStream mix I/O stream API and Shell pipe/redirects.
 

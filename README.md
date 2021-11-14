@@ -258,6 +258,11 @@ console.log(res); // → root:x:0:0:root:/root:/bin/bash
 reduced. The behavior can probably be different from shell pipes, especially if
 the stream is not text.
 
+## NodeJS ShellStream : [sh-stream NPM package](https://www.npmjs.com/package/sh-stream)
+
+sh-stream NPM package is the NodeJS version of The deno ShellStream lib, build in Node by
+[dnt](https://github.com/denoland/dnt).
+
 ## Development
 
 The folder `.DENO_DIR` and `.lock.json` are **not** necessary for the project to
