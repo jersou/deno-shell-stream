@@ -27,6 +27,8 @@ import { sponge } from "./operators/sponge.ts";
 import { fromDir } from "./startpoints/from_dir.ts";
 import { fromWalk } from "./startpoints/from_walk.ts";
 import { WalkOptions } from "./deps.ts";
+import { sort } from "./operators/sort.ts";
+import { uniq } from "./operators/uniq.ts";
 
 export class ShellStream {
   process?: Deno.Process;
@@ -55,6 +57,8 @@ export class ShellStream {
   head = (count = 1) => head(count)(this);
   tail = (count = 1) => tail(count)(this);
   sponge = () => sponge()(this);
+  sort = () => sort()(this);
+  uniq = () => uniq()(this);
 
   pipe = (...operators: OperatorFunc[]) => pipe(...operators)(this);
 
