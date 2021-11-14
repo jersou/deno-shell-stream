@@ -5,7 +5,7 @@ scripts:
 
   test-watch: deno test -A --watch --unstable --ignore=".DENO_DIR,dist,npm"
 
-  lint: deno lint --ignore=.DENO_DIR,dist,npm,npm_examples.js
+  lint: deno lint --ignore=.DENO_DIR,dist,npm
 
   fmt: deno fmt --ignore=.DENO_DIR,dist,.lock.json,npm
 
