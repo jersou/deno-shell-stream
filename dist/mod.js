@@ -1659,6 +1659,15 @@ const pipe1 = (...operators)=>(shellStream)=>{
         return current;
     }
 ;
+const toIterable1 = ()=>(stream)=>{
+        return (async function*() {
+            for await (const line of stream.generator){
+                yield line;
+            }
+            await stream.close();
+        })();
+    }
+;
 const run1 = (cmdOrStr, opt)=>(stream)=>{
         const generator = async function*() {
             stream.processCmd = parseCmdString1(cmdOrStr);
@@ -1850,6 +1859,8 @@ class ShellStream1 {
     toString = async ()=>await toString1()(this)
     ;
     toArray = async ()=>await toArray1()(this)
+    ;
+    toIterable = ()=>toIterable1()(this)
     ;
     success = async ()=>await success1()(this)
     ;
