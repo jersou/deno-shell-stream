@@ -130,8 +130,10 @@ All these operators close the stream and return a Promise :
   write to the `converted` file.
 - `close(opt?: CloseOptions = { processes: "AWAIT" }):Promise<CloseRes>` : close
   all ressources and wait end of operators (includes processes end)
-- `success():Promise<boolean>` : the stream is closed and CloseRes.success is
+- `success():Promise<boolean>` : the stream is closed and `CloseRes.success` is
   returned
+- `toIterable():AsyncIterable<string>` : return the iterable of the stream. The
+  stream is closed at end of the iterable.
 
 ```typescript
 export type CloseRes = {

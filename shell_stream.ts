@@ -29,6 +29,7 @@ import { fromWalk } from "./startpoints/from_walk.ts";
 import { WalkOptions } from "./deps.ts";
 import { sort } from "./operators/sort.ts";
 import { uniq } from "./operators/uniq.ts";
+import { toIterable } from "./endpoints/to_iterable.ts";
 
 export class ShellStream {
   process?: Deno.Process;
@@ -67,6 +68,7 @@ export class ShellStream {
     await close(opt)(this);
   toString = async () => await toString()(this);
   toArray = async () => await toArray()(this);
+  toIterable = () => toIterable()(this);
   success = async () => await success()(this);
 
   static builder(generator: Generator, inputStream?: ShellStream): ShellStream {
