@@ -38,6 +38,7 @@ export declare class ShellStream {
     close: (opt?: CloseOptions) => Promise<import("./endpoints/close.js").CloseRes>;
     toString: () => Promise<string>;
     toArray: () => Promise<string[]>;
+    toIterable: () => AsyncIterable<string>;
     success: () => Promise<boolean>;
     static builder(generator: Generator, inputStream?: ShellStream): ShellStream;
     static empty(): ShellStream;

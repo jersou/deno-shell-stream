@@ -1,17 +1,46 @@
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
 (function (factory) {
     if (typeof module === "object" && typeof module.exports === "object") {
         var v = factory(require, exports);
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "tslib", "deno.ns", "../_util/assert.js", "../bytes/bytes_list.js", "../bytes/mod.js"], factory);
+        define(["require", "exports", "deno.ns", "../_util/assert.js", "../bytes/bytes_list.js", "../bytes/mod.js"], factory);
     }
 })(function (require, exports) {
     var _Buffer_instances, _Buffer_buf, _Buffer_off, _Buffer_tryGrowByReslice, _Buffer_reslice, _Buffer_grow;
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.readLines = exports.readStringDelim = exports.readDelim = exports.BufWriterSync = exports.BufWriter = exports.BufReader = exports.PartialReadError = exports.BufferFullError = exports.Buffer = void 0;
-    const tslib_1 = require("tslib");
-    const denoShim = (0, tslib_1.__importStar)(require("deno.ns"));
+    const denoShim = __importStar(require("deno.ns"));
     // Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
     const assert_js_1 = require("../_util/assert.js");
     const bytes_list_js_1 = require("../bytes/bytes_list.js");
@@ -41,7 +70,7 @@
             _Buffer_instances.add(this);
             _Buffer_buf.set(this, void 0); // contents are the bytes buf[off : len(buf)]
             _Buffer_off.set(this, 0); // read at buf[off], write at buf[buf.byteLength]
-            (0, tslib_1.__classPrivateFieldSet)(this, _Buffer_buf, ab === undefined ? new Uint8Array(0) : new Uint8Array(ab), "f");
+            __classPrivateFieldSet(this, _Buffer_buf, ab === undefined ? new Uint8Array(0) : new Uint8Array(ab), "f");
         }
         /** Returns a slice holding the unread portion of the buffer.
          *
@@ -54,21 +83,21 @@
          */
         bytes(options = { copy: true }) {
             if (options.copy === false)
-                return (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f").subarray((0, tslib_1.__classPrivateFieldGet)(this, _Buffer_off, "f"));
-            return (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f").slice((0, tslib_1.__classPrivateFieldGet)(this, _Buffer_off, "f"));
+                return __classPrivateFieldGet(this, _Buffer_buf, "f").subarray(__classPrivateFieldGet(this, _Buffer_off, "f"));
+            return __classPrivateFieldGet(this, _Buffer_buf, "f").slice(__classPrivateFieldGet(this, _Buffer_off, "f"));
         }
         /** Returns whether the unread portion of the buffer is empty. */
         empty() {
-            return (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f").byteLength <= (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_off, "f");
+            return __classPrivateFieldGet(this, _Buffer_buf, "f").byteLength <= __classPrivateFieldGet(this, _Buffer_off, "f");
         }
         /** A read only number of bytes of the unread portion of the buffer. */
         get length() {
-            return (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f").byteLength - (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_off, "f");
+            return __classPrivateFieldGet(this, _Buffer_buf, "f").byteLength - __classPrivateFieldGet(this, _Buffer_off, "f");
         }
         /** The read only capacity of the buffer's underlying byte slice, that is,
          * the total space allocated for the buffer's data. */
         get capacity() {
-            return (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f").buffer.byteLength;
+            return __classPrivateFieldGet(this, _Buffer_buf, "f").buffer.byteLength;
         }
         /** Discards all but the first `n` unread bytes from the buffer but
          * continues to use the same allocated storage. It throws if `n` is
@@ -81,11 +110,11 @@
             if (n < 0 || n > this.length) {
                 throw Error("bytes.Buffer: truncation out of range");
             }
-            (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_instances, "m", _Buffer_reslice).call(this, (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_off, "f") + n);
+            __classPrivateFieldGet(this, _Buffer_instances, "m", _Buffer_reslice).call(this, __classPrivateFieldGet(this, _Buffer_off, "f") + n);
         }
         reset() {
-            (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_instances, "m", _Buffer_reslice).call(this, 0);
-            (0, tslib_1.__classPrivateFieldSet)(this, _Buffer_off, 0, "f");
+            __classPrivateFieldGet(this, _Buffer_instances, "m", _Buffer_reslice).call(this, 0);
+            __classPrivateFieldSet(this, _Buffer_off, 0, "f");
         }
         /** Reads the next `p.length` bytes from the buffer or until the buffer is
          * drained. Returns the number of bytes read. If the buffer has no data to
@@ -100,8 +129,8 @@
                 }
                 return null;
             }
-            const nread = (0, mod_js_1.copy)((0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f").subarray((0, tslib_1.__classPrivateFieldGet)(this, _Buffer_off, "f")), p);
-            (0, tslib_1.__classPrivateFieldSet)(this, _Buffer_off, (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_off, "f") + nread, "f");
+            const nread = (0, mod_js_1.copy)(__classPrivateFieldGet(this, _Buffer_buf, "f").subarray(__classPrivateFieldGet(this, _Buffer_off, "f")), p);
+            __classPrivateFieldSet(this, _Buffer_off, __classPrivateFieldGet(this, _Buffer_off, "f") + nread, "f");
             return nread;
         }
         /** Reads the next `p.length` bytes from the buffer or until the buffer is
@@ -116,8 +145,8 @@
             return Promise.resolve(rr);
         }
         writeSync(p) {
-            const m = (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_instances, "m", _Buffer_grow).call(this, p.byteLength);
-            return (0, mod_js_1.copy)(p, (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f"), m);
+            const m = __classPrivateFieldGet(this, _Buffer_instances, "m", _Buffer_grow).call(this, p.byteLength);
+            return (0, mod_js_1.copy)(p, __classPrivateFieldGet(this, _Buffer_buf, "f"), m);
         }
         /** NOTE: This methods writes bytes synchronously; it's provided for
          * compatibility with `Writer` interface. */
@@ -136,8 +165,8 @@
             if (n < 0) {
                 throw Error("Buffer.grow: negative count");
             }
-            const m = (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_instances, "m", _Buffer_grow).call(this, n);
-            (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_instances, "m", _Buffer_reslice).call(this, m);
+            const m = __classPrivateFieldGet(this, _Buffer_instances, "m", _Buffer_grow).call(this, n);
+            __classPrivateFieldGet(this, _Buffer_instances, "m", _Buffer_reslice).call(this, m);
         }
         /** Reads data from `r` until EOF (`null`) and appends it to the buffer,
          * growing the buffer as needed. It resolves to the number of bytes read.
@@ -154,7 +183,7 @@
                 // otherwise read directly into the internal buffer
                 const buf = shouldGrow
                     ? tmp
-                    : new Uint8Array((0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f").buffer, this.length);
+                    : new Uint8Array(__classPrivateFieldGet(this, _Buffer_buf, "f").buffer, this.length);
                 const nread = await r.read(buf);
                 if (nread === null) {
                     return n;
@@ -163,7 +192,7 @@
                 if (shouldGrow)
                     this.writeSync(buf.subarray(0, nread));
                 else
-                    (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_instances, "m", _Buffer_reslice).call(this, this.length + nread);
+                    __classPrivateFieldGet(this, _Buffer_instances, "m", _Buffer_reslice).call(this, this.length + nread);
                 n += nread;
             }
         }
@@ -182,7 +211,7 @@
                 // otherwise read directly into the internal buffer
                 const buf = shouldGrow
                     ? tmp
-                    : new Uint8Array((0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f").buffer, this.length);
+                    : new Uint8Array(__classPrivateFieldGet(this, _Buffer_buf, "f").buffer, this.length);
                 const nread = r.readSync(buf);
                 if (nread === null) {
                     return n;
@@ -191,30 +220,30 @@
                 if (shouldGrow)
                     this.writeSync(buf.subarray(0, nread));
                 else
-                    (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_instances, "m", _Buffer_reslice).call(this, this.length + nread);
+                    __classPrivateFieldGet(this, _Buffer_instances, "m", _Buffer_reslice).call(this, this.length + nread);
                 n += nread;
             }
         }
     }
     exports.Buffer = Buffer;
     _Buffer_buf = new WeakMap(), _Buffer_off = new WeakMap(), _Buffer_instances = new WeakSet(), _Buffer_tryGrowByReslice = function _Buffer_tryGrowByReslice(n) {
-        const l = (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f").byteLength;
+        const l = __classPrivateFieldGet(this, _Buffer_buf, "f").byteLength;
         if (n <= this.capacity - l) {
-            (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_instances, "m", _Buffer_reslice).call(this, l + n);
+            __classPrivateFieldGet(this, _Buffer_instances, "m", _Buffer_reslice).call(this, l + n);
             return l;
         }
         return -1;
     }, _Buffer_reslice = function _Buffer_reslice(len) {
-        (0, assert_js_1.assert)(len <= (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f").buffer.byteLength);
-        (0, tslib_1.__classPrivateFieldSet)(this, _Buffer_buf, new Uint8Array((0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f").buffer, 0, len), "f");
+        (0, assert_js_1.assert)(len <= __classPrivateFieldGet(this, _Buffer_buf, "f").buffer.byteLength);
+        __classPrivateFieldSet(this, _Buffer_buf, new Uint8Array(__classPrivateFieldGet(this, _Buffer_buf, "f").buffer, 0, len), "f");
     }, _Buffer_grow = function _Buffer_grow(n) {
         const m = this.length;
         // If buffer is empty, reset to recover space.
-        if (m === 0 && (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_off, "f") !== 0) {
+        if (m === 0 && __classPrivateFieldGet(this, _Buffer_off, "f") !== 0) {
             this.reset();
         }
         // Fast: Try to grow by means of a reslice.
-        const i = (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_instances, "m", _Buffer_tryGrowByReslice).call(this, n);
+        const i = __classPrivateFieldGet(this, _Buffer_instances, "m", _Buffer_tryGrowByReslice).call(this, n);
         if (i >= 0) {
             return i;
         }
@@ -224,7 +253,7 @@
             // ArrayBuffer. We only need m+n <= c to slide, but
             // we instead let capacity get twice as large so we
             // don't spend all our time copying.
-            (0, mod_js_1.copy)((0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f").subarray((0, tslib_1.__classPrivateFieldGet)(this, _Buffer_off, "f")), (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f"));
+            (0, mod_js_1.copy)(__classPrivateFieldGet(this, _Buffer_buf, "f").subarray(__classPrivateFieldGet(this, _Buffer_off, "f")), __classPrivateFieldGet(this, _Buffer_buf, "f"));
         }
         else if (c + n > MAX_SIZE) {
             throw new Error("The buffer cannot be grown beyond the maximum size.");
@@ -232,12 +261,12 @@
         else {
             // Not enough space anywhere, we need to allocate.
             const buf = new Uint8Array(Math.min(2 * c + n, MAX_SIZE));
-            (0, mod_js_1.copy)((0, tslib_1.__classPrivateFieldGet)(this, _Buffer_buf, "f").subarray((0, tslib_1.__classPrivateFieldGet)(this, _Buffer_off, "f")), buf);
-            (0, tslib_1.__classPrivateFieldSet)(this, _Buffer_buf, buf, "f");
+            (0, mod_js_1.copy)(__classPrivateFieldGet(this, _Buffer_buf, "f").subarray(__classPrivateFieldGet(this, _Buffer_off, "f")), buf);
+            __classPrivateFieldSet(this, _Buffer_buf, buf, "f");
         }
         // Restore this.#off and len(this.#buf).
-        (0, tslib_1.__classPrivateFieldSet)(this, _Buffer_off, 0, "f");
-        (0, tslib_1.__classPrivateFieldGet)(this, _Buffer_instances, "m", _Buffer_reslice).call(this, Math.min(m + n, MAX_SIZE));
+        __classPrivateFieldSet(this, _Buffer_off, 0, "f");
+        __classPrivateFieldGet(this, _Buffer_instances, "m", _Buffer_reslice).call(this, Math.min(m + n, MAX_SIZE));
         return m;
     };
     const DEFAULT_BUF_SIZE = 4096;

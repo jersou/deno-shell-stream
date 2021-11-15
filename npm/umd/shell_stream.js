@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./operators/log.js", "./endpoints/to_file.js", "./operators/run.js", "./operators/grep.js", "./operators/timestamp.js", "./operators/tap.js", "./operators/replace.js", "./operators/map.js", "./operators/filter.js", "./operators/cut.js", "./endpoints/close.js", "./endpoints/to_string.js", "./endpoints/to_array.js", "./operators/pipe.js", "./operators/tee.js", "./startpoints/from.js", "./startpoints/from_file.js", "./startpoints/from_array.js", "./startpoints/from_run.js", "./startpoints/from_string.js", "./operators/tail.js", "./operators/head.js", "./operators/logWithTimestamp.js", "./endpoints/success.js", "./operators/sponge.js", "./startpoints/from_dir.js", "./startpoints/from_walk.js", "./operators/sort.js", "./operators/uniq.js"], factory);
+        define(["require", "exports", "./operators/log.js", "./endpoints/to_file.js", "./operators/run.js", "./operators/grep.js", "./operators/timestamp.js", "./operators/tap.js", "./operators/replace.js", "./operators/map.js", "./operators/filter.js", "./operators/cut.js", "./endpoints/close.js", "./endpoints/to_string.js", "./endpoints/to_array.js", "./operators/pipe.js", "./operators/tee.js", "./startpoints/from.js", "./startpoints/from_file.js", "./startpoints/from_array.js", "./startpoints/from_run.js", "./startpoints/from_string.js", "./operators/tail.js", "./operators/head.js", "./operators/logWithTimestamp.js", "./endpoints/success.js", "./operators/sponge.js", "./startpoints/from_dir.js", "./startpoints/from_walk.js", "./operators/sort.js", "./operators/uniq.js", "./endpoints/to_iterable.js"], factory);
     }
 })(function (require, exports) {
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -38,6 +38,7 @@
     const from_walk_js_1 = require("./startpoints/from_walk.js");
     const sort_js_1 = require("./operators/sort.js");
     const uniq_js_1 = require("./operators/uniq.js");
+    const to_iterable_js_1 = require("./endpoints/to_iterable.js");
     class ShellStream {
         constructor(parents, generator) {
             Object.defineProperty(this, "parents", {
@@ -202,6 +203,12 @@
                 configurable: true,
                 writable: true,
                 value: async () => await (0, to_array_js_1.toArray)()(this)
+            });
+            Object.defineProperty(this, "toIterable", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: () => (0, to_iterable_js_1.toIterable)()(this)
             });
             Object.defineProperty(this, "success", {
                 enumerable: true,

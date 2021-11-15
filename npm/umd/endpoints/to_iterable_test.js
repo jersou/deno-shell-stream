@@ -23,17 +23,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "deno.ns", "../test_deps.js", "../shell_stream.js"], factory);
+        define(["require", "exports", "deno.ns", "../shell_stream.js", "../test_deps.js"], factory);
     }
 })(function (require, exports) {
     Object.defineProperty(exports, "__esModule", { value: true });
     const denoShim = __importStar(require("deno.ns"));
-    const test_deps_js_1 = require("../test_deps.js");
     const shell_stream_js_1 = require("../shell_stream.js");
-    denoShim.Deno.test("filter", async () => {
-        const res = await (0, shell_stream_js_1.FromArray)(["line1", "line222"])
-            .filter((l) => l.length < 6)
-            .toArray();
-        (0, test_deps_js_1.assertEquals)(res, ["line1"]);
+    const test_deps_js_1 = require("../test_deps.js");
+    denoShim.Deno.test("toIterable", async () => {
+        const iterable = (0, shell_stream_js_1.FromArray)(["line1", "line2"]).toIterable();
+        const res = [];
+        for await (const str of iterable) {
+            res.push(str);
+        }
+        (0, test_deps_js_1.assertEquals)(res, ["line1", "line2"]);
     });
 });

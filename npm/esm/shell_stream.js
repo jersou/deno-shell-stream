@@ -27,6 +27,7 @@ import { fromDir } from "./startpoints/from_dir.js";
 import { fromWalk } from "./startpoints/from_walk.js";
 import { sort } from "./operators/sort.js";
 import { uniq } from "./operators/uniq.js";
+import { toIterable } from "./endpoints/to_iterable.js";
 export class ShellStream {
     constructor(parents, generator) {
         Object.defineProperty(this, "parents", {
@@ -191,6 +192,12 @@ export class ShellStream {
             configurable: true,
             writable: true,
             value: async () => await toArray()(this)
+        });
+        Object.defineProperty(this, "toIterable", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: () => toIterable()(this)
         });
         Object.defineProperty(this, "success", {
             enumerable: true,

@@ -5,6 +5,8 @@ esm/endpoints/success_test.js
 umd/endpoints/success_test.js
 esm/endpoints/to_file_test.js
 umd/endpoints/to_file_test.js
+esm/endpoints/to_iterable_test.js
+umd/endpoints/to_iterable_test.js
 esm/endpoints/to_string_test.js
 umd/endpoints/to_string_test.js
 esm/operators/cut_test.js

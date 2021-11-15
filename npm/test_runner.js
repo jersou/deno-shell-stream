@@ -6,6 +6,7 @@ const filePaths = [
   "endpoints/close_test.js",
   "endpoints/success_test.js",
   "endpoints/to_file_test.js",
+  "endpoints/to_iterable_test.js",
   "endpoints/to_string_test.js",
   "operators/cut_test.js",
   "operators/filter_test.js",
