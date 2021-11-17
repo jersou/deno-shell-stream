@@ -138,7 +138,7 @@ All these operators close the stream and return a Promise :
 - `toString():Promise<string>` : the stream is closed and converted to String.
 - `toArray():Promise<string[]>` : the stream is closed and converted to Array.
 - `toFile(outputPath: string):Promise<CloseRes>` : the stream is closed and
-  write to the `converted` file.
+  write to the `outputPath` file.
 - `close(opt?: CloseOptions = { processes: "AWAIT" }):Promise<CloseRes>` : close
   all ressources and wait end of operators (includes processes end)
 - `success():Promise<boolean>` : the stream is closed and `CloseRes.success` is

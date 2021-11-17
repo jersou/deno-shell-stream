@@ -10,7 +10,7 @@ It has zero 3rd party dependencies and don't internally run sh or bash commands.
 import {
   FromFile,
   FromRun,
-} from "https://deno.land/x/shell_stream@v0.1.11/mod.ts";
+} from "https://deno.land/x/shell_stream@v0.1.13/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.114.0/fmt/colors.ts";
 
 let res = await FromRun("cat /etc/passwd").run("grep /root").toString();
@@ -136,7 +136,7 @@ All these operators close the stream and return a Promise :
 - `toString():Promise<string>` : the stream is closed and converted to String.
 - `toArray():Promise<string[]>` : the stream is closed and converted to Array.
 - `toFile(outputPath: string):Promise<CloseRes>` : the stream is closed and
-  write to the `converted` file.
+  write to the `outputPath` file.
 - `close(opt?: CloseOptions = { processes: "AWAIT" }):Promise<CloseRes>` : close
   all ressources and wait end of operators (includes processes end)
 - `success():Promise<boolean>` : the stream is closed and `CloseRes.success` is
@@ -214,7 +214,8 @@ await FromArray(["1", "2", "3"])
 ## Deno API only equivalents
 
 ```typescript
-await FromRun("cat /etc/passwd").grep(/\/root/).toString();
+const res = await FromRun("cat /etc/passwd").grep(/\/root/).toString();
+console.log(res); // → root:x:0:0:root:/root:/bin/bash
 ```
 
 is equivalent to :
@@ -224,7 +225,7 @@ const process = Deno.run({
   cmd: ["cat", "/etc/passwd"],
   stdout: "piped",
 });
-res = new TextDecoder()
+const res = new TextDecoder()
   .decode(await process.output())
   .split("\n")
   .filter((line) => line.match(/\/root/))
@@ -236,7 +237,8 @@ console.log(res); // → root:x:0:0:root:/root:/bin/bash
 ---
 
 ```typescript
-await FromRun("cat /etc/passwd").run("grep /root").toString();
+const res = await FromRun("cat /etc/passwd").run("grep /root").toString();
+console.log(res); // → root:x:0:0:root:/root:/bin/bash
 ```
 
 is equivalent to :
@@ -260,7 +262,7 @@ try {
   // process1.stdout.close() generate BadResource exception in copy()
 }
 process2.stdin!.close();
-res = new TextDecoder().decode(await process2.output());
+const res = new TextDecoder().decode(await process2.output());
 process2.close();
 console.log(res); // → root:x:0:0:root:/root:/bin/bash
 ```
