@@ -1,7 +1,7 @@
 import { log, LogTransformFunction } from "./operators/log.ts";
 import { toFile } from "./endpoints/to_file.ts";
 import { run, RunOptions } from "./operators/run.ts";
-import { grep } from "./operators/grep.ts";
+import { grep, grepOption } from "./operators/grep.ts";
 import { timestamp } from "./operators/timestamp.ts";
 import { tap, TapFunction } from "./operators/tap.ts";
 import { replace, Replacer } from "./operators/replace.ts";
@@ -30,6 +30,7 @@ import { WalkOptions } from "./deps.ts";
 import { sort } from "./operators/sort.ts";
 import { uniq } from "./operators/uniq.ts";
 import { toIterable } from "./endpoints/to_iterable.ts";
+import { grepo } from "./operators/grepo.ts";
 
 export class ShellStream {
   process?: Deno.Process;
@@ -48,7 +49,8 @@ export class ShellStream {
   tee = (outputPath: string) => tee(outputPath)(this);
   log = (transform?: LogTransformFunction) => log(transform)(this);
   logWithTimestamp = () => logWithTimestamp()(this);
-  grep = (regex: RegExp) => grep(regex)(this);
+  grep = (regex: RegExp | string, opt?: grepOption) => grep(regex, opt)(this);
+  grepo = (regex: RegExp | string) => grepo(regex)(this);
   timestamp = () => timestamp()(this);
   tap = (tapFunction: TapFunction) => tap(tapFunction)(this);
   replace = (v: string | RegExp, r: Replacer) => replace(v, r)(this);

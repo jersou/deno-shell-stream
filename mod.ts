@@ -1,5 +1,6 @@
 import { fromString } from "./startpoints/from_string.ts";
 import { from } from "./startpoints/from.ts";
+import { grepOption } from "./operators/grep.ts";
 
 export {
   From,
@@ -24,6 +25,7 @@ export { fromString } from "./startpoints/from_string.ts";
 export { cut } from "./operators/cut.ts";
 export { filter } from "./operators/filter.ts";
 export { grep } from "./operators/grep.ts";
+export { grepo } from "./operators/grepo.ts";
 export { log } from "./operators/log.ts";
 export { map } from "./operators/map.ts";
 export { pipe } from "./operators/pipe.ts";
@@ -45,5 +47,6 @@ export { toString } from "./endpoints/to_string.ts";
 export { sanitize } from "./sanitize.ts";
 
 export type { OperatorFunc } from "./types.ts";
+export type { grepOption } from "./operators/grep.ts";
 export type { RunOptions } from "./operators/run.ts";
 export type { ProcessEvent, ProcessEventListener } from "./shell_stream.ts";

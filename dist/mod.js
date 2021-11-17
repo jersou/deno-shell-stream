@@ -1826,7 +1826,9 @@ class ShellStream1 {
     ;
     logWithTimestamp = ()=>logWithTimestamp1()(this)
     ;
-    grep = (regex)=>grep1(regex)(this)
+    grep = (regex, opt)=>grep1(regex, opt)(this)
+    ;
+    grepo = (regex)=>grepo1(regex)(this)
     ;
     timestamp = ()=>timestamp1()(this)
     ;
@@ -1952,8 +1954,22 @@ const filter1 = (filterFunction)=>(shellStream)=>{
         return ShellStream1.builder(generator, shellStream);
     }
 ;
-const grep1 = (regex)=>(shellStream)=>filter1((line)=>regex.test(line)
-        )(shellStream)
+const grep1 = (regex, opt)=>(shellStream)=>{
+        const regEx = regex instanceof RegExp ? regex : new RegExp(regex, "g");
+        if (opt?.onlyMatching) {
+            const generator = async function*() {
+                for await (const line of shellStream.generator){
+                    for (const res of line.match(regEx) || []){
+                        yield res;
+                    }
+                }
+            }();
+            return ShellStream1.builder(generator, shellStream);
+        } else {
+            return filter1((line)=>regEx.test(line)
+            )(shellStream);
+        }
+    }
 ;
 const timestamp1 = ()=>(shellStream)=>{
         const inputGenerator = async function*() {
@@ -2131,6 +2147,12 @@ const cut1 = (delim, indexes, sep = " ")=>(shellStream)=>map1((line)=>{
 const logWithTimestamp1 = ()=>(shellStream)=>tap1((line)=>{
             console.log(`${new Date().toISOString()} ${line}`);
         })(shellStream)
+;
+const grepo1 = (regex)=>(shellStream)=>{
+        return grep1(regex, {
+            onlyMatching: true
+        })(shellStream);
+    }
 ;
 const Pipe1 = ShellStream1.pipe;
 const From1 = ShellStream1.from;

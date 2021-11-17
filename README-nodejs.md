@@ -73,7 +73,8 @@ These operators return a ShellStream :
 - `FromString(line: string)` → generate a stream from line.
 - `FromDir(path: string)` → generate a stream of file name from dir.
 - `FromWalk(path: string, opt?: WalkOptions)` → generate a stream of file path
-  from dir, using [walk](https://deno.land/std/fs#walk).
+  from dir, using [walk](https://deno.land/std/fs#walk), see
+  [WalkOptions](https://doc.deno.land/https/deno.land/std@0.114.0/fs/walk.ts#WalkOptions).
 - Pipe: [see bellow "Pipe chapter"](#Pipe).
 
 The startpoint are also available from static method of ShellStream :
@@ -112,14 +113,18 @@ These operators return a ShellStream :
   the part ordered by indexes, split the line by `delim`.
 - `filter(filterFunction: FilterFunction)` : transform the stream, keep only
   lines that return true in filterFunction.
-- `grep(regex: RegExp)` : transform the stream, keep only lines that match the
-  regex.
+- `grep(regex: RegExp | string, opt?: {onlyMatching?: boolean})` : transform the
+  stream, keep only lines that match the regex. If `opt.onlyMatching === true`,
+  the stream is then all results matching the complete regex, like `grep -o`
+  Linux command.
 - `head(count = 1)` : transform the stream, keep only first `count` lines.
 - `tail(count = 1)` :transform the stream, keep only last `count` lines.
 - `sponge()` : keep stream unchanged, soaks up all its input before re-emit all.
 - `sort()` : transform the stream, sort the stream.
 - `uniq()` : transform the stream, keep only lines that are different from
   previous line.
+- `grepo(regex: RegExp | string)`: alias of grep() with opt :
+  `{ onlyMatching: true }`.
 - `pipe(...operators: OperatorFunc[])` : [see bellow "Pipe chapter"](#Pipe).
 
 ### Endpoint Operators
