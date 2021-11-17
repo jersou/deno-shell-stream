@@ -30,6 +30,8 @@ import { WalkOptions } from "./deps.ts";
 import { sort } from "./operators/sort.ts";
 import { uniq } from "./operators/uniq.ts";
 import { toIterable } from "./endpoints/to_iterable.ts";
+import { fetchUrl } from "./operators/fetch.ts";
+import { fromFetch } from "./startpoints/from_fetch.ts";
 import { grepo } from "./operators/grepo.ts";
 
 export class ShellStream {
@@ -62,6 +64,7 @@ export class ShellStream {
   sponge = () => sponge()(this);
   sort = () => sort()(this);
   uniq = () => uniq()(this);
+  fetch = (url?: string, init?: RequestInit) => fetchUrl(url, init)(this);
 
   pipe = (...operators: OperatorFunc[]) => pipe(...operators)(this);
 
@@ -93,6 +96,8 @@ export class ShellStream {
   static fromString = (line: string) => fromString(line)();
   static fromRun = (cmd: string[] | string, opt?: RunOptions) =>
     fromRun(cmd, opt)();
+  static fromFetch = (url?: string, init?: RequestInit) =>
+    fromFetch(url, init)();
   static pipe = (...op: OperatorFunc[]) => pipe(...op)(ShellStream.empty());
 
   static processCount = 0;
@@ -134,3 +139,4 @@ export const FromWalk = ShellStream.fromWalk;
 export const FromRun = ShellStream.fromRun;
 export const FromArray = ShellStream.fromArray;
 export const FromString = ShellStream.fromString;
+export const FromFetch = ShellStream.fromFetch;

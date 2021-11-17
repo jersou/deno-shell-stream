@@ -73,6 +73,8 @@ These operators return a ShellStream :
 - `FromWalk(path: string, opt?: WalkOptions)` → generate a stream of file path
   from dir, using [walk](https://deno.land/std/fs#walk), see
   [WalkOptions](https://doc.deno.land/https/deno.land/std@0.114.0/fs/walk.ts#WalkOptions).
+- `FromFetch(url: string, init?: RequestInit)` → generate a stream from an http
+  query.
 - Pipe: [see bellow "Pipe chapter"](#Pipe).
 
 The startpoint are also available from static method of ShellStream :
@@ -121,6 +123,8 @@ These operators return a ShellStream :
 - `sort()` : transform the stream, sort the stream.
 - `uniq()` : transform the stream, keep only lines that are different from
   previous line.
+- `fetch(url?: string, init?: RequestInit)` : fetch the url if present or each
+  line of input stream.
 - `grepo(regex: RegExp | string)`: alias of grep() with opt :
   `{ onlyMatching: true }`.
 - `pipe(...operators: OperatorFunc[])` : [see bellow "Pipe chapter"](#Pipe).

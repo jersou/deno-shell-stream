@@ -1852,6 +1852,8 @@ class ShellStream1 {
     ;
     uniq = ()=>uniq1()(this)
     ;
+    fetch = (url, init)=>fetchUrl(url, init)(this)
+    ;
     pipe = (...operators)=>pipe1(...operators)(this)
     ;
     close = async (opt = {
@@ -1890,6 +1892,8 @@ class ShellStream1 {
     static fromString = (line)=>fromString1(line)()
     ;
     static fromRun = (cmd, opt)=>fromRun1(cmd, opt)()
+    ;
+    static fromFetch = (url, init)=>fromFetch1(url, init)()
     ;
     static pipe = (...op)=>pipe1(...op)(ShellStream1.empty())
     ;
@@ -2138,6 +2142,32 @@ const uniq1 = ()=>(shellStream)=>{
         return ShellStream1.builder(generator, shellStream);
     }
 ;
+async function* streamUrl(url, init) {
+    const resp = await fetch(url, init);
+    const text = await resp.text();
+    for (const line of text.split("\n")){
+        yield line;
+    }
+}
+const fetchUrl = (url, init)=>(shellStream)=>{
+        const generator = async function*() {
+            if (url) {
+                for await (const line of streamUrl(url, init)){
+                    yield line;
+                }
+            } else {
+                for await (const urlFromStream of shellStream.generator){
+                    for await (const line of streamUrl(urlFromStream, init)){
+                        yield line;
+                    }
+                }
+            }
+        }();
+        return ShellStream1.builder(generator, shellStream);
+    }
+;
+const fromFetch1 = (url, init)=>()=>fetchUrl(url, init)(ShellStream1.empty())
+;
 const cut1 = (delim, indexes, sep = " ")=>(shellStream)=>map1((line)=>{
             const parts = line.split(delim);
             return indexes.map((i)=>parts[i]
@@ -2162,6 +2192,7 @@ const FromWalk1 = ShellStream1.fromWalk;
 const FromRun1 = ShellStream1.fromRun;
 const FromArray1 = ShellStream1.fromArray;
 const FromString1 = ShellStream1.fromString;
+ShellStream1.fromFetch;
 class CloseRes {
     success;
     statuses;

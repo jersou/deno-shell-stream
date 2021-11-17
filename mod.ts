@@ -21,6 +21,7 @@ export { fromFile } from "./startpoints/from_file.ts";
 export { fromDir } from "./startpoints/from_dir.ts";
 export { fromWalk } from "./startpoints/from_walk.ts";
 export { fromString } from "./startpoints/from_string.ts";
+export { fromFetch } from "./startpoints/from_fetch.ts";
 
 export { cut } from "./operators/cut.ts";
 export { filter } from "./operators/filter.ts";
@@ -37,6 +38,7 @@ export { tap } from "./operators/tap.ts";
 export { tee } from "./operators/tee.ts";
 export { timestamp } from "./operators/timestamp.ts";
 export { uniq } from "./operators/uniq.ts";
+export { fetchUrl } from "./operators/fetch.ts";
 
 export { close } from "./endpoints/close.ts";
 export { success } from "./endpoints/success.ts";
