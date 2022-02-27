@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="gen-cov" type="ShConfigurationType">
+    <option name="SCRIPT_TEXT" value="rm -rf .cov_profile &amp;&amp; deno test --ignore=vendor,dist,npm --coverage=.cov_profile -A &amp;&amp; deno coverage .cov_profile --lcov &gt; .cov_profile/cov_profile.lcov &amp;&amp; genhtml -o .cov_profile/html .cov_profile/cov_profile.lcov" />
+    <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+    <option name="SCRIPT_PATH" value="" />
+    <option name="SCRIPT_OPTIONS" value="" />
+    <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+    <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+    <option name="INTERPRETER_PATH" value="/usr/bin/bash" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="EXECUTE_IN_TERMINAL" value="false" />
+    <option name="EXECUTE_SCRIPT_FILE" value="false" />
+    <envs />
+    <method v="2" />
+  </configuration>
+</component>
