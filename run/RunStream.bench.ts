@@ -11,38 +11,38 @@ import { sanitize } from "../utils/sanitize.ts";
 //            ┌────────────────────────┬───────┬──────────┐
 //            │       1 000 lines      │    ms │ relative │
 //            ├────────────────────────┼───────┼──────────┤
-//            │ bash grep              │     5 │        1 │
-//            │ Stream V1 run(grep)    │    27 │     5.97 │
-//            │ Stream V1 grep()       │    12 │      2.6 │
-//            │ Stream V2 run(grep)    │     6 │     1.32 │
-//            │ Stream V2 grep()       │    10 │     2.21 │
+//            │ bash grep              │     8 │        1 │
+//            │ Stream V1 run(grep)    │    33 │     4.25 │
+//            │ Stream V1 grep()       │    20 │     2.56 │
+//            │ Stream V2 run(grep)    │    10 │     1.26 │
+//            │ Stream V2 grep()       │     9 │     1.19 │
 //            └────────────────────────┴───────┴──────────┘
 //            ┌────────────────────────┬───────┬──────────┐
 //            │      10 000 lines      │    ms │ relative │
 //            ├────────────────────────┼───────┼──────────┤
-//            │ bash grep              │     5 │        1 │
-//            │ Stream V1 run(grep)    │    26 │     5.31 │
-//            │ Stream V1 grep()       │    15 │     3.11 │
-//            │ Stream V2 run(grep)    │     7 │     1.46 │
-//            │ Stream V2 grep()       │    32 │     6.59 │
+//            │ bash grep              │     7 │        1 │
+//            │ Stream V1 run(grep)    │    30 │      4.2 │
+//            │ Stream V1 grep()       │    22 │     2.97 │
+//            │ Stream V2 run(grep)    │     9 │     1.19 │
+//            │ Stream V2 grep()       │    32 │     4.47 │
 //            └────────────────────────┴───────┴──────────┘
 //            ┌────────────────────────┬───────┬──────────┐
 //            │      100 000 lines     │    ms │ relative │
 //            ├────────────────────────┼───────┼──────────┤
-//            │ bash grep              │     8 │        1 │
-//            │ Stream V1 run(grep)    │  1082 │   141.56 │
-//            │ Stream V1 grep()       │   363 │    47.48 │
-//            │ Stream V2 run(grep)    │    11 │     1.42 │
-//            │ Stream V2 grep()       │   166 │    21.68 │
+//            │ bash grep              │    10 │        1 │
+//            │ Stream V1 run(grep)    │  1852 │   179.96 │
+//            │ Stream V1 grep()       │   645 │    62.73 │
+//            │ Stream V2 run(grep)    │    15 │      1.5 │
+//            │ Stream V2 grep()       │   226 │    21.97 │
 //            └────────────────────────┴───────┴──────────┘
 //            ┌────────────────────────┬───────┬──────────┐
 //            │    1 000 000 lines     │    ms │ relative │
 //            ├────────────────────────┼───────┼──────────┤
-//            │ bash grep              │    20 │        1 │
-//            │ Stream V1 run(grep)    │ 10479 │   518.36 │
-//            │ Stream V1 grep()       │  3585 │   177.33 │
-//            │ Stream V2 run(grep)    │    33 │     1.61 │
-//            │ Stream V2 grep()       │  1229 │    60.81 │
+//            │ bash grep              │    32 │        1 │
+//            │ Stream V1 run(grep)    │ 19633 │    604.6 │
+//            │ Stream V1 grep()       │  6907 │    212.7 │
+//            │ Stream V2 run(grep)    │    48 │     1.49 │
+//            │ Stream V2 grep()       │  1989 │    61.27 │
 //            └────────────────────────┴───────┴──────────┘
 const assertData = [
   { inputLinesLength: 1_000, expectedLineLength: 19 },
@@ -50,16 +50,17 @@ const assertData = [
   { inputLinesLength: 100_000, expectedLineLength: 3691 },
   { inputLinesLength: 1_000_000, expectedLineLength: 45739 },
 ];
-const dataIndex = 1;
+const dataIndex = 2;
 const linesLength = assertData[dataIndex].inputLinesLength;
 const expectedLineLength = assertData[dataIndex].expectedLineLength;
 
 const grepStr = "55";
 const bashSeqCmd = `seq ${linesLength} ${linesLength * 2}`;
+const runMult = 4;
 
 bench({
   name: `bash grep ${linesLength} lines`,
-  runs: 10,
+  runs: 10 * runMult,
   async func(b) {
     b.start();
     const out = await Stream.run([
@@ -77,7 +78,7 @@ bench({
 
 bench({
   name: `Stream V1 run(grep) ${linesLength} lines`,
-  runs: 2,
+  runs: 2 * runMult,
   async func(b) {
     b.start();
     const lines = await FromRun(["bash", "-c", bashSeqCmd]).run(
@@ -92,7 +93,7 @@ bench({
 
 bench({
   name: `Stream V1 grep() ${linesLength} lines`,
-  runs: 4,
+  runs: 4 * runMult,
   async func(b) {
     b.start();
     const lines = await FromRun(["bash", "-c", bashSeqCmd]).grep(grepStr)
@@ -106,7 +107,7 @@ bench({
 
 bench({
   name: `Stream V2 run(grep) ${linesLength} lines`,
-  runs: 10,
+  runs: 10 * runMult,
   async func(b) {
     b.start();
     const out = await Stream.run(["bash", "-c", bashSeqCmd]).run(
@@ -123,7 +124,7 @@ bench({
 
 bench({
   name: `Stream V2 grep() ${linesLength} lines`,
-  runs: 4,
+  runs: 4 * runMult,
   async func(b) {
     b.start();
     const lines = await Stream.run(["bash", "-c", bashSeqCmd]).grep(grepStr)

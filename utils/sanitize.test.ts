@@ -1,6 +1,6 @@
-import { assertEquals } from "../test_deps.ts";
+import { assertEquals, delay } from "../test_deps.ts";
 import { sanitize } from "./sanitize.ts";
-import { delay } from "https://deno.land/std@0.127.0/async/mod.ts";
+
 Deno.test({
   name: "sanitize noOpenedRessource",
   async fn() {

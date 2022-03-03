@@ -1,6 +1,6 @@
 import { RunStreamRunning } from "./RunStreamRunning.ts";
 import { assert } from "../test_deps.ts";
-import { LinesTransform } from "../transform/LinesTransform.ts";
+import { TextLineStream } from "../deps.ts";
 import { LineStream, TapFunction } from "../line/LineStream.ts";
 import { parseCmdString } from "../utils/parseCmdString.ts";
 import { MapFunction } from "../transform/MapTransform.ts";
@@ -64,7 +64,7 @@ export class RunStream {
   }
 
   stdoutLines(): ReadableStream<string> {
-    return this.stdoutStringReadableStream().pipeThrough(new LinesTransform());
+    return this.stdoutStringReadableStream().pipeThrough(new TextLineStream());
   }
 
   run(cmdOrStr: string[] | string, opt: RunOptions = {}) {
