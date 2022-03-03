@@ -1,17 +1,17 @@
-export class GrepoTransform extends TransformStream<string, string> {
+export class GrepoTransform<T> extends TransformStream<T, string> {
   constructor(regex: RegExp | string) {
-    super(new GrepoTransformer(regex));
+    super(new GrepoTransformer<T>(regex));
   }
 }
 
-export class GrepoTransformer implements Transformer<string, string> {
+export class GrepoTransformer<T> implements Transformer<T, string> {
   constructor(private regex: RegExp | string) {
   }
   transform(
-    str: string,
+    str: T,
     controller: TransformStreamDefaultController<string>,
   ) {
-    const matchs = str.match(this.regex);
+    const matchs = String(str).match(this.regex);
     matchs?.forEach((value) => controller.enqueue(value));
   }
 }

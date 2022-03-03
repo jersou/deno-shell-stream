@@ -1,102 +1,142 @@
-import { RunStreamRunning } from "./RunStreamRunning.ts";
 import { assert } from "../test_deps.ts";
-import { TextLineStream } from "../deps.ts";
-import { LineStream, TapFunction } from "../line/LineStream.ts";
 import { parseCmdString } from "../utils/parseCmdString.ts";
-import { MapFunction } from "../transform/MapTransform.ts";
+import { LineStream } from "../line/LineStream.ts";
+import {
+  TextLineStream,
+} from "https://deno.land/std@0.128.0/streams/delimiter.ts";
+
+export function getParentRun(stream: LineStream<unknown> | undefined) {
+  if (stream?.parent instanceof RunStream) {
+    return stream.parent;
+  }
+  return undefined;
+}
 
 export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
   dontThrowIfRunFail?: boolean;
   dontThrowIfStdinError?: boolean;
 };
 
-export class RunStream {
+export class RunStream extends LineStream<string> {
   processCmd: string[];
-  running?: RunStreamRunning;
-  lineStream?: LineStream;
-  stdoutReadable?: ReadableStream<Uint8Array>;
+  process?: Deno.Process<Deno.RunOptions>;
+  processStatus?: Deno.ProcessStatus;
+  stdinError?: Error;
+  runningOpt?: { stdout: RunOptions["stdout"] };
 
   constructor(
     public cmdOrStr: string[] | string,
-    public opt?: RunOptions,
-    public parentRunStream?: RunStream,
+    public opt?: RunOptions | undefined,
+    public parent?: LineStream<unknown> | undefined,
   ) {
+    super(parent);
     this.processCmd = parseCmdString(cmdOrStr);
   }
 
-  start(opt?: { stdout: RunOptions["stdout"] }) {
-    if (!this.running) {
-      this.running = new RunStreamRunning(
-        this,
-        opt,
+  getLineReadableStream(): ReadableStream<string> {
+    if (!this.linesStream) {
+      this.linesStream = this.toStringReadableStream().pipeThrough(
+        new TextLineStream(),
       );
+    }
+    return this.linesStream!;
+  }
+
+  start(opt?: { stdout: RunOptions["stdout"] }) {
+    if (!this.process) {
+      this.runningOpt = opt;
+      if (this.parent) {
+        const parentStream = this.parent.toByteReadableStream(); // if this.parentRunStream → this.parentRunStream.opt.stdout==="piped"
+
+        if (this.parent instanceof RunStream) {
+          assert(
+            this.parent.runningOpt?.stdout === "piped" ||
+              this.parent.opt?.stdout === "piped",
+            `The parent stream "${this.parent.cmdOrStr}" does not have the option : stdout="piped"`,
+          );
+        }
+
+        this.process = Deno.run({
+          cmd: this.processCmd,
+          ...this.opt,
+          ...opt,
+          stdin: "piped",
+        });
+
+        parentStream.pipeTo(this.process.stdin!.writable).catch(
+          (err: Error) => (this.stdinError = err),
+        );
+      } else {
+        this.process = Deno.run({
+          cmd: this.processCmd,
+          ...this.opt,
+          ...opt,
+        });
+      }
     } else if (opt) {
       assert(
-        !this.running || this.running.opt?.stdout === "piped",
+        this.runningOpt?.stdout === "piped",
         `Already running and the opt param is not empty. Use start({ stdout: "piped" })`,
       );
     }
-    return this.running;
+    return this;
   }
 
-  outputBytes() {
-    return this.start({ stdout: "piped" }).outputBytes();
+  async toString() {
+    return new TextDecoder().decode(await this.toBytes());
   }
 
-  outputString() {
-    return this.start({ stdout: "piped" }).outputString();
+  async toBytes() {
+    this.start({ stdout: "piped" });
+    const ret = await this.process!.output();
+    await this.wait();
+    return ret;
   }
 
-  async wait() {
-    return await this.start().wait();
+  async wait(): Promise<this> {
+    this.start();
+    await this.parent?.wait();
+    if (!this.processStatus) {
+      this.processStatus = await this.process!.status();
+    }
+
+    this.process!.close();
+
+    if (!this.opt?.dontThrowIfStdinError && this.stdinError) {
+      console.error(this.stdinError);
+      throw new Error("Stdin error");
+    }
+    if (!this.opt?.dontThrowIfRunFail && !this.processStatus?.success) {
+      throw new Error(
+        `Fail, process exit code : ${this.processStatus?.code}`,
+      );
+    }
+    return this;
   }
 
-  getStdoutReadable() {
-    this.stdoutReadable = this.start({ stdout: "piped" })
-      .process.stdout!.readable;
-    return this.stdoutReadable;
+  toByteReadableStream(): ReadableStream<Uint8Array> {
+    this.start({ stdout: "piped" });
+    return this.process!.stdout!.readable;
   }
 
-  stdoutStringReadableStream() {
+  toStringReadableStream() {
     return this
-      .getStdoutReadable()
+      .toByteReadableStream()
       .pipeThrough(new TextDecoderStream());
-  }
-
-  stdoutLines(): ReadableStream<string> {
-    return this.stdoutStringReadableStream().pipeThrough(new TextLineStream());
   }
 
   run(cmdOrStr: string[] | string, opt: RunOptions = {}) {
     return new RunStream(cmdOrStr, opt, this);
   }
 
-  lines() {
-    if (!this.lineStream) {
-      this.lineStream = new LineStream(this, this.stdoutLines());
+  async toFile(file: Deno.FsFile | string) {
+    let fsFile;
+    if (typeof file === "string") {
+      fsFile = await Deno.create(file);
+    } else {
+      fsFile = file;
     }
-    return this.lineStream;
-  }
-
-  transform(transformStream: TransformStream<string, string>) {
-    return this.lines().transform(transformStream);
-  }
-  array() {
-    return this.lines().array();
-  }
-  log() {
-    return this.lines().log();
-  }
-  grep(regex: RegExp | string, opt?: { onlyMatching?: boolean }) {
-    return this.lines().grep(regex, opt);
-  }
-  grepo(regex: RegExp | string) {
-    return this.grep(regex, { onlyMatching: true });
-  }
-  map(mapFunction: MapFunction) {
-    return this.lines().map(mapFunction);
-  }
-  tap(tapFunction: TapFunction) {
-    return this.lines().tap(tapFunction);
+    await this.toByteReadableStream().pipeTo(fsFile.writable);
+    await this.wait();
   }
 }

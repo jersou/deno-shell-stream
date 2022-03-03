@@ -1,6 +1,6 @@
-export async function streamToArray(
-  stream: ReadableStream<string>,
-): Promise<string[]> {
+export async function streamToArray<T>(
+  stream: ReadableStream<T>,
+): Promise<T[]> {
   const array = [];
   const reader = stream.getReader();
   let res;

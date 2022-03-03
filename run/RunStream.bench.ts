@@ -56,7 +56,7 @@ const expectedLineLength = assertData[dataIndex].expectedLineLength;
 
 const grepStr = "55";
 const bashSeqCmd = `seq ${linesLength} ${linesLength * 2}`;
-const runMult = 4;
+const runMult = 1;
 
 bench({
   name: `bash grep ${linesLength} lines`,
@@ -67,7 +67,7 @@ bench({
       "bash",
       "-c",
       `${bashSeqCmd} | grep "${grepStr}"`,
-    ]).outputBytes();
+    ]).toBytes();
     const lines = new TextDecoder().decode(out).split("\n");
     const lineLength = lines.length - 1;
     b.stop();
@@ -81,10 +81,10 @@ bench({
   runs: 2 * runMult,
   async func(b) {
     b.start();
-    const lines = await FromRun(["bash", "-c", bashSeqCmd]).run(
+    await FromRun(["bash", "-c", bashSeqCmd]).run(
       `grep "${grepStr}"`,
     ).toArray();
-    const lineLength = lines.length;
+    // const lineLength = lines.length;
     b.stop();
     //  assertEquals(lineLength, expectedLineLength); // FAIL !
     assertEquals(sanitize(false), true);
@@ -96,9 +96,9 @@ bench({
   runs: 4 * runMult,
   async func(b) {
     b.start();
-    const lines = await FromRun(["bash", "-c", bashSeqCmd]).grep(grepStr)
+    await FromRun(["bash", "-c", bashSeqCmd]).grep(grepStr)
       .toArray();
-    const lineLength = lines.length;
+    // const lineLength = lines.length;
     b.stop();
     //  assertEquals(lineLength, expectedLineLength); // FAIL !
     assertEquals(sanitize(false), true);
@@ -113,7 +113,7 @@ bench({
     const out = await Stream.run(["bash", "-c", bashSeqCmd]).run(
       `grep "${grepStr}"`,
     )
-      .outputBytes();
+      .toBytes();
     const lines = new TextDecoder().decode(out).split("\n");
     b.stop();
     const lineLength = lines.length - 1;
@@ -128,7 +128,7 @@ bench({
   async func(b) {
     b.start();
     const lines = await Stream.run(["bash", "-c", bashSeqCmd]).grep(grepStr)
-      .array();
+      .toArray();
     const lineLength = lines.length;
     b.stop();
     assertEquals(lineLength, expectedLineLength);

@@ -1,17 +1,17 @@
-export type MapFunction = (line: string) => string;
+export type MapFunction<T, U> = (line: T) => U;
 
-export class MapTransform extends TransformStream<string, string> {
-  constructor(mapFunction: MapFunction) {
-    super(new MapTransformer(mapFunction));
+export class MapTransform<T, U> extends TransformStream<T, U> {
+  constructor(mapFunction: MapFunction<T, U>) {
+    super(new MapTransformer<T, U>(mapFunction));
   }
 }
 
-export class MapTransformer implements Transformer<string, string> {
-  constructor(private mapFunction: MapFunction) {
+export class MapTransformer<T, U> implements Transformer<T, U> {
+  constructor(private mapFunction: MapFunction<T, U>) {
   }
   transform(
-    str: string,
-    controller: TransformStreamDefaultController<string>,
+    str: T,
+    controller: TransformStreamDefaultController<U>,
   ) {
     controller.enqueue(this.mapFunction(str));
   }

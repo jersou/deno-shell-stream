@@ -1,17 +1,17 @@
-export type FilterFunction = (line: string) => boolean;
+export type FilterFunction<T> = (line: T) => boolean;
 
-export class FilterTransform extends TransformStream<string, string> {
-  constructor(filterFunction: FilterFunction) {
+export class FilterTransform<T> extends TransformStream<T, T> {
+  constructor(filterFunction: FilterFunction<T>) {
     super(new FilterTransformer(filterFunction));
   }
 }
 
-export class FilterTransformer implements Transformer<string, string> {
-  constructor(private filterFunction: FilterFunction) {
+export class FilterTransformer<T> implements Transformer<T, T> {
+  constructor(private filterFunction: FilterFunction<T>) {
   }
   transform(
-    str: string,
-    controller: TransformStreamDefaultController<string>,
+    str: T,
+    controller: TransformStreamDefaultController<T>,
   ) {
     if (this.filterFunction(str)) {
       controller.enqueue(str);

@@ -1,64 +1,62 @@
 import { Stream } from "../Stream.ts";
 import { assertEquals, assertRejects, Buffer } from "../test_deps.ts";
-import { RunStream } from "./RunStream.ts";
+import { getParentRun, RunStream } from "./RunStream.ts";
 import { MapTransform } from "../transform/MapTransform.ts";
 
-Deno.test("Stream.runStream.outputBytes()", async () => {
-  const runStream = Stream.run(`deno eval "console.log('is ok')"`);
-  assertEquals(runStream.running, undefined);
-  const out = await runStream.outputBytes();
+Deno.test("Stream.fromRunStream.toBytes()", async () => {
+  const runStream = Stream.fromRun(`deno eval "console.log('is ok')"`);
+  assertEquals(runStream.process, undefined);
+  const out = await runStream.toBytes();
   assertEquals(out, new Uint8Array([105, 115, 32, 111, 107, 10]));
-  assertEquals(runStream.running?.processStatus?.code, 0);
+  assertEquals(runStream.processStatus?.code, 0);
 });
 
-Deno.test("Stream.run.outputString()", async () => {
-  const runStream = Stream.run(`deno eval "console.log('is ok')"`);
-  const out = await runStream.outputString();
+Deno.test("Stream.fromRun.outputString()", async () => {
+  const runStream = Stream.fromRun(`deno eval "console.log('is ok')"`);
+  const out = await runStream.toString();
   assertEquals(out, "is ok\n");
-  assertEquals(runStream.running?.processStatus?.code, 0);
+  assertEquals(runStream.processStatus?.code, 0);
 });
 
-Deno.test("Stream.run.start()", async () => {
-  const runStream = Stream.run(`deno eval "console.log('is ok')"`);
+Deno.test("Stream.fromRun.start()", async () => {
+  const runStream = Stream.fromRun(`deno eval "console.log('is ok')"`);
   const running = await runStream.start();
   await running.wait();
   assertEquals(running.processStatus?.code, 0);
 });
 
-Deno.test("Stream.run.wait()", async () => {
-  const runStream = Stream.run(`deno eval "console.log('is ok')"`);
-  const out = await runStream.wait();
-  assertEquals(out.code, 0);
-  assertEquals(runStream.running?.processStatus?.code, 0);
+Deno.test("Stream.fromRun.wait()", async () => {
+  const runStream = Stream.fromRun(`deno eval "console.log('is ok')"`);
+  await runStream.wait();
+  assertEquals(runStream.processStatus!.code, 0);
 });
 
-Deno.test("Stream.run().run().run()", async () => {
+Deno.test("Stream.fromRun().run().run()", async () => {
   const runStream = Stream
-    .run("echo toto")
+    .fromRun("echo toto")
     .run("sed 's|o|a|g'")
     .run("sed 's|a|ii|g'");
-  const out = await runStream.outputString();
+  const out = await runStream.toString();
   assertEquals(out, "tiitii\n");
-  assertEquals(runStream.running?.processStatus?.code, 0);
-  assertEquals(runStream.parentRunStream?.running?.processStatus?.code, 0);
+  assertEquals(runStream.processStatus?.code, 0);
+  assertEquals(getParentRun(runStream)?.processStatus?.code, 0);
   assertEquals(
-    runStream.parentRunStream?.parentRunStream?.running?.processStatus?.code,
+    getParentRun(getParentRun(runStream))?.processStatus?.code,
     0,
   );
   assertEquals(
-    runStream.parentRunStream?.parentRunStream?.parentRunStream?.running
-      ?.processStatus?.code,
+    getParentRun(getParentRun(getParentRun(runStream)))?.processStatus?.code,
     undefined,
   );
 });
 
 Deno.test("run(), start, run.run() check stdout piped", async () => {
-  const runStream1 = Stream.run("echo toto");
+  const runStream1 = Stream.fromRun("echo toto");
   runStream1.start();
   const runStream2 = runStream1.run("sed 's|o|a|g'");
   await assertRejects(async () => {
     try {
-      await runStream2.outputString();
+      await runStream2.toString();
     } finally {
       await runStream1.wait();
       await runStream2.wait();
@@ -67,18 +65,18 @@ Deno.test("run(), start, run.run() check stdout piped", async () => {
 });
 
 Deno.test("run(), start, run.run()", async () => {
-  const runStream1 = Stream.run("echo toto");
+  const runStream1 = Stream.fromRun("echo toto");
   runStream1.start({ stdout: "piped" });
   const runStream2 = runStream1.run("sed 's|o|a|g'");
-  const out = await runStream2.outputString();
+  const out = await runStream2.toString();
   assertEquals(out, "tata\n");
-  assertEquals(runStream1.running?.processStatus?.code, 0);
-  assertEquals(runStream2.running?.processStatus?.code, 0);
+  assertEquals(runStream1.processStatus?.code, 0);
+  assertEquals(runStream2.processStatus?.code, 0);
 });
 
-Deno.test("Stream.run.stdout()", async () => {
-  const runStream = Stream.run(`deno eval "console.log('is ok')"`);
-  const reader = runStream.getStdoutReadable().getReader();
+Deno.test("Stream.fromRun.stdout()", async () => {
+  const runStream = Stream.fromRun(`deno eval "console.log('is ok')"`);
+  const reader = runStream.toByteReadableStream().getReader();
   const buffer = new Buffer();
   let res;
   while (!res?.done) {
@@ -88,35 +86,35 @@ Deno.test("Stream.run.stdout()", async () => {
     }
   }
   assertEquals(new TextDecoder().decode(buffer.bytes()), "is ok\n");
-  const status = await runStream.wait();
-  assertEquals(status.code, 0);
+  await runStream.wait();
+  assertEquals(runStream.processStatus!.code, 0);
 });
 
-Deno.test("Stream.run ThrowIfStdinError", async () => {
+Deno.test("Stream.fromRun ThrowIfStdinError", async () => {
   const runStream = Stream
-    .run(`deno eval "Deno.exit(12)"`)
+    .fromRun(`deno eval "Deno.exit(12)"`)
     .run(`deno eval "console.log('is ok')"`);
   await assertRejects(async () => {
     try {
       await runStream.wait();
     } finally {
-      await runStream.running?.process.close();
-      await runStream.parentRunStream?.running?.process.close();
+      await runStream.process!.close();
+      await getParentRun(runStream)?.process!.close();
     }
   });
 });
 
-Deno.test("Stream.run ThrowIfRunFail", async () => {
+Deno.test("Stream.fromRun ThrowIfRunFail", async () => {
   const runStream = Stream
-    .run(`deno eval "console.log('is ok')"`)
+    .fromRun(`deno eval "console.log('is ok')"`)
     .run(`deno eval "Deno.exit(12)"`)
     .run(`deno eval "console.log('is ok')"`);
   await assertRejects(async () => {
     try {
       await runStream.wait();
     } finally {
-      await runStream.running?.process.close();
-      await runStream.parentRunStream?.running?.process.close();
+      await runStream.process!.close();
+      await getParentRun(runStream)?.process!.close();
     }
   });
 });
@@ -128,26 +126,26 @@ Deno.test("runStream.log", async () => {
 
 Deno.test("runStream.grep", async () => {
   const runStream = new RunStream(`deno eval "console.log('is ok')"`);
-  const out = await runStream.grepo("ok").string();
+  const out = await runStream.grepo("ok").toString();
   assertEquals(out, "ok");
 });
 
 Deno.test("runStream.map", async () => {
   const runStream = new RunStream(`deno eval "console.log('is\\n ok')"`);
-  const out = await runStream.map((str) => str + "--").string();
+  const out = await runStream.map((str) => str + "--").toString();
   assertEquals(out, "is--\n ok--\n--");
 });
 
-Deno.test("runStream.array", async () => {
+Deno.test("runStream.toArray", async () => {
   const out = await new RunStream(`deno eval "console.log('is\\n ok')"`)
-    .array();
+    .toArray();
   assertEquals(out, ["is", " ok"]);
 });
 
-Deno.test("runStream.array", async () => {
+Deno.test("runStream.toArray", async () => {
   const out = await new RunStream(`deno eval "console.log('is\\n ok')"`)
     .transform(new MapTransform((str) => str + "**"))
-    .array();
+    .toArray();
   assertEquals(out, ["is**", " ok**", "**"]);
 });
 
@@ -156,19 +154,19 @@ Deno.test("runStream.tap", async () => {
   const array: string[] = [];
   const out = await runStream
     .tap((str) => array.push(str))
-    .map((str) => str + "--").string();
+    .map((str) => str + "--").toString();
   assertEquals(out, "is--\n ok--\n--");
   assertEquals(array, ["is", " ok", ""]);
 });
 
 Deno.test("runStream stdout === piped", async () => {
   const runStream = new RunStream(`deno eval "console.log('is\\n ok')"`);
-  const runStreamRunning = runStream.start();
+  runStream.start();
   await assertRejects(async () => {
     try {
-      await runStream.lines().array();
+      await runStream.toArray();
     } finally {
-      runStreamRunning.process.close();
+      runStream.process!.close();
     }
   });
 });
