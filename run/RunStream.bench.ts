@@ -63,7 +63,7 @@ bench({
   runs: 10 * runMult,
   async func(b) {
     b.start();
-    const out = await Stream.run([
+    const out = await Stream.fromRun([
       "bash",
       "-c",
       `${bashSeqCmd} | grep "${grepStr}"`,
@@ -110,7 +110,7 @@ bench({
   runs: 10 * runMult,
   async func(b) {
     b.start();
-    const out = await Stream.run(["bash", "-c", bashSeqCmd]).run(
+    const out = await Stream.fromRun(["bash", "-c", bashSeqCmd]).run(
       `grep "${grepStr}"`,
     )
       .toBytes();
@@ -127,7 +127,7 @@ bench({
   runs: 4 * runMult,
   async func(b) {
     b.start();
-    const lines = await Stream.run(["bash", "-c", bashSeqCmd]).grep(grepStr)
+    const lines = await Stream.fromRun(["bash", "-c", bashSeqCmd]).grep(grepStr)
       .toArray();
     const lineLength = lines.length;
     b.stop();

@@ -16,3 +16,9 @@ export type { BenchmarkRunResult } from "https://deno.land/std@0.128.0/testing/b
 export { Buffer } from "https://deno.land/std@0.128.0/io/buffer.ts";
 
 export { FromRun } from "https://deno.land/x/shell_stream@v0.1.13/mod.ts";
+
+export {
+  bgBlue,
+  bgGreen,
+  bgRed,
+} from "https://deno.land/std@0.128.0/fmt/colors.ts";

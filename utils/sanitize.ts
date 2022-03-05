@@ -1,4 +1,4 @@
-import { bgRed } from "../deps.ts";
+import { bgYellow, black } from "../deps.ts";
 
 const stdRes = ["stdin", "stderr", "stdout"];
 
@@ -10,7 +10,9 @@ export function checkResources(log = true) {
     Object.values(res).filter((v) => !stdRes.includes(v)).length > 0
   ) {
     log && console.log(
-      bgRed("Some resources are not closed except stdin/stderr/stdout :"),
+      bgYellow(
+        black("Some resources are not closed except stdin/stderr/stdout :"),
+      ),
     );
     log && console.log(res);
     noOpenedRessource = false;
@@ -35,9 +37,11 @@ export function checkOps(log = true) {
     const completed = group[1];
     if (metrics[dispatched] !== metrics[completed]) {
       log && console.log(
-        bgRed(
-          `${metrics[dispatched]} ${dispatched} ` +
-            `!== ${metrics[completed]} ${completed}`,
+        bgYellow(
+          black(
+            `${metrics[dispatched]} ${dispatched} ` +
+              `!== ${metrics[completed]} ${completed}`,
+          ),
         ),
       );
       noOpsInProgress = false;

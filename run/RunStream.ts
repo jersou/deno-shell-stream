@@ -1,9 +1,6 @@
-import { assert } from "../test_deps.ts";
 import { parseCmdString } from "../utils/parseCmdString.ts";
 import { LineStream } from "../line/LineStream.ts";
-import {
-  TextLineStream,
-} from "https://deno.land/std@0.128.0/streams/delimiter.ts";
+import { assert, TextLineStream } from "../deps.ts";
 
 export function getParentRun(stream: LineStream<unknown> | undefined) {
   if (stream?.parent instanceof RunStream) {
@@ -14,14 +11,13 @@ export function getParentRun(stream: LineStream<unknown> | undefined) {
 
 export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
   dontThrowIfRunFail?: boolean;
-  dontThrowIfStdinError?: boolean;
+  exitCodeIfRunFail?: number;
 };
 
 export class RunStream extends LineStream<string> {
   processCmd: string[];
   process?: Deno.Process<Deno.RunOptions>;
   processStatus?: Deno.ProcessStatus;
-  stdinError?: Error;
   runningOpt?: { stdout: RunOptions["stdout"] };
 
   constructor(
@@ -48,14 +44,6 @@ export class RunStream extends LineStream<string> {
       if (this.parent) {
         const parentStream = this.parent.toByteReadableStream(); // if this.parentRunStream → this.parentRunStream.opt.stdout==="piped"
 
-        if (this.parent instanceof RunStream) {
-          assert(
-            this.parent.runningOpt?.stdout === "piped" ||
-              this.parent.opt?.stdout === "piped",
-            `The parent stream "${this.parent.cmdOrStr}" does not have the option : stdout="piped"`,
-          );
-        }
-
         this.process = Deno.run({
           cmd: this.processCmd,
           ...this.opt,
@@ -63,9 +51,7 @@ export class RunStream extends LineStream<string> {
           stdin: "piped",
         });
 
-        parentStream.pipeTo(this.process.stdin!.writable).catch(
-          (err: Error) => (this.stdinError = err),
-        );
+        parentStream.pipeTo(this.process.stdin!.writable);
       } else {
         this.process = Deno.run({
           cmd: this.processCmd,
@@ -102,14 +88,15 @@ export class RunStream extends LineStream<string> {
 
     this.process!.close();
 
-    if (!this.opt?.dontThrowIfStdinError && this.stdinError) {
-      console.error(this.stdinError);
-      throw new Error("Stdin error");
-    }
-    if (!this.opt?.dontThrowIfRunFail && !this.processStatus?.success) {
-      throw new Error(
-        `Fail, process exit code : ${this.processStatus?.code}`,
-      );
+    if (!this.processStatus?.success) {
+      if (this.opt?.exitCodeIfRunFail !== undefined) {
+        Deno.exit(this.opt?.exitCodeIfRunFail);
+      }
+      if (!this.opt?.dontThrowIfRunFail) {
+        throw new Error(
+          `Fail, process exit code : ${this.processStatus?.code}`,
+        );
+      }
     }
     return this;
   }
@@ -123,10 +110,6 @@ export class RunStream extends LineStream<string> {
     return this
       .toByteReadableStream()
       .pipeThrough(new TextDecoderStream());
-  }
-
-  run(cmdOrStr: string[] | string, opt: RunOptions = {}) {
-    return new RunStream(cmdOrStr, opt, this);
   }
 
   async toFile(file: Deno.FsFile | string) {

@@ -90,7 +90,7 @@ Deno.test("Stream.fromRun.stdout()", async () => {
   assertEquals(runStream.processStatus!.code, 0);
 });
 
-Deno.test("Stream.fromRun ThrowIfStdinError", async () => {
+Deno.test("Stream.fromRun", async () => {
   const runStream = Stream
     .fromRun(`deno eval "Deno.exit(12)"`)
     .run(`deno eval "console.log('is ok')"`);
@@ -102,6 +102,16 @@ Deno.test("Stream.fromRun ThrowIfStdinError", async () => {
       await getParentRun(runStream)?.process!.close();
     }
   });
+});
+
+Deno.test("Stream.fromRun dontThrowIfRunFail", async () => {
+  const runStream = Stream
+    .fromRun(`deno eval "Deno.exit(12)"`, { dontThrowIfRunFail: true })
+    .run(`deno eval "console.log('is ok')"`);
+
+  const stream = await runStream.wait();
+  assertEquals(stream.processStatus?.code, 0);
+  assertEquals(getParentRun(stream)?.processStatus?.code, 12);
 });
 
 Deno.test("Stream.fromRun ThrowIfRunFail", async () => {
@@ -170,3 +180,25 @@ Deno.test("runStream stdout === piped", async () => {
     }
   });
 });
+
+Deno.test("runStream.toFile", async () => {
+  await Deno.mkdir("tmp", { recursive: true });
+  await new RunStream(`deno eval "console.log('is\\n ok')"`)
+    .toFile("tmp/tmp-runStream-toFile");
+  const out = await Deno.readTextFile("tmp/tmp-runStream-toFile");
+  assertEquals(out, "is\n ok\n");
+});
+
+Deno.test("runStream.toFile opened", async () => {
+  await Deno.mkdir("tmp", { recursive: true });
+  const file = await Deno.open("tmp/tmp-runStream-toFile", { write: true });
+  await new RunStream(`deno eval "console.log('is\\n ok')"`)
+    .toFile(file);
+  const out = await Deno.readTextFile("tmp/tmp-runStream-toFile");
+  assertEquals(out, "is\n ok\n");
+});
+
+// Deno.test("exitCodeIfRunFail", async () => {
+//   await Stream.fromRun(["bash", "-c", "exit 1"], { exitCodeIfRunFail: 2 })
+//     .wait();
+// });

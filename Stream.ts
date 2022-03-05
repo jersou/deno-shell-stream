@@ -5,6 +5,9 @@ import { LineStream } from "./line/LineStream.ts";
 import { dirToStream } from "./utils/dirToStream.ts";
 import { walkToStream } from "./utils/walkToStream.ts";
 import { WalkEntry, WalkOptions } from "./deps.ts";
+import { promiseToStream } from "./utils/PromiseToStream.ts";
+
+// TODO class ByteStream, FileStream→ByteStream, RunStream→ByteStream
 
 export abstract class Stream {
   static fromRun(cmdOrStr: string[] | string, opt?: RunOptions): RunStream {
@@ -13,10 +16,6 @@ export abstract class Stream {
 
   static fromFile(file: Deno.FsFile | string): FileStream {
     return new FileStream(file);
-  }
-
-  static fromLineStream<T>(stream: ReadableStream<T>): LineStream<T> {
-    return new LineStream(undefined, stream);
   }
 
   static fromArray<T>(array: T[]): LineStream<T> {
@@ -33,5 +32,14 @@ export abstract class Stream {
 
   static fromWalk(path: string, opt?: WalkOptions): LineStream<WalkEntry> {
     return new LineStream(undefined, walkToStream(path, opt));
+  }
+
+  static fromFetch(url: string): LineStream<string> {
+    return new LineStream(
+      undefined,
+      promiseToStream(
+        fetch(url).then((r) => r.body!.pipeThrough(new TextDecoderStream())),
+      ),
+    );
   }
 }

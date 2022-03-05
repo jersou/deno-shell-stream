@@ -34,6 +34,7 @@ Some dev command are listed in the scripts.yaml file, this file can be use with
 - lint: lint the code
 - fmt: format the code
 - bundle: bundle the project and its dependencies to dist/shell_stream.js
+- build-npm
 - vendor: backup the dependencies to `vendor/`
 - gen-cov: generate the test coverage
-
+- pre-commit

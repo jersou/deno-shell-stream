@@ -1,13 +1,16 @@
 import { build } from "https://deno.land/x/dnt@0.21.1/mod.ts";
 
 await build({
+  shims: {
+    deno: true,
+  },
   entryPoints: ["./mod.ts"],
   outDir: "./npm",
   typeCheck: false, // TODO remove
   package: {
     // package.json properties
     name: "sh-stream",
-    version: "0.1.11",
+    version: "1.0.0",
     description: "Mix I/O stream API and Shell pipe/redirects",
     license: "MIT",
     repository: {

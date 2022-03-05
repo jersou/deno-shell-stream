@@ -5,14 +5,18 @@ import {
 } from "../transform/FilterTransform.ts";
 import { GrepoTransform } from "../transform/GrepoTransform.ts";
 import { streamToArray } from "../utils/StreamToArray.ts";
-import {
-  TextLineStream,
-} from "https://deno.land/std@0.128.0/streams/delimiter.ts";
+import { RunOptions, RunStream } from "../run/RunStream.ts";
+import { HeadTransform } from "../transform/HeadTransform.ts";
+import { TailTransform } from "../transform/TailTransform.ts";
+import { SpongeTransform } from "../transform/SpongeTransform.ts";
+import { UniqTransform } from "../transform/UniqTransform.ts";
+import { CompareFn, SortTransform } from "../transform/SortTransform.ts";
 
 export type TapFunction<T> = (line: T) => unknown;
 export type LogTransformFunction<T> = (line: T) => string;
 
 export class LineStream<T> {
+  // FIXME not always set
   child?: LineStream<unknown>;
 
   constructor(
@@ -65,7 +69,6 @@ export class LineStream<T> {
     );
   }
 
-  // FIXME use tap()
   log(transform?: LogTransformFunction<T>) {
     return this.tap((line) =>
       transform ? console.log(transform(line)) : console.log(line)
@@ -74,6 +77,14 @@ export class LineStream<T> {
 
   logJson(replacer = null, space = "  ") {
     return this.log((el) => JSON.stringify(el, replacer, space));
+  }
+
+  logWithTimestamp(transform?: LogTransformFunction<string>) {
+    return this.tap((line) =>
+      transform
+        ? console.log(transform(`${new Date().toISOString()} ${line}`))
+        : console.log(`${new Date().toISOString()} ${line}`)
+    );
   }
 
   filter(filterFunction: FilterFunction<T>) {
@@ -125,7 +136,69 @@ export class LineStream<T> {
     return (await this.toArray()).join("\n");
   }
 
-  // run(){
-  //  TODO generic,call
-  // }
+  run(cmdOrStr: string[] | string, opt: RunOptions = {}): RunStream {
+    return new RunStream(cmdOrStr, opt, this);
+  }
+
+  toIterable(): AsyncIterable<T> {
+    const stream: ReadableStream<T> = this.getLineReadableStream();
+    return (async function* () {
+      const reader = stream.getReader();
+      let res;
+      while (!res?.done) {
+        res = await reader.read();
+        if (!res?.done) {
+          yield res.value as T;
+        }
+      }
+    })();
+  }
+
+  cut(delim: string, indexes: number[]) {
+    return this.map((line: T) => {
+      const parts = String(line).split(delim);
+      return indexes.map((i) => parts[i]);
+    });
+  }
+
+  replace(searchValue: string | RegExp, replacer: string) {
+    return this.map((line: T) => String(line).replace(searchValue, replacer));
+  }
+
+  tee(path: string): LineStream<T | string> {
+    if (this.linesStream) {
+      const streams = this.linesStream.tee();
+      this.linesStream = streams[0];
+      new LineStream(this, streams[1]).toFile(path).then();
+      return this;
+    } else {
+      // TODO class ByteStream, FileStream→ByteStream, RunStream→ByteStream
+      const streams = this.toByteReadableStream().tee();
+      Deno.create(path).then((file) => streams[1].pipeTo(file.writable).then());
+      return new LineStream(
+        this,
+        streams[0].pipeThrough(new TextDecoderStream()),
+      );
+    }
+  }
+
+  head(max = 1) {
+    return this.transform(new HeadTransform(max));
+  }
+
+  tail(max = 1) {
+    return this.transform(new TailTransform(max));
+  }
+
+  sponge() {
+    return this.transform(new SpongeTransform());
+  }
+
+  uniq() {
+    return this.transform(new UniqTransform());
+  }
+
+  sort(compareFn?: CompareFn<T>) {
+    return this.transform(new SortTransform(compareFn));
+  }
 }

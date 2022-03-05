@@ -24,10 +24,8 @@ export class FileStream extends LineStream<string> {
     return this.linesStream!;
   }
 
-  async wait(): Promise<this> {
-    // TODO ?
-    //Deno.close(this.fsFile.rid);
-    return this;
+  wait(): Promise<this> {
+    return Promise.resolve(this);
   }
 
   async toBytes() {
