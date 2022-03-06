@@ -1,7 +1,9 @@
 #!/usr/bin/env -S deno run -A
-import { Stream } from "https://deno.land/x/shell_stream@v1.0.0/mod.ts";
+import {
+  getRunStream,
+  Stream,
+} from "https://deno.land/x/shell_stream@v1.0.1/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.128.0/fmt/colors.ts";
-import { getRunStream } from "./run/RunStream.ts";
 
 let rootLine = await Stream
   .fromRun("cat /etc/passwd")

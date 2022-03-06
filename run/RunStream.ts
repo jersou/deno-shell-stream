@@ -9,10 +9,7 @@ export function getRunStream(stream: LineStream<unknown> | undefined) {
   return undefined;
 }
 export function getParentRun(stream: LineStream<unknown> | undefined) {
-  if (stream?.parent instanceof RunStream) {
-    return stream.parent;
-  }
-  return undefined;
+  return getRunStream(stream?.parent);
 }
 
 export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
