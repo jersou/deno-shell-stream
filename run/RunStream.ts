@@ -16,7 +16,7 @@ export function getParentRun(stream: LineStream<unknown> | undefined) {
 }
 
 export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
-  dontThrowIfRunFail?: boolean;
+  allowFail?: boolean;
   exitCodeIfRunFail?: number;
 };
 
@@ -102,7 +102,7 @@ export class RunStream extends LineStream<string> {
         if (this.opt?.exitCodeIfRunFail !== undefined) {
           Deno.exit(this.opt?.exitCodeIfRunFail);
         }
-        if (!this.opt?.dontThrowIfRunFail) {
+        if (!this.opt?.allowFail) {
           throw new Error(
             `Fail, process exit code : ${this.processStatus?.code}`,
           );
@@ -131,6 +131,6 @@ export class RunStream extends LineStream<string> {
 
   async success() {
     await this.wait();
-    return this.processStatus?.success;
+    return this.processStatus!.success;
   }
 }

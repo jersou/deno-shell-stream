@@ -2,7 +2,7 @@ import { readAll, TextLineStream } from "../deps.ts";
 import { LineStream } from "../line/LineStream.ts";
 
 export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
-  dontThrowIfRunFail?: boolean;
+  allowFail?: boolean;
   dontThrowIfStdinError?: boolean;
 };
 

@@ -2,7 +2,7 @@
 import {
   getRunStream,
   Stream,
-} from "https://deno.land/x/shell_stream@v1.0.3/mod.ts";
+} from "https://deno.land/x/shell_stream@v1.0.4/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.128.0/fmt/colors.ts";
 
 let rootLine = await Stream
@@ -34,7 +34,7 @@ console.log(await Stream.fromRun("deno --version").tail(2).toArray());
 const stream = await Stream.fromArray(["line1", "line2"])
   .run(
     [Deno.execPath(), "eval", 'console.log("foo"); Deno.exit(13)'],
-    { dontThrowIfRunFail: true },
+    { allowFail: true },
   )
   .logWithTimestamp()
   .replace("foo", "bar")

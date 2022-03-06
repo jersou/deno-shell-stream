@@ -104,9 +104,9 @@ Deno.test("Stream.fromRun", async () => {
   });
 });
 
-Deno.test("Stream.fromRun dontThrowIfRunFail", async () => {
+Deno.test("Stream.fromRun allowFail", async () => {
   const runStream = Stream
-    .fromRun(`deno eval "Deno.exit(12)"`, { dontThrowIfRunFail: true })
+    .fromRun(`deno eval "Deno.exit(12)"`, { allowFail: true })
     .run(`deno eval "console.log('is ok')"`);
 
   const stream = await runStream.wait();
