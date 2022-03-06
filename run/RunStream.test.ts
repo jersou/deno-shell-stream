@@ -1,6 +1,6 @@
 import { Stream } from "../Stream.ts";
 import { assertEquals, assertRejects, Buffer } from "../test_deps.ts";
-import { getParentRun, RunStream } from "./RunStream.ts";
+import { getParentRun, getRunStream, RunStream } from "./RunStream.ts";
 import { MapTransform } from "../transform/MapTransform.ts";
 
 Deno.test("Stream.fromRunStream.toBytes()", async () => {
@@ -196,6 +196,14 @@ Deno.test("runStream.toFile opened", async () => {
     .toFile(file);
   const out = await Deno.readTextFile("tmp/tmp-runStream-toFile");
   assertEquals(out, "is\n ok\n");
+});
+
+Deno.test("getRunStream", async () => {
+  const runStream = new RunStream(`deno eval "console.log('is ok')"`);
+  await runStream.log().wait();
+  assertEquals(getRunStream(runStream), runStream);
+  const arrayStream = await Stream.fromArray([]).wait();
+  assertEquals(getRunStream(arrayStream), undefined);
 });
 
 // Deno.test("exitCodeIfRunFail", async () => {

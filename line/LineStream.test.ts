@@ -1,7 +1,6 @@
 import { assertEquals } from "../test_deps.ts";
 import { Stream } from "../Stream.ts";
 import { bgBlue } from "../test_deps.ts";
-import { streamToArray } from "../utils/StreamToArray.ts";
 
 Deno.test("LineStream toArray", async () => {
   const inputArray = ["line1", "line2", "line3"];
@@ -34,40 +33,44 @@ Deno.test("LineStream grep", async () => {
   const inputArray = ["line1", "line2", "line3"];
   const lineStream = Stream.fromArray(inputArray);
   assertEquals(lineStream.linesStream?.locked, false);
-  const array = await lineStream.grep("2").toArray();
+  const grepStream = lineStream.grep("2");
+  const array = await grepStream.toArray();
   assertEquals(array, ["line2"]);
   assertEquals(lineStream.linesStream?.locked, false);
-  assertEquals(lineStream.child!.linesStream!.locked, false);
+  assertEquals(grepStream.linesStream!.locked, false);
 });
 
 Deno.test("LineStream grepo", async () => {
   const inputArray = ["line1", "line2", "line3"];
   const lineStream = Stream.fromArray(inputArray);
   assertEquals(lineStream.linesStream?.locked, false);
-  const array = await lineStream.grepo(".2").toArray();
+  const grepStream = lineStream.grepo(".2");
+  const array = await grepStream.toArray();
   assertEquals(array, ["e2"]);
   assertEquals(lineStream.linesStream?.locked, false);
-  assertEquals(lineStream.child!.linesStream!.locked, false);
+  assertEquals(grepStream.linesStream!.locked, false);
 });
 
 Deno.test("LineStream grep regex", async () => {
   const inputArray = ["line1", "line2", "line3"];
   const lineStream = Stream.fromArray(inputArray);
   assertEquals(lineStream.linesStream?.locked, false);
-  const array = await lineStream.grep(/2$/).toArray();
+  const grepStream = lineStream.grep(/2$/);
+  const array = await grepStream.toArray();
   assertEquals(array, ["line2"]);
   assertEquals(lineStream.linesStream?.locked, false);
-  assertEquals(lineStream.child!.linesStream!.locked, false);
+  assertEquals(grepStream.linesStream!.locked, false);
 });
 
 Deno.test("LineStream map", async () => {
   const inputArray = ["line1", "line2", "line3"];
   const lineStream = Stream.fromArray(inputArray);
   assertEquals(lineStream.linesStream?.locked, false);
-  const array = await lineStream.map((str) => "++" + str).toArray();
+  const mapStream = lineStream.map((str) => "++" + str);
+  const array = await mapStream.toArray();
   assertEquals(array, ["++line1", "++line2", "++line3"]);
   assertEquals(lineStream.linesStream?.locked, false);
-  assertEquals(lineStream.child!.linesStream!.locked, false);
+  assertEquals(mapStream.linesStream!.locked, false);
 });
 
 Deno.test("Stream.logJson().log().logWithTimestamp()", async () => {
@@ -102,13 +105,6 @@ Deno.test("Stream.toFile opened", async () => {
   await Stream.fromArray(inputArray).toFile(file);
   const out = await Deno.readTextFile("tmp/tmp-runStream-toFile");
   assertEquals(out, "line1\nline2\nline3");
-});
-
-Deno.test("Stream.toStringReadableStream", async () => {
-  const inputArray = ["line1", "line2", "line3"];
-  const stream = await Stream.fromArray(inputArray).toStringReadableStream();
-  const out = await streamToArray(stream);
-  assertEquals(out, ["line1", "line2", "line3"]);
 });
 
 Deno.test("Stream.toBytes", async () => {
@@ -207,4 +203,24 @@ Deno.test("Stream.sort", async () => {
   const inputArray = ["line2", "line1", "line3"];
   const out = await Stream.fromArray(inputArray).sort().toArray();
   assertEquals(out, ["line1", "line2", "line3"]);
+});
+
+Deno.test("Stream getParents", async () => {
+  const inputArray = ["line1", "line2", "line3"];
+  const stream1 = Stream.fromArray(inputArray);
+  const stream2 = stream1.replace("line", "LINE=");
+  const stream3 = stream2.cut("=", [0, 1]);
+  const out = await stream3.toArray();
+  const parents = stream3.getParents();
+  assertEquals(out, [["LINE", "1"], ["LINE", "2"], ["LINE", "3"]]);
+  assertEquals(parents, [stream1, stream2]);
+});
+
+Deno.test("Stream.toBytes", async () => {
+  const inputArray = ["line1", "line2"];
+  const out = await Stream.fromArray(inputArray).toBytes();
+  assertEquals(
+    out,
+    new Uint8Array([108, 105, 110, 101, 49, 10, 108, 105, 110, 101, 50]),
+  );
 });

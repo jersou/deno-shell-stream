@@ -17,9 +17,10 @@ export class FileStream extends LineStream<string> {
 
   getLineReadableStream(): ReadableStream<string> {
     if (!this.linesStream) {
-      this.linesStream = this.toStringReadableStream().pipeThrough(
-        new TextLineStream(),
-      );
+      this.linesStream = this
+        .toByteReadableStream()
+        .pipeThrough(new TextDecoderStream())
+        .pipeThrough(new TextLineStream());
     }
     return this.linesStream!;
   }
@@ -42,17 +43,9 @@ export class FileStream extends LineStream<string> {
     return this.fsFile.readable;
   }
 
-  toStringReadableStream() {
-    return this.toByteReadableStream().pipeThrough(new TextDecoderStream());
-  }
-
-  async toFile(file: Deno.FsFile | string): Promise<void> {
-    let fsFile;
-    if (typeof file === "string") {
-      fsFile = await Deno.create(file);
-    } else {
-      fsFile = file;
-    }
+  async toFile(file: Deno.FsFile | string) {
+    const fsFile = (typeof file === "string") ? await Deno.create(file) : file;
     await this.fsFile.readable.pipeTo(fsFile.writable);
+    return this.wait();
   }
 }

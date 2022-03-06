@@ -7,6 +7,7 @@ import { walkToStream } from "./utils/walkToStream.ts";
 import { WalkEntry, WalkOptions } from "./deps.ts";
 import { promiseToStream } from "./utils/PromiseToStream.ts";
 
+// TODO doc readme AND in *.ts
 // TODO class ByteStream, FileStream→ByteStream, RunStream→ByteStream
 
 export abstract class Stream {

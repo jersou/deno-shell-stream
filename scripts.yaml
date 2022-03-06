@@ -9,13 +9,11 @@ scripts:
 
   fmt: deno fmt --ignore=vendor,dist,.lock.json,npm
 
-  bundle: deno bundle mod.ts dist/mod.js
-
   build-npm: deno run -A build_npm.ts
 
   vendor:
     - rm -rf vendor
-    - deno vendor mod.ts
+    - deno vendor mod.ts test_deps.ts deps.ts
 
   gen-cov:
     - rm -rf .cov_profile

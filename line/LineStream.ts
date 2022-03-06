@@ -16,21 +16,24 @@ export type TapFunction<T> = (line: T) => unknown;
 export type LogTransformFunction<T> = (line: T) => string;
 
 export class LineStream<T> {
-  // FIXME not always set
-  child?: LineStream<unknown>;
-
   constructor(
     public parent?: LineStream<unknown> | undefined,
     public linesStream?: ReadableStream<T> | undefined,
   ) {
   }
 
-  // overwrite this method !
-  toStringReadableStream() {
+  getParents(): LineStream<unknown>[] {
+    if (this.parent) {
+      return [...this.parent.getParents(), this.parent];
+    } else {
+      return [];
+    }
+  }
+
+  getLineReadableStream() {
     return this.linesStream!;
   }
 
-  // overwrite this method !
   toByteReadableStream(): ReadableStream<Uint8Array> {
     let isFirst = true;
     const addLineBreakFn = (line: T) => {
@@ -44,10 +47,6 @@ export class LineStream<T> {
     return this.getLineReadableStream()
       .pipeThrough(new MapTransform(addLineBreakFn))
       .pipeThrough(new TextEncoderStream());
-  }
-
-  getLineReadableStream(): ReadableStream<T> {
-    return this.linesStream!;
   }
 
   async wait(): Promise<this> {
@@ -92,11 +91,10 @@ export class LineStream<T> {
   }
 
   transform<U>(transformStream: TransformStream<T, U>): LineStream<U> {
-    this.child = new LineStream<U>(
+    return new LineStream<U>(
       this,
       this.getLineReadableStream().pipeThrough(transformStream),
     );
-    return this.child as LineStream<U>;
   }
 
   grep(
@@ -115,7 +113,7 @@ export class LineStream<T> {
     return this.grep(regex, { onlyMatching: true });
   }
 
-  async toArray() {
+  async toArray(): Promise<T[]> {
     const array = await streamToArray(this.getLineReadableStream());
     await this.wait();
     return array;
@@ -129,11 +127,15 @@ export class LineStream<T> {
       fsFile = file;
     }
     await this.toByteReadableStream().pipeTo(fsFile.writable);
-    await this.wait();
+    return await this.wait();
   }
 
-  async toString() {
+  async toString(): Promise<string> {
     return (await this.toArray()).join("\n");
+  }
+
+  async toBytes(): Promise<Uint8Array> {
+    return new TextEncoder().encode(await this.toString());
   }
 
   run(cmdOrStr: string[] | string, opt: RunOptions = {}): RunStream {

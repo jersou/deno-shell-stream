@@ -2,6 +2,12 @@ import { parseCmdString } from "../utils/parseCmdString.ts";
 import { LineStream } from "../line/LineStream.ts";
 import { assert, TextLineStream } from "../deps.ts";
 
+export function getRunStream(stream: LineStream<unknown> | undefined) {
+  if (stream instanceof RunStream) {
+    return stream;
+  }
+  return undefined;
+}
 export function getParentRun(stream: LineStream<unknown> | undefined) {
   if (stream?.parent instanceof RunStream) {
     return stream.parent;
@@ -31,9 +37,10 @@ export class RunStream extends LineStream<string> {
 
   getLineReadableStream(): ReadableStream<string> {
     if (!this.linesStream) {
-      this.linesStream = this.toStringReadableStream().pipeThrough(
-        new TextLineStream(),
-      );
+      this.linesStream = this
+        .toByteReadableStream()
+        .pipeThrough(new TextDecoderStream())
+        .pipeThrough(new TextLineStream());
     }
     return this.linesStream!;
   }
@@ -105,13 +112,6 @@ export class RunStream extends LineStream<string> {
     this.start({ stdout: "piped" });
     return this.process!.stdout!.readable;
   }
-
-  toStringReadableStream() {
-    return this
-      .toByteReadableStream()
-      .pipeThrough(new TextDecoderStream());
-  }
-
   async toFile(file: Deno.FsFile | string) {
     let fsFile;
     if (typeof file === "string") {
@@ -120,6 +120,6 @@ export class RunStream extends LineStream<string> {
       fsFile = file;
     }
     await this.toByteReadableStream().pipeTo(fsFile.writable);
-    await this.wait();
+    return await this.wait();
   }
 }

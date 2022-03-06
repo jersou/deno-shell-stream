@@ -1,14 +1,31 @@
 import { build } from "https://deno.land/x/dnt@0.21.1/mod.ts";
+import { copy } from "https://deno.land/std@0.128.0/fs/copy.ts";
+import { Stream } from "./Stream.ts";
+
+await Stream.fromRun(["bash", "-c", "type node"]).wait();
+
+await copy("./test-data", "./npm/script/test-data", { overwrite: true });
 
 await build({
   shims: {
     deno: true,
+    undici: true,
+    timers: true,
+    custom: [{
+      package: { name: "stream/web" },
+      globalNames: [
+        "ReadableStream",
+        "WritableStream",
+        "TransformStream",
+        "TextDecoderStream",
+      ],
+    }],
   },
   entryPoints: ["./mod.ts"],
   outDir: "./npm",
-  typeCheck: false, // TODO remove
+  typeCheck: false,
+  test: true,
   package: {
-    // package.json properties
     name: "sh-stream",
     version: "1.0.0",
     description: "Mix I/O stream API and Shell pipe/redirects",
