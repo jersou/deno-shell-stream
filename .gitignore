@@ -1,6 +1,8 @@
 /**/.idea/workspace.xml
 /tmp*
-/.DENO_DIR/gen/
 /.cov_profile
 /.idea/checkstyle-idea.xml
 /npm/node_modules/
+/.idea/markdown.xml
+/.idea/google-java-format.xml
+/.idea/highlightedFiles.xml

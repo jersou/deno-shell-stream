@@ -1,27 +1,27 @@
 # Velociraptor is a script runner for Deno: https://velociraptor.run/docs/installation/
 
 scripts:
-  test: deno test -A --ignore=".DENO_DIR,dist,npm"
+  test: deno test -A --ignore="vendor,dist,npm"
 
-  test-watch: deno test -A --watch --unstable --ignore=".DENO_DIR,dist,npm"
+  test-watch: deno test -A --watch --unstable --ignore="vendor,dist,npm"
 
-  lint: deno lint --ignore=.DENO_DIR,dist,npm
+  lint: deno lint --ignore=vendor,dist,npm
 
-  fmt: deno fmt --ignore=.DENO_DIR,dist,.lock.json,npm
-
-  bundle: deno bundle mod.ts dist/mod.js
+  fmt: deno fmt --ignore=vendor,dist,.lock.json,npm
 
   build-npm: deno run -A build_npm.ts
 
-  bak-dep: DENO_DIR=./.DENO_DIR deno cache --lock=.lock.json --lock-write mod.ts deps.ts test_deps.ts
+  vendor:
+    - rm -rf vendor
+    - deno vendor mod.ts test_deps.ts deps.ts
 
   gen-cov:
     - rm -rf .cov_profile
-    - deno test --coverage=.cov_profile -A
+    - deno test --ignore=vendor,dist,npm --coverage=.cov_profile -A
     - deno coverage .cov_profile --lcov > .cov_profile/cov_profile.lcov
     - genhtml -o .cov_profile/html .cov_profile/cov_profile.lcov
 
   pre-commit:
-    - deno fmt --ignore=.DENO_DIR,dist,.lock.json,npm --check
-    - deno lint --ignore=.DENO_DIR,dist,npm
-    - deno test -A --ignore=".DENO_DIR,dist,npm" --no-check
+    - deno fmt --ignore=vendor,dist,.lock.json,npm --check
+    - deno lint --ignore=vendor,dist,npm
+    - deno test -A --ignore="vendor,dist,npm" --no-check

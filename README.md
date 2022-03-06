@@ -1,162 +1,119 @@
 # Deno ShellStream
 
-ShellStream is a lib for Deno that mix I/O stream API and Shell pipe/redirects.
+ShellStream is a lib for Deno that mix I/O
+[stream API](https://developer.mozilla.org/en-US/docs/Web/API/Streams_API) and
+Shell pipe/redirects.
 
 It has zero 3rd party dependencies and don't internally run sh or bash commands.
 
 ## Quick examples
 
 ```typescript
-import {
-  FromFile,
-  FromRun,
-} from "https://deno.land/x/shell_stream@v0.1.13/mod.ts";
-import { bgBlue } from "https://deno.land/std@0.114.0/fmt/colors.ts";
+import { Stream } from "./Stream.ts";
+import { bgBlue } from "https://deno.land/std@0.128.0/fmt/colors.ts";
+import { getRunStream } from "./run/RunStream.ts";
 
-let res = await FromRun("cat /etc/passwd").run("grep /root").toString();
-console.log(res); // → root:x:0:0:root:/root:/bin/bash
+let rootLine = await Stream
+  .fromRun("cat /etc/passwd")
+  .run("grep /root")
+  .toString();
+console.log(rootLine); // → root:x:0:0:root:/root:/bin/bash
 
 // the same example without run cat & grep command :
-res = await FromFile("/etc/passwd")
+rootLine = await Stream.fromFile("/etc/passwd")
   .log(bgBlue) // → log the entire file with blue background
   .grep(/\/root/) // keep lines that contain /root
   .log() // → log "root:x:0:0:root:/root:/bin/bash"
   .toString();
-console.log(res); // → res = "root:x:0:0:root:/root:/bin/bash"
+console.log({ rootLine });
+// → { rootLine: "root:x:0:0:root:/root:/bin/bash" }
 
-res = await FromRun("deno --version").head(1).toString();
-console.log(res); // → deno 1.15.1 (release, x86_64-unknown-linux-gnu)
+const denoVersionFromCli = await Stream
+  .fromRun(["deno", "--version"])
+  .head(1)
+  .toString();
+console.log({ denoVersionFromCli });
+// → { denoVersionFromCli: "deno 1.19.2 (release, x86_64-unknown-linux-gnu)" }
 
-console.log(await FromRun(["deno", "--version"]).tail(2).toArray());
-// → ["v8 9.5.172.19", "typescript 4.4.2"]
-
-// exit codes of processes can be retrieved :
-const closeRes = await FromRun([
-  Deno.execPath(),
-  "eval",
-  'console.log("foo"); Deno.exit(13)',
-])
-  .run("cat")
-  .run("cat")
-  .close();
-const exitCodes = closeRes.statuses.map((s) => s?.code);
-console.log(
-  `success=${closeRes.success} codes=${exitCodes} out=${closeRes.out}`,
-);
-// → "success=false codes=13,0,0 out=foo"
+console.log(await Stream.fromRun("deno --version").tail(2).toArray());
+// → [ "v8 9.9.115.7", "typescript 4.5.2" ]
 ```
 
 See more examples in `example.ts` file.
 
-## Operators
-
-The usage :
-`res = await Startpoint(...).Operator(...).Operator(...).Endpoint(...)`
-
-All startpoints and operators return a ShellStream, the endpoints return a
-promise. ShellStream contains all operators as method, the IDEs can
-autocomplete/check the code.
-
 ### Startpoint Operators
 
-These operators return a ShellStream :
-
-- `FromRun(cmd: string[] | string, opt?:` [RunOptions](#RunOptions) `)` →
-  generate a stream from each line of the stdout of the process. If cmd is a
-  string, it will be parsed to array.
-- `FromFile(path: string, opt?: { closeBeforeStreaming?: boolean })` → generate
-  a stream from each line of the file.
-- `FromArray(lines: string[])` → generate a stream from each element of the
+- `Stream.fromRun(cmd: string[] | string, opt?:` [RunOptions](#RunOptions) `)`:
+  generate stream from the process. If cmd is a string, it will be parsed to
+  array (regex used to split : `/"(\\"|[^"])*"|'(\\'|[^'])*'|[^ "']*/g`).
+- `Stream.fromFile(file: Deno.FsFile | string)`: generate a stream from the
+  file.
+- `Stream.fromDir(path: string)`: generate a stream of `Deno.DirEntry` from dir.
+- `Stream.fromFetch(url: string)`: generate a stream from a http query.
+- `Stream.fromArray<T>(array: T[])`: generate a stream from each element of the
   array.
-- `FromString(line: string)` → generate a stream from line.
-- `FromDir(path: string)` → generate a stream of file name from dir.
-- `FromWalk(path: string, opt?: WalkOptions)` → generate a stream of file path
-  from dir, using [walk](https://deno.land/std/fs#walk), see
+- `Stream.fromString(str: string)`: generate a stream from string
+- `Stream.fromWalk(path: string, opt?: WalkOptions)`: generate a stream of file
+  path from dir, using [walk](https://deno.land/std/fs#walk), see
   [WalkOptions](https://doc.deno.land/https/deno.land/std@0.114.0/fs/walk.ts#WalkOptions).
-- `FromFetch(url: string, init?: RequestInit)` → generate a stream from an http
-  query.
-- Pipe: [see bellow "Pipe chapter"](#Pipe).
-
-The startpoint are also available from static method of ShellStream :
-
-```typescript
-ShellStream.fromRun(cmd: string[] | string, opt?: RunOptions);
-ShellStream.fromFile(path: string, opt?: { closeBeforeStreaming?: boolean });
-ShellStream.fromArray(lines: string[]);
-ShellStream.pipe(...operators: OperatorFunc[]);
-```
 
 ### Intermediate Operators
 
-These operators return a ShellStream :
-
-- `run(cmd: string[] | string, opt?:` [RunOptions](#RunOptions) `)` : generate a
-  stream with each line of the stdout of the process. The current stream is
-  passed to the stdin of the process. If cmd is a string, it will be parsed to
-  array (regex used to split : `/"(\\"|[^"])*"|'(\\'|[^'])*'|[^ "']*/g`).
-- `tap(tapFunction: TapFunction)` : keep stream unchanged, run the `tapFunction`
-  with the current line as argument.
-- `tee(outputPath: string)` : keep stream unchanged, write the stream in the
-  `outputPath` file.
-- `log(transform?: LogTransformFunction)` : keep stream unchanged, log each
-  lines in console.
-- logWithTimestamp : keep stream unchanged, log each lines in console with the
-  date (ISOString) at the beginning.
-- `map(mapFunction: MapFunction)` : transform the stream with the return of
-  mapFunction, the current line is passed as the first argument to the
-  mapFunction.
-- `timestamp()` : transform the stream with the date (ISOString) at the
-  begining.
-- `replace(v: string | RegExp, r: Replacer)` : transform the stream with the
-  replace result.
-- `cut(delim: string, indexes: number[], sep = " ")` : transform the stream with
-  the part ordered by indexes, split the line by `delim`.
-- `filter(filterFunction: FilterFunction)` : transform the stream, keep only
-  lines that return true in filterFunction.
-- `grep(regex: RegExp | string, opt?: {onlyMatching?: boolean})` : transform the
-  stream, keep only lines that match the regex. If `opt.onlyMatching === true`,
-  the stream is then all results matching the complete regex, like `grep -o`
-  Linux command.
-- `head(count = 1)` : transform the stream, keep only first `count` lines.
-- `tail(count = 1)` :transform the stream, keep only last `count` lines.
+- `cut(delim: string, indexes: number[])` : transform the stream with the part
+  ordered by indexes, split the line by `delim`.
+- `filter(filterFunction: FilterFunction<T>)` : transform the stream, keep only
+  lines that return true with the filterFunction.
+- `grep(regex: RegExp | string, opt?: { onlyMatching?: boolean })` : transform
+  the stream, keep only lines that match the regex. If
+  `opt.onlyMatching === true`, the stream is then all results matching the
+  complete regex, like `grep -o` Linux command.
+- `grepo(regex: RegExp | string)` : alias of grep() with opt :
+  `{ onlyMatching: true }`.
+- `head(max = 1)` : transform the stream, keep only first `count` lines.
+- `log(transform?: LogTransformFunction<T>)` : keep stream unchanged, log each
+  lines in the console. Use the transform function if defined before log.
+- `logJson(replacer = null, space = "  ")` : keep stream unchanged, log each
+  lines as json in the console.
+- `logWithTimestamp(transform?: LogTransformFunction<string>)` : keep stream
+  unchanged, log each lines in the console with the date (ISOString) at the
+  beginning. Use the transform function if defined before log.
+- `map(mapFunction: MapFunction<T, U>)` : transform the stream with the return
+  of mapFunction
+- `replace(searchValue: string | RegExp, replacer: string)` : transform the
+  stream with the replace result.
+- `run(cmdOrStr: string[] | string, opt: RunOptions = {})` : generate a stream
+  with the current stream as the stdin of the new process. If cmd is a string,
+  it will be parsed to array (regex used to split :
+  `/"(\\"|[^"])*"|'(\\'|[^'])*'|[^ "']*/g`).
+- `sort(compareFn?: CompareFn)` : transform the stream, sort the stream.
 - `sponge()` : keep stream unchanged, soaks up all its input before re-emit all.
-- `sort()` : transform the stream, sort the stream.
+- `tail(max = 1)` : transform the stream, keep only last `count` lines.
+- `tap(tapFunction: TapFunction<T>)` : keep stream unchanged, run the
+  `tapFunction` for each line.
+- `tee(path: string)` : keep stream unchanged, write the stream in the
+  `outputPath` file.
+- `transform(transformStream: TransformStream<T, U>)` : transform the stream
+  with the transformStream.
 - `uniq()` : transform the stream, keep only lines that are different from
   previous line.
-- `fetch(url?: string, init?: RequestInit)` : fetch the url if present or each
-  line of input stream.
-- `grepo(regex: RegExp | string)`: alias of grep() with opt :
-  `{ onlyMatching: true }`.
-- `pipe(...operators: OperatorFunc[])` : [see bellow "Pipe chapter"](#Pipe).
 
 ### Endpoint Operators
 
-All these operators close the stream and return a Promise :
-
-- `toString():Promise<string>` : the stream is closed and converted to String.
-- `toArray():Promise<string[]>` : the stream is closed and converted to Array.
-- `toFile(outputPath: string):Promise<CloseRes>` : the stream is closed and
-  write to the `outputPath` file.
-- `close(opt?: CloseOptions = { processes: "AWAIT" }):Promise<CloseRes>` : close
-  all ressources and wait end of operators (includes processes end)
-- `success():Promise<boolean>` : the stream is closed and `CloseRes.success` is
-  returned
-- `toIterable():AsyncIterable<string>` : return the iterable of the stream. The
+- `wait(): Promise<Stream>` : the stream is closed and returned.
+- `toArray(): Promise<T[]>` : the stream is closed and converted to Array.
+- `toBytes(): Promise<Uint8Array>` : the stream is closed and converted to
+  Uint8Array.
+- `toByteReadableStream(): ReadableStream<Uint8Array>` : return the stream as
+  bytes ReadableStream.
+- `toFile(file: Deno.FsFile | string): Promise<Stream>` : the stream is closed
+  and write to the `outputPath` file.
+- `toIterable(): AsyncIterable<T>` : return the iterable of the stream. The
   stream is closed at end of the iterable.
+- `toString(): Promise<string>` : the stream is closed and converted to String.
+- `getLineReadableStream(): ReadableStream<T>` : return the Stream of elements,
+  split stdout/file by line if the stream is from Run/File.
 
-```typescript
-export type CloseRes = {
-  success: boolean;
-  statuses: ((Deno.ProcessStatus & { cmd: string[] }) | undefined)[];
-  out: string[];
-};
-```
-
-- success : true if all processes run from the startpoint are in success status
-- statuses: array of status of all operators from startpoint
-- out: array of the output stream
-
-## RunOptions
+### RunOptions
 
 Extends [Deno.RunOptions](https://doc.deno.land/builtin/stable#Deno.RunOptions)
 
@@ -164,122 +121,20 @@ Extends [Deno.RunOptions](https://doc.deno.land/builtin/stable#Deno.RunOptions)
 export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
   throwIfRunFail?: boolean;
   exitCodeIfRunFail?: number;
-  streamStdErr?: boolean;
 };
 ```
 
 - throwIfRunFail: if the process exit code !== 0, throw error
 - exitCodeIfRunFail: if the process exit code !== 0, immediately exit from Deno
-- streamStdErr: stream stderr of the process instead of the stdout
-- stdout: Deno.run option, unused if streamStdErr !== true
-- stderr: Deno.run option, unused if streamStdErr === true
-
-## Pipe
-
-Pipe(...operators: OperatorFunc[])
-
-An alternative "pipe" API is possible. The "call chain" version :
-
-```typescript
-await FromArray(["1", "2", "3"])
-  .filter((l) => parseInt(l) > 1) // keep ["2", "3"]
-  .run("wc -l") // "wc -l" count input lines
-  .log() // log "2"
-  .close();
-```
-
-The "pipe" API version :
-
-```typescript
-await Pipe(
-  fromArray(["1", "2", "3"]),
-  filter((l: string) => parseInt(l) > 1), // keep ["2", "3"],
-  run("wc -l"), // "wc -l" count input lines
-  log(), // log "2"
-).close();
-```
-
-Pipe is also available from ShellStream Class :
-
-```typescript
-await FromArray(["1", "2", "3"])
-  .filter((l) => parseInt(l) > 1) // keep ["2", "3"]
-  .pipe(
-    run("wc -l"), // "wc -l" count input lines
-    log(), // log "2"
-  )
-  .close();
-```
-
-## Deno API only equivalents
-
-```typescript
-const res = await FromRun("cat /etc/passwd").grep(/\/root/).toString();
-console.log(res); // → root:x:0:0:root:/root:/bin/bash
-```
-
-is equivalent to :
-
-```typescript
-const process = Deno.run({
-  cmd: ["cat", "/etc/passwd"],
-  stdout: "piped",
-});
-const res = new TextDecoder()
-  .decode(await process.output())
-  .split("\n")
-  .filter((line) => line.match(/\/root/))
-  .join("\n");
-process.close();
-console.log(res); // → root:x:0:0:root:/root:/bin/bash
-```
-
----
-
-```typescript
-const res = await FromRun("cat /etc/passwd").run("grep /root").toString();
-console.log(res); // → root:x:0:0:root:/root:/bin/bash
-```
-
-is equivalent to :
-
-```typescript
-const process1 = Deno.run({ cmd: ["cat", "/etc/passwd"], stdout: "piped" });
-const process2 = Deno.run({
-  cmd: ["grep", "/root"],
-  stdin: "piped",
-  stdout: "piped",
-});
-// copy() get stuck if the process1.stdout is not closed
-(async () => {
-  await process1.status();
-  process1.stdout!.close();
-  process1.close();
-})();
-try {
-  await copy(process1.stdout!, process2.stdin!);
-} catch (_) {
-  // process1.stdout.close() generate BadResource exception in copy()
-}
-process2.stdin!.close();
-const res = new TextDecoder().decode(await process2.output());
-process2.close();
-console.log(res); // → root:x:0:0:root:/root:/bin/bash
-```
-
-**Warning** : ShellStream streams line by line, and the performances is then
-reduced. The behavior can probably be different from shell pipes, especially if
-the stream is not text.
-
-## NodeJS ShellStream : [sh-stream NPM package](https://www.npmjs.com/package/sh-stream)
-
-sh-stream NPM package is the NodeJS version of The deno ShellStream lib, build
-in Node by [dnt](https://github.com/denoland/dnt).
 
 ## Development
 
-The folder `.DENO_DIR` and `.lock.json` are **not** necessary for the project to
-work, it just allows to save its dependencies.
+### vendor/
+
+The folder `vendor` is **not** necessary for the project to work, it just allows
+to save its dependencies.
+
+### vr
 
 Some dev command are listed in the scripts.yaml file, this file can be use with
 [Velociraptor](https://velociraptor.run/docs/installation/) :
@@ -289,8 +144,7 @@ Some dev command are listed in the scripts.yaml file, this file can be use with
 - lint: lint the code
 - fmt: format the code
 - bundle: bundle the project and its dependencies to dist/shell_stream.js
-- bak-dep: backup the dependencies to `.DENO_DIR` and update `.lock.json`
+- build-npm
+- vendor: backup the dependencies to `vendor/`
 - gen-cov: generate the test coverage
-
-The `sanitize` function from `sanitize.ts` check if all ressource and ops are\
-closed/completed.
+- pre-commit

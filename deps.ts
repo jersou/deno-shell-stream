@@ -1,18 +1,14 @@
 export {
-  Buffer,
-  copy,
-  readerFromStreamReader,
-  readLines,
-} from "https://deno.land/std@0.114.0/io/mod.ts";
+  assert,
+  assertEquals,
+} from "https://deno.land/std@0.128.0/testing/asserts.ts";
+export { walk } from "https://deno.land/std@0.128.0/fs/walk.ts";
+export type {
+  WalkEntry,
+  WalkOptions,
+} from "https://deno.land/std@0.128.0/fs/walk.ts";
 
-export { basename, join } from "https://deno.land/std@0.114.0/path/mod.ts";
+export { TextLineStream } from "https://deno.land/std@0.128.0/streams/delimiter.ts";
+export { readAll } from "https://deno.land/std@0.128.0/streams/conversion.ts";
 
-export {
-  bgBlue,
-  bgGreen,
-  bgRed,
-  yellow,
-} from "https://deno.land/std@0.114.0/fmt/colors.ts";
-
-export { walk } from "https://deno.land/std@0.114.0/fs/walk.ts";
-export type { WalkOptions } from "https://deno.land/std@0.114.0/fs/walk.ts";
+export { bgYellow, black } from "https://deno.land/std@0.128.0/fmt/colors.ts";
