@@ -43,4 +43,34 @@ export abstract class Stream {
       ),
     );
   }
+
+  static processCount = 0;
+  static processDone = 0;
+  static processEventListener: ProcessEventListener[] = [];
+  static subscribeProcessEvent(listener: ProcessEventListener) {
+    Stream.processEventListener.push(listener);
+  }
+  static unsubscribeProcessEvent(listener: ProcessEventListener) {
+    Stream.processEventListener = Stream.processEventListener.filter(
+      (l) => l !== listener,
+    );
+  }
+  static sendProcessEvent() {
+    Stream.processEventListener.forEach((listener: ProcessEventListener) =>
+      listener({
+        processCount: Stream.processCount,
+        processDone: Stream.processDone,
+      })
+    );
+  }
+  static incProcessCount() {
+    Stream.processCount++;
+    Stream.sendProcessEvent();
+  }
+  static incProcessDone() {
+    Stream.processDone++;
+    Stream.sendProcessEvent();
+  }
 }
+export type ProcessEvent = { processCount: number; processDone: number };
+export type ProcessEventListener = (event: ProcessEvent) => unknown;

@@ -1,6 +1,7 @@
 import { parseCmdString } from "../utils/parseCmdString.ts";
 import { LineStream } from "../line/LineStream.ts";
 import { assert, TextLineStream } from "../deps.ts";
+import { Stream } from "../Stream.ts";
 
 export function getRunStream(stream: LineStream<unknown> | undefined) {
   if (stream instanceof RunStream) {
@@ -47,16 +48,16 @@ export class RunStream extends LineStream<string> {
       this.runningOpt = opt;
       if (this.parent) {
         const parentStream = this.parent.toByteReadableStream(); // if this.parentRunStream → this.parentRunStream.opt.stdout==="piped"
-
+        Stream.incProcessCount();
         this.process = Deno.run({
           cmd: this.processCmd,
           ...this.opt,
           ...opt,
           stdin: "piped",
         });
-
         parentStream.pipeTo(this.process.stdin!.writable);
       } else {
+        Stream.incProcessCount();
         this.process = Deno.run({
           cmd: this.processCmd,
           ...this.opt,
@@ -91,6 +92,7 @@ export class RunStream extends LineStream<string> {
     }
 
     this.process!.close();
+    Stream.incProcessDone();
 
     if (!this.processStatus?.success) {
       if (this.opt?.exitCodeIfRunFail !== undefined) {
@@ -109,6 +111,7 @@ export class RunStream extends LineStream<string> {
     this.start({ stdout: "piped" });
     return this.process!.stdout!.readable;
   }
+
   async toFile(file: Deno.FsFile | string) {
     let fsFile;
     if (typeof file === "string") {
