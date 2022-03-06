@@ -1,13 +1,13 @@
 # Velociraptor is a script runner for Deno: https://velociraptor.run/docs/installation/
 
 scripts:
-  test: deno test -A --ignore="vendor,dist,npm"
+  test: deno test -A --ignore="vendor,npm"
 
-  test-watch: deno test -A --watch --unstable --ignore="vendor,dist,npm"
+  test-watch: deno test -A --watch --unstable --ignore="vendor,npm"
 
-  lint: deno lint --ignore=vendor,dist,npm
+  lint: deno lint --ignore="vendor,npm"
 
-  fmt: deno fmt --ignore=vendor,dist,.lock.json,npm
+  fmt: deno fmt --ignore="vendor,npm"
 
   build-npm: deno run -A build_npm.ts
 
@@ -17,11 +17,11 @@ scripts:
 
   gen-cov:
     - rm -rf .cov_profile
-    - deno test --ignore=vendor,dist,npm --coverage=.cov_profile -A
+    - deno test --ignore="vendor,npm" --coverage=.cov_profile -A
     - deno coverage .cov_profile --lcov > .cov_profile/cov_profile.lcov
     - genhtml -o .cov_profile/html .cov_profile/cov_profile.lcov
 
   pre-commit:
-    - deno fmt --ignore=vendor,dist,.lock.json,npm --check
-    - deno lint --ignore=vendor,dist,npm
-    - deno test -A --ignore="vendor,dist,npm" --no-check
+    - deno fmt --ignore="vendor,npm" --check
+    - deno lint --ignore="vendor,npm"
+    - deno test -A --ignore="vendor,npm" --no-check

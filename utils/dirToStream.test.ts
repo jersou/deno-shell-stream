@@ -8,13 +8,10 @@ Deno.test({
   async fn() {
     const stream = dirToStream("./test-data");
     const arr = await streamToArray(stream);
-    assertEquals(arr.map((e) => e.name), [
-      "file-1",
-      "dir-a",
-      "file-2",
-      "dir-b",
-      "file-3",
-    ]);
+    const names = arr.map((e) => e.name);
+    names.sort();
+    const expected = ["dir-a", "dir-b", "file-1", "file-2", "file-3"];
+    assertEquals(names, expected);
   },
 });
 
@@ -22,12 +19,8 @@ Deno.test({
   name: "Stream.dirToStream",
   async fn() {
     const arr = await Stream.fromDir("./test-data").toArray();
-    assertEquals(arr.map((e) => e.name), [
-      "file-1",
-      "dir-a",
-      "file-2",
-      "dir-b",
-      "file-3",
-    ]);
+    const names = arr.map((e) => e.name);
+    names.sort();
+    assertEquals(names, ["dir-a", "dir-b", "file-1", "file-2", "file-3"]);
   },
 });
