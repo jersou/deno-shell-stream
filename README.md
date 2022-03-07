@@ -9,7 +9,7 @@ It has zero 3rd party dependencies and don't internally run sh or bash commands.
 ## Quick examples
 
 ```typescript
-import { Stream } from "https://deno.land/x/shell_stream@v1.0.4/mod.ts";
+import { Stream } from "https://deno.land/x/shell_stream@v1.0.5/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.128.0/fmt/colors.ts";
 
 let rootLine = await Stream

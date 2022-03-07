@@ -1,4 +1,7 @@
 export { Stream } from "./Stream.ts";
+export { LineStream } from "./line/LineStream.ts";
+export { RunStream } from "./run/RunStream.ts";
+export { FileStream } from "./file/FileStream.ts";
 export { streamToArray } from "./utils/StreamToArray.ts";
 export { arrayToStream } from "./utils/ArrayToStream.ts";
 export { promiseToStream } from "./utils/PromiseToStream.ts";
