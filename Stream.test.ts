@@ -1,4 +1,4 @@
-import { Stream } from "./Stream.ts";
+import { ProcessEvent, ProcessEventListener, Stream } from "./Stream.ts";
 import { assertEquals } from "./test_deps.ts";
 
 Deno.test("Stream.run.toBytes()", async () => {
@@ -48,4 +48,24 @@ Deno.test("Stream.toIterable", async () => {
     out.push(str);
   }
   assertEquals(out, ["line1", "line2", "line3"]);
+});
+
+Deno.test("Stream.subscribeProcessEvent", async () => {
+  Stream.verbose = true;
+  const events: ProcessEvent[] = [];
+  const listener: ProcessEventListener = (event) => events.push(event);
+  Stream.subscribeProcessEvent(listener);
+  const runStream = Stream.fromRun(["bash", "-c", "sleep 1"]);
+  assertEquals(events, []);
+  await runStream.wait();
+  assertEquals(events, [
+    { processCount: 2, processDone: 1 },
+    { processCount: 2, processDone: 2 },
+  ]);
+  Stream.unsubscribeProcessEvent(listener);
+  await Stream.fromRun(["bash", "-c", "echo 1"]).wait();
+  assertEquals(events, [
+    { processCount: 2, processDone: 1 },
+    { processCount: 2, processDone: 2 },
+  ]);
 });

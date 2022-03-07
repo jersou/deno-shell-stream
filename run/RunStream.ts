@@ -52,6 +52,9 @@ export class RunStream extends LineStream<string> {
       if (this.parent) {
         const parentStream = this.parent.toByteReadableStream(); // if this.parentRunStream → this.parentRunStream.opt.stdout==="piped"
         Stream.incProcessCount();
+        if (Stream.verbose) {
+          console.log("start processCmd: ", this.processCmd);
+        }
         this.process = Deno.run({
           cmd: this.processCmd,
           ...this.opt,
@@ -61,6 +64,9 @@ export class RunStream extends LineStream<string> {
         parentStream.pipeTo(this.process.stdin!.writable);
       } else {
         Stream.incProcessCount();
+        if (Stream.verbose) {
+          console.log("start processCmd: ", this.processCmd);
+        }
         this.process = Deno.run({
           cmd: this.processCmd,
           ...this.opt,
@@ -87,10 +93,10 @@ export class RunStream extends LineStream<string> {
     return ret;
   }
 
-  async wait(): Promise<this> {
+  async wait(opt?: { checkSuccess?: boolean }): Promise<this> {
     if (!this.isClosed) {
       this.start();
-      await this.parent?.wait();
+      await this.parent?.wait(opt);
       if (!this.processStatus) {
         this.processStatus = await this.process!.status();
       }
@@ -102,7 +108,16 @@ export class RunStream extends LineStream<string> {
         if (this.opt?.exitCodeIfRunFail !== undefined) {
           Deno.exit(this.opt?.exitCodeIfRunFail);
         }
-        if (!this.opt?.allowFail) {
+        if (opt?.checkSuccess) {
+          if (this.opt?.allowFail === false) {
+            console.warn(
+              "[RunStream] allowFail===false but checkSuccess is requested",
+            );
+            throw new Error(
+              `Fail, process exit code : ${this.processStatus?.code}`,
+            );
+          }
+        } else if (!this.opt?.allowFail) {
           throw new Error(
             `Fail, process exit code : ${this.processStatus?.code}`,
           );
@@ -127,10 +142,5 @@ export class RunStream extends LineStream<string> {
     }
     await this.toByteReadableStream().pipeTo(fsFile.writable);
     return await this.wait();
-  }
-
-  async success() {
-    await this.wait();
-    return this.processStatus!.success;
   }
 }

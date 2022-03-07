@@ -43,6 +43,8 @@ export abstract class Stream {
       ),
     );
   }
+  // TODO add log if verbose===true
+  static verbose = false;
 
   static processCount = 0;
   static processDone = 0;

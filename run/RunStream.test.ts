@@ -32,6 +32,7 @@ Deno.test("Stream.fromRun.wait()", async () => {
 });
 
 Deno.test("Stream.fromRun().run().run()", async () => {
+  Stream.verbose = true;
   const runStream = Stream
     .fromRun("echo toto")
     .run("sed 's|o|a|g'")
@@ -209,4 +210,27 @@ Deno.test("getRunStream", async () => {
 // Deno.test("exitCodeIfRunFail", async () => {
 //   await Stream.fromRun(["bash", "-c", "exit 1"], { exitCodeIfRunFail: 2 })
 //     .wait();
+// });
+
+Deno.test("Stream.success()", async () => {
+  const out = await Stream
+    .fromRun(`deno eval "Deno.exit(12)"`)
+    .run(`deno eval "console.log('is ok')"`).log().success();
+  assertEquals(out, false);
+});
+Deno.test("Stream.fail()", async () => {
+  const out = await Stream
+    .fromRun(`deno eval "Deno.exit(12)"`)
+    .run(`deno eval "console.log('is ok')"`).log().fail();
+  assertEquals(out, true);
+});
+
+// TODO
+// Deno.test("Stream.success() fail", async () => {
+//   await assertRejects(async () => {
+//     const stream = Stream
+//       .fromRun(`deno eval "Deno.exit(12)"`, { allowFail: false })
+//       .run(`deno eval "console.log('is ok')"`).log();
+//     await stream.success();
+//   });
 // });

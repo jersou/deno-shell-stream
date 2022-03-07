@@ -206,9 +206,14 @@ Deno.test("Stream.head", async () => {
 });
 
 Deno.test("Stream.tail", async () => {
-  const inputArray = ["line1", "line2", "line3"];
+  const inputArray = ["line1", "line2", "line3", "line4", ""];
   const out = await Stream.fromArray(inputArray).tail(2).toArray();
-  assertEquals(out, ["line2", "line3"]);
+  assertEquals(out, ["line3", "line4"]);
+});
+Deno.test("Stream.tail shift", async () => {
+  const inputArray = ["line1", "line2", "line3", "line4"];
+  const out = await Stream.fromArray(inputArray).tail(2).toArray();
+  assertEquals(out, ["line3", "line4"]);
 });
 
 Deno.test("Stream.sponge", async () => {

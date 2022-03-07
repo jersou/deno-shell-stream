@@ -5,7 +5,7 @@ import {
 } from "../transform/FilterTransform.ts";
 import { GrepoTransform } from "../transform/GrepoTransform.ts";
 import { streamToArray } from "../utils/StreamToArray.ts";
-import { RunOptions, RunStream } from "../run/RunStream.ts";
+import { getRunStream, RunOptions, RunStream } from "../run/RunStream.ts";
 import { HeadTransform } from "../transform/HeadTransform.ts";
 import { TailTransform } from "../transform/TailTransform.ts";
 import { SpongeTransform } from "../transform/SpongeTransform.ts";
@@ -49,9 +49,9 @@ export class LineStream<T> {
       .pipeThrough(new TextEncoderStream());
   }
 
-  async wait(): Promise<this> {
+  async wait(opt?: { checkSuccess?: boolean }): Promise<this> {
     await this.getLineReadableStream().pipeTo(new WritableStream<T>());
-    await this.parent?.wait();
+    await this.parent?.wait(opt);
     return this;
   }
 
@@ -202,5 +202,17 @@ export class LineStream<T> {
 
   sort(compareFn?: CompareFn<T>) {
     return this.transform(new SortTransform(compareFn));
+  }
+
+  async success() {
+    await this.wait({ checkSuccess: true });
+    const isFail = this.getParents()
+      .map(getRunStream)
+      .some((r) => r?.processStatus?.success === false);
+    return !isFail;
+  }
+
+  async fail() {
+    return !await this.success();
   }
 }
