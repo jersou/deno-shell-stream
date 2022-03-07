@@ -9,7 +9,7 @@ It has zero 3rd party dependencies and don't internally run sh or bash commands.
 ## Quick examples
 
 ```typescript
-import { Stream } from "https://deno.land/x/shell_stream@v1.0.6/mod.ts";
+import { Stream } from "https://deno.land/x/shell_stream@v1.0.7/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.128.0/fmt/colors.ts";
 
 let rootLine = await Stream
@@ -111,10 +111,11 @@ See more examples in `example.ts` file.
 - `toString(): Promise<string>` : the stream is closed and converted to String.
 - `getLineReadableStream(): ReadableStream<T>` : return the Stream of elements,
   split stdout/file by line if the stream is from Run/File.
-- `success(): Promise<boolean>` : the stream is closed and the success state is 
- returned (all parents RunStream are checked).
-- `fail(): Promise<boolean>` : the stream is closed and the fail state is 
- returned (all parents RunStream are checked).
+- `success(): Promise<boolean>` : the stream is closed and the success state is
+  returned (all parents RunStream are checked).
+- `fail(): Promise<boolean>` : the stream is closed and the fail state is
+  returned (all parents RunStream are checked).
+
 ### RunOptions
 
 Extends [Deno.RunOptions](https://doc.deno.land/builtin/stable#Deno.RunOptions)
