@@ -46,7 +46,7 @@ export abstract class Stream {
   // region ---------------- verbose ---------------
   static verbose = false;
   static setVerbose(verb: boolean) {
-    this.verbose = verb;
+    Stream.verbose = verb;
   }
   // endregion ---------------- verbose ---------------
 
@@ -83,10 +83,10 @@ export abstract class Stream {
   // region ---------------- cwd ---------------
   static cwd?: string;
   static setCwd(newCwd: string) {
-    this.cwd = newCwd;
+    Stream.cwd = newCwd;
   }
   static getCwd() {
-    return this.cwd;
+    return Stream.cwd;
   }
   // endregion ---------------- cwd ---------------
 }
