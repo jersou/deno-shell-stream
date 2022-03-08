@@ -8,7 +8,6 @@ import { WalkEntry, WalkOptions } from "./deps.ts";
 import { promiseToStream } from "./utils/PromiseToStream.ts";
 
 // TODO doc readme AND in *.ts
-// TODO class ByteStream, FileStream→ByteStream, RunStream→ByteStream
 
 export abstract class Stream {
   static fromRun(cmdOrStr: string[] | string, opt?: RunOptions): RunStream {
@@ -43,9 +42,15 @@ export abstract class Stream {
       ),
     );
   }
-  // TODO add log if verbose===true
-  static verbose = false;
 
+  // region ---------------- verbose ---------------
+  static verbose = false;
+  static setVerbose(verb: boolean) {
+    this.verbose = verb;
+  }
+  // endregion ---------------- verbose ---------------
+
+  // region ---------------- process Event Listener ---------------
   static processCount = 0;
   static processDone = 0;
   static processEventListener: ProcessEventListener[] = [];
@@ -73,6 +78,34 @@ export abstract class Stream {
     Stream.processDone++;
     Stream.sendProcessEvent();
   }
+  // endregion ---------------- process Event Listener ---------------
+
+  // region ---------------- cwd ---------------
+  static cwd?: string;
+  static setCwd(newCwd: string) {
+    this.cwd = newCwd;
+  }
+  static getCwd() {
+    return this.cwd;
+  }
+  // endregion ---------------- cwd ---------------
 }
 export type ProcessEvent = { processCount: number; processDone: number };
 export type ProcessEventListener = (event: ProcessEvent) => unknown;
+
+// aliases
+export const setCwd = Stream.setCwd;
+export const run = Stream.fromRun;
+export const read = Stream.fromFile;
+export function waitRun(cmdOrStr: string[] | string, opt?: RunOptions) {
+  return Stream.fromRun(cmdOrStr, opt).wait();
+}
+export function runOk(cmdOrStr: string[] | string, opt?: RunOptions) {
+  return Stream.fromRun(cmdOrStr, opt).success();
+}
+export function runKo(cmdOrStr: string[] | string, opt?: RunOptions) {
+  return Stream.fromRun(cmdOrStr, opt).fail();
+}
+export function runToString(cmdOrStr: string[] | string, opt?: RunOptions) {
+  return Stream.fromRun(cmdOrStr, opt).toString();
+}

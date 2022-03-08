@@ -17,7 +17,7 @@ export function getParentRun(stream: LineStream<unknown> | undefined) {
 
 export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
   allowFail?: boolean;
-  exitCodeIfRunFail?: number;
+  exitCodeOnFail?: number;
 };
 
 export class RunStream extends LineStream<string> {
@@ -26,6 +26,7 @@ export class RunStream extends LineStream<string> {
   processStatus?: Deno.ProcessStatus;
   runningOpt?: { stdout: RunOptions["stdout"] };
   isClosed = false;
+  cwd: string;
 
   constructor(
     public cmdOrStr: string[] | string,
@@ -34,6 +35,7 @@ export class RunStream extends LineStream<string> {
   ) {
     super(parent);
     this.processCmd = parseCmdString(cmdOrStr);
+    this.cwd = Stream.getCwd() || Deno.cwd();
   }
 
   getLineReadableStream(): ReadableStream<string> {
@@ -52,26 +54,36 @@ export class RunStream extends LineStream<string> {
       if (this.parent) {
         const parentStream = this.parent.toByteReadableStream(); // if this.parentRunStream → this.parentRunStream.opt.stdout==="piped"
         Stream.incProcessCount();
-        if (Stream.verbose) {
-          console.log("start processCmd: ", this.processCmd);
-        }
-        this.process = Deno.run({
+        const fullOpt: Deno.RunOptions = {
           cmd: this.processCmd,
+          cwd: this.cwd,
           ...this.opt,
           ...opt,
           stdin: "piped",
-        });
+        };
+        if (Stream.verbose) {
+          console.log("start processCmd: ", {
+            processCmd: this.processCmd,
+            opt: fullOpt,
+          });
+        }
+        this.process = Deno.run(fullOpt);
         parentStream.pipeTo(this.process.stdin!.writable);
       } else {
         Stream.incProcessCount();
-        if (Stream.verbose) {
-          console.log("start processCmd: ", this.processCmd);
-        }
-        this.process = Deno.run({
+        const fullOpt: Deno.RunOptions = {
           cmd: this.processCmd,
+          cwd: this.cwd,
           ...this.opt,
           ...opt,
-        });
+        };
+        if (Stream.verbose) {
+          console.log("start processCmd: ", {
+            processCmd: this.processCmd,
+            opt: fullOpt,
+          });
+        }
+        this.process = Deno.run(fullOpt);
       }
     } else if (opt) {
       assert(
@@ -105,8 +117,8 @@ export class RunStream extends LineStream<string> {
       Stream.incProcessDone();
 
       if (!this.processStatus?.success) {
-        if (this.opt?.exitCodeIfRunFail !== undefined) {
-          Deno.exit(this.opt?.exitCodeIfRunFail);
+        if (this.opt?.exitCodeOnFail !== undefined) {
+          Deno.exit(this.opt?.exitCodeOnFail);
         }
         if (opt?.checkSuccess) {
           if (this.opt?.allowFail === false) {

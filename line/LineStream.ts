@@ -174,7 +174,6 @@ export class LineStream<T> {
       new LineStream(this, streams[1]).toFile(path).then();
       return this;
     } else {
-      // TODO class ByteStream, FileStream→ByteStream, RunStream→ByteStream
       const streams = this.toByteReadableStream().tee();
       Deno.create(path).then((file) => streams[1].pipeTo(file.writable).then());
       return new LineStream(
@@ -204,9 +203,9 @@ export class LineStream<T> {
     return this.transform(new SortTransform(compareFn));
   }
 
-  async success() {
+  async success(): Promise<boolean> {
     await this.wait({ checkSuccess: true });
-    const isFail = this.getParents()
+    const isFail: boolean = [...this.getParents(), this]
       .map(getRunStream)
       .some((r) => r?.processStatus?.success === false);
     return !isFail;

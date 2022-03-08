@@ -207,8 +207,8 @@ Deno.test("getRunStream", async () => {
   assertEquals(getRunStream(arrayStream), undefined);
 });
 
-// Deno.test("exitCodeIfRunFail", async () => {
-//   await Stream.fromRun(["bash", "-c", "exit 1"], { exitCodeIfRunFail: 2 })
+// Deno.test("exitCodeOnFail", async () => {
+//   await Stream.fromRun(["bash", "-c", "exit 1"], { exitCodeOnFail: 2 })
 //     .wait();
 // });
 
@@ -224,13 +224,18 @@ Deno.test("Stream.fail()", async () => {
     .run(`deno eval "console.log('is ok')"`).log().fail();
   assertEquals(out, true);
 });
+Deno.test("allowFail===false check", async () => {
+  const stream = Stream.fromRun(
+    `deno eval "Deno.exit(1)"`,
+    { allowFail: false },
+  );
+  await assertRejects(async () => await stream.success());
+});
 
-// TODO
-// Deno.test("Stream.success() fail", async () => {
-//   await assertRejects(async () => {
-//     const stream = Stream
-//       .fromRun(`deno eval "Deno.exit(12)"`, { allowFail: false })
-//       .run(`deno eval "console.log('is ok')"`).log();
-//     await stream.success();
-//   });
-// });
+Deno.test("Stream.success() fail", async () => {
+  const stream = Stream
+    .fromRun(`deno eval "Deno.exit(12)"`, { allowFail: false })
+    .run(`deno eval "console.log('is ok')"`).log();
+  await assertRejects(async () => await stream.success());
+  await getRunStream(stream.parent)?.process?.close();
+});

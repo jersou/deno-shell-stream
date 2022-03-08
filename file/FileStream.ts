@@ -1,16 +1,12 @@
 import { readAll, TextLineStream } from "../deps.ts";
 import { LineStream } from "../line/LineStream.ts";
-
-export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
-  allowFail?: boolean;
-  dontThrowIfStdinError?: boolean;
-};
+import { Stream } from "../Stream.ts";
 
 export class FileStream extends LineStream<string> {
   fsFile: Deno.FsFile;
   byteReadableStream?: ReadableStream;
 
-  constructor(file: Deno.FsFile | string, parent?: LineStream<unknown>) {
+  constructor(public file: Deno.FsFile | string, parent?: LineStream<unknown>) {
     super(parent);
     this.fsFile = (typeof file === "string") ? Deno.openSync(file) : file;
   }
@@ -30,6 +26,9 @@ export class FileStream extends LineStream<string> {
   }
 
   async toBytes() {
+    if (Stream.verbose) {
+      console.log("ReadAll file", this.file);
+    }
     const bytes = await readAll(this.fsFile);
     Deno.close(this.fsFile.rid);
     return bytes;
@@ -40,6 +39,9 @@ export class FileStream extends LineStream<string> {
   }
 
   toByteReadableStream() {
+    if (Stream.verbose) {
+      console.log("Open readable of file", this.file);
+    }
     return this.fsFile.readable;
   }
 

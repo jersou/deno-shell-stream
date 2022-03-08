@@ -9,8 +9,14 @@ It has zero 3rd party dependencies and don't internally run sh or bash commands.
 ## Quick examples
 
 ```typescript
-import { Stream } from "https://deno.land/x/shell_stream@v1.0.7/mod.ts";
+import {
+  run,
+  runToString,
+  Stream,
+} from "https://deno.land/x/shell_stream@v1.0.8/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.128.0/fmt/colors.ts";
+
+console.log(await runToString("uname --kernel-name")); // → Linux
 
 let rootLine = await Stream
   .fromRun("cat /etc/passwd")
@@ -34,7 +40,7 @@ const denoVersionFromCli = await Stream
 console.log({ denoVersionFromCli });
 // → { denoVersionFromCli: "deno 1.19.2 (release, x86_64-unknown-linux-gnu)" }
 
-console.log(await Stream.fromRun("deno --version").tail(2).toArray());
+console.log(await run("deno --version").tail(2).toArray());
 // → [ "v8 9.9.115.7", "typescript 4.5.2" ]
 ```
 
@@ -116,6 +122,23 @@ See more examples in `example.ts` file.
 - `fail(): Promise<boolean>` : the stream is closed and the fail state is
   returned (all parents RunStream are checked).
 
+### CWD
+
+`setCwd` or `Stream.setCwd` : change the cwd option for future run.
+
+### verbose
+
+`Stream.setverbose` : enable verbose mode
+
+### Aliases
+
+- runOk(cmdOrStr, opt) = Stream.fromRun(cmdOrStr, opt).success()
+- runKo(cmdOrStr, opt) = Stream.fromRun(cmdOrStr, opt).fail()
+- runToString(cmdOrStr, opt) = Stream.fromRun(cmdOrStr, opt).toString()
+- waitRun(cmdOrStr, opt) = Stream.fromRun(cmdOrStr, opt).wait()
+- run = Stream.fromRun
+- read = Stream.fromFile
+
 ### RunOptions
 
 Extends [Deno.RunOptions](https://doc.deno.land/builtin/stable#Deno.RunOptions)
@@ -123,12 +146,12 @@ Extends [Deno.RunOptions](https://doc.deno.land/builtin/stable#Deno.RunOptions)
 ```
 export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
   throwIfRunFail?: boolean;
-  exitCodeIfRunFail?: number;
+  exitCodeOnFail?: number;
 };
 ```
 
 - throwIfRunFail: if the process exit code !== 0, throw error
-- exitCodeIfRunFail: if the process exit code !== 0, immediately exit from Deno
+- exitCodeOnFail: if the process exit code !== 0, immediately exit from Deno
 
 ## Development
 

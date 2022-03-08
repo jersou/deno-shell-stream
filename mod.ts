@@ -1,6 +1,13 @@
-import { Stream } from "./Stream.ts";
-
-export { Stream } from "./Stream.ts";
+export {
+  read,
+  run,
+  runKo,
+  runOk,
+  runToString,
+  setCwd,
+  Stream,
+  waitRun,
+} from "./Stream.ts";
 export { LineStream } from "./line/LineStream.ts";
 export { RunStream } from "./run/RunStream.ts";
 export { FileStream } from "./file/FileStream.ts";
@@ -12,6 +19,3 @@ export { checkOps, checkResources, sanitize } from "./utils/sanitize.ts";
 export { getParentRun, getRunStream } from "./run/RunStream.ts";
 
 export type { ProcessEvent, ProcessEventListener } from "./Stream.ts";
-
-export const run = Stream.fromRun;
-export const read = Stream.fromFile;

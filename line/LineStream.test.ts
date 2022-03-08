@@ -116,6 +116,7 @@ Deno.test("Stream.toFile opened", async () => {
 });
 
 Deno.test("Stream.toBytes", async () => {
+  Stream.setVerbose(true);
   const file = await Deno.open("test-data/file-1", { read: true });
   const out = await Stream.fromFile(file).toBytes();
   assertEquals(out, new Uint8Array([116, 101, 115, 116, 49, 10]));

@@ -1,7 +1,16 @@
-import { ProcessEvent, ProcessEventListener, Stream } from "./Stream.ts";
+import {
+  ProcessEvent,
+  ProcessEventListener,
+  runKo,
+  runOk,
+  runToString,
+  Stream,
+  waitRun,
+} from "./Stream.ts";
 import { assertEquals } from "./test_deps.ts";
 
 Deno.test("Stream.run.toBytes()", async () => {
+  Stream.setVerbose(true);
   const runStream = Stream.fromRun(`deno eval "console.log('is ok')"`);
   assertEquals(runStream.process, undefined);
   const out = await runStream.toBytes();
@@ -55,7 +64,7 @@ Deno.test("Stream.subscribeProcessEvent", async () => {
   const events: ProcessEvent[] = [];
   const listener: ProcessEventListener = (event) => events.push(event);
   Stream.subscribeProcessEvent(listener);
-  const runStream = Stream.fromRun(["bash", "-c", "sleep 1"]);
+  const runStream = Stream.fromRun(["bash", "-c", "sleep 0.1"]);
   assertEquals(events, []);
   await runStream.wait();
   assertEquals(events, [
@@ -68,4 +77,25 @@ Deno.test("Stream.subscribeProcessEvent", async () => {
     { processCount: 2, processDone: 1 },
     { processCount: 2, processDone: 2 },
   ]);
+});
+
+Deno.test("waitRun", async () => {
+  const out = await waitRun("echo 2");
+  assertEquals(out.processStatus?.success, true);
+});
+
+Deno.test("runOk", async () => {
+  assertEquals(await runOk("deno eval Deno.exit(0)"), true);
+  assertEquals(await runOk("deno eval Deno.exit(1)"), false);
+});
+
+Deno.test("runKo", async () => {
+  assertEquals(await runKo("deno eval Deno.exit(0)"), false);
+  assertEquals(await runKo("deno eval Deno.exit(1)"), true);
+});
+
+Deno.test("cwd", async () => {
+  assertEquals((await runToString("pwd")).trim(), Deno.cwd());
+  Stream.setCwd(Deno.cwd() + "/test-data");
+  assertEquals((await runToString("pwd")).trim(), Deno.cwd() + "/test-data");
 });

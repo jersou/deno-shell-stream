@@ -1,8 +1,10 @@
 #!/usr/bin/env -S deno run -A
 import {
   getRunStream,
+  run,
+  runToString,
   Stream,
-} from "https://deno.land/x/shell_stream@v1.0.7/mod.ts";
+} from "https://deno.land/x/shell_stream@v1.0.8/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.128.0/fmt/colors.ts";
 
 let rootLine = await Stream
@@ -10,6 +12,8 @@ let rootLine = await Stream
   .run("grep /root")
   .toString();
 console.log(rootLine); // → root:x:0:0:root:/root:/bin/bash
+
+console.log(await runToString("uname --kernel-name")); // → Linux
 
 // the same example without run cat & grep command :
 rootLine = await Stream.fromFile("/etc/passwd")
@@ -27,7 +31,7 @@ const denoVersionFromCli = await Stream
 console.log({ denoVersionFromCli });
 // → { denoVersionFromCli: "deno 1.19.2 (release, x86_64-unknown-linux-gnu)" }
 
-console.log(await Stream.fromRun("deno --version").tail(2).toArray());
+console.log(await run("deno --version").tail(2).toArray());
 // → [ "v8 9.9.115.7", "typescript 4.5.2" ]
 
 // exit codes of processes can be retrieved :
