@@ -1,10 +1,14 @@
+/* Filter the input, keep only the results of the RegExp */
 export class GrepoTransform<T> extends TransformStream<T, string> {
+  /**
+   * @param {RegExp | string} regex The regular expression to match against.
+   */
   constructor(regex: RegExp | string) {
     super(new GrepoTransformer<T>(regex));
   }
 }
 
-export class GrepoTransformer<T> implements Transformer<T, string> {
+class GrepoTransformer<T> implements Transformer<T, string> {
   constructor(private regex: RegExp | string) {
   }
   transform(

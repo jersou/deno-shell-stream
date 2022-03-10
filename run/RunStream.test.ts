@@ -1,6 +1,6 @@
 import { Stream } from "../Stream.ts";
 import { assertEquals, assertRejects, Buffer } from "../test_deps.ts";
-import { getParentRun, getRunStream, RunStream } from "./RunStream.ts";
+import { getRunStream, RunStream } from "./RunStream.ts";
 import { MapTransform } from "../transform/MapTransform.ts";
 
 Deno.test("Stream.fromRunStream.toBytes()", async () => {
@@ -39,16 +39,11 @@ Deno.test("Stream.fromRun().run().run()", async () => {
     .run("sed 's|a|ii|g'");
   const out = await runStream.toString();
   assertEquals(out, "tiitii\n");
-  assertEquals(runStream.processStatus?.code, 0);
-  assertEquals(getParentRun(runStream)?.processStatus?.code, 0);
-  assertEquals(
-    getParentRun(getParentRun(runStream))?.processStatus?.code,
-    0,
-  );
-  assertEquals(
-    getParentRun(getParentRun(getParentRun(runStream)))?.processStatus?.code,
-    undefined,
-  );
+  const parents = runStream.getParents();
+  const codes = [...parents, runStream]
+    .map((s) => getRunStream(s))
+    .map((r) => r?.processStatus?.code);
+  assertEquals(codes, [0, 0, 0]);
 });
 
 Deno.test("run(), start, run.run() check stdout piped", async () => {
@@ -100,7 +95,7 @@ Deno.test("Stream.fromRun", async () => {
       await runStream.wait();
     } finally {
       await runStream.process!.close();
-      await getParentRun(runStream)?.process!.close();
+      await getRunStream(runStream.parent)?.process!.close();
     }
   });
 });
@@ -112,7 +107,7 @@ Deno.test("Stream.fromRun allowFail", async () => {
 
   const stream = await runStream.wait();
   assertEquals(stream.processStatus?.code, 0);
-  assertEquals(getParentRun(stream)?.processStatus?.code, 12);
+  assertEquals(getRunStream(runStream.parent)?.processStatus?.code, 12);
 });
 
 Deno.test("Stream.fromRun ThrowIfRunFail", async () => {
@@ -125,7 +120,7 @@ Deno.test("Stream.fromRun ThrowIfRunFail", async () => {
       await runStream.wait();
     } finally {
       await runStream.process!.close();
-      await getParentRun(runStream)?.process!.close();
+      await getRunStream(runStream.parent)?.process!.close();
     }
   });
 });

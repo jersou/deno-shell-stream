@@ -1,10 +1,11 @@
+/* A TransformStream soaks up all its input before re-emit all */
 export class SpongeTransform<T> extends TransformStream<T> {
   constructor() {
     super(new SpongeTransformer<T>());
   }
 }
 
-export class SpongeTransformer<T> implements Transformer<T> {
+class SpongeTransformer<T> implements Transformer<T> {
   buffer: T[] = [];
   constructor() {}
   transform(line: T) {

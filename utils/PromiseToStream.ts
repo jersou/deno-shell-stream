@@ -1,3 +1,8 @@
+/**
+ * It takes a promise that resolves to a readable stream, and returns a readable
+ * stream synchronously
+ * @param promise The promise to resolve.
+ */
 export function promiseToStream(
   promise: Promise<ReadableStream>,
 ): ReadableStream {

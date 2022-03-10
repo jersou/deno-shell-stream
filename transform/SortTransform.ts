@@ -1,12 +1,16 @@
 export type CompareFn<T> = (a: T, b: T) => number;
 
+/* A TransformStream that sorts its input */
 export class SortTransform<T> extends TransformStream<T> {
+  /**
+   * @param [compareFn] the compare function
+   */
   constructor(compareFn?: CompareFn<T>) {
     super(new SortTransformer<T>(compareFn));
   }
 }
 
-export class SortTransformer<T> implements Transformer<T> {
+class SortTransformer<T> implements Transformer<T> {
   buffer: T[] = [];
   constructor(private compareFn?: CompareFn<T>) {}
   transform(line: T) {

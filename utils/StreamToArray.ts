@@ -1,3 +1,8 @@
+/**
+ * Create ReadableStream from an array
+ * @param {T[]} array The input array to convert
+ * @returns A `ReadableStream` of `T`.
+ */
 export async function streamToArray<T>(
   stream: ReadableStream<T>,
 ): Promise<T[]> {

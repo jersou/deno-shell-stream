@@ -1,10 +1,14 @@
+/* A TransformStream that outputs the last n items of the input stream */
 export class TailTransform<T> extends TransformStream<T> {
+  /**
+   * @param {number} max  The maximum number of items to emit
+   */
   constructor(max: number) {
     super(new TailTransformer<T>(max));
   }
 }
 
-export class TailTransformer<T> implements Transformer<T> {
+class TailTransformer<T> implements Transformer<T> {
   buffer: T[] = [];
   constructor(private max: number) {}
   transform(line: T) {

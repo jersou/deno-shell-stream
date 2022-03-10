@@ -15,13 +15,24 @@ import { CompareFn, SortTransform } from "../transform/SortTransform.ts";
 export type TapFunction<T> = (line: T) => unknown;
 export type LogTransformFunction<T> = (line: T) => string;
 
+// TODO JSDoc
+
 export class LineStream<T> {
+  /**
+   * It takes a parent stream and a child stream, and returns a new stream that is
+   * the parent stream with the child stream attached to it
+   * @param {LineStream<unknown> | undefined} [parent] the parent of this instance.
+   * @param {ReadableStream<T> | undefined} [linesStream] The stream to use as input
+   */
   constructor(
     public parent?: LineStream<unknown> | undefined,
     public linesStream?: ReadableStream<T> | undefined,
   ) {
   }
 
+  /**
+   * @returns an array of all the parents of the current stream
+   */
   getParents(): LineStream<unknown>[] {
     if (this.parent) {
       return [...this.parent.getParents(), this.parent];
@@ -30,10 +41,17 @@ export class LineStream<T> {
     }
   }
 
+  /**
+   * convert the stream output to stream of lines
+   * @returns linesStream
+   */
   getLineReadableStream() {
     return this.linesStream!;
   }
 
+  /**
+   * @returns the file readable of the stream
+   */
   toByteReadableStream(): ReadableStream<Uint8Array> {
     let isFirst = true;
     const addLineBreakFn = (line: T) => {
@@ -119,6 +137,11 @@ export class LineStream<T> {
     return array;
   }
 
+  /**
+   * Write the stream output in the file
+   * @param {Deno.FsFile | string} file file to write
+   * @returns promise of itself.
+   */
   async toFile(file: Deno.FsFile | string) {
     let fsFile;
     if (typeof file === "string") {
@@ -130,10 +153,16 @@ export class LineStream<T> {
     return await this.wait();
   }
 
+  /**
+   * @returns A promise of output of the stream, as string
+   */
   async toString(): Promise<string> {
     return (await this.toArray()).join("\n");
   }
 
+  /**
+   * @returns A promise of output of the stream, as Uint8Array
+   */
   async toBytes(): Promise<Uint8Array> {
     return new TextEncoder().encode(await this.toString());
   }
@@ -195,14 +224,21 @@ export class LineStream<T> {
     return this.transform(new SpongeTransform());
   }
 
+  /**
+   * Emits element only if the element is different from the previous line
+   */
   uniq() {
     return this.transform(new UniqTransform());
   }
 
+  /* sorts its input and returms a sorted stream */
   sort(compareFn?: CompareFn<T>) {
     return this.transform(new SortTransform(compareFn));
   }
 
+  /**
+   * @returns true is the stream is successfully and if all parent RunStream are successfully
+   */
   async success(): Promise<boolean> {
     await this.wait({ checkSuccess: true });
     const isFail: boolean = [...this.getParents(), this]
@@ -211,6 +247,9 @@ export class LineStream<T> {
     return !isFail;
   }
 
+  /**
+   * @returns true is the stream have at least one fail (current or a parent)
+   */
   async fail() {
     return !await this.success();
   }

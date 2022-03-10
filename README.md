@@ -6,6 +6,8 @@ Shell pipe/redirects.
 
 It has zero 3rd party dependencies and don't internally run sh or bash commands.
 
+Deno Doc : https://doc.deno.land/https://deno.land/x/shell_stream@v1.0.8/mod.ts
+
 ## Quick examples
 
 ```typescript

@@ -2,6 +2,11 @@ import { bgYellow, black } from "../deps.ts";
 
 const stdRes = ["stdin", "stderr", "stdout"];
 
+/**
+ * Checks if all resources are closed
+ * @param [log=true] If true, the function will log the errors
+ * @returns true if there is no open resource
+ */
 export function checkResources(log = true) {
   let noOpenedRessource = true;
   const res = Deno.resources();
@@ -20,6 +25,11 @@ export function checkResources(log = true) {
   return noOpenedRessource;
 }
 
+/**
+ * Check if there are any operations in progress.
+ * @param [log=true] If true, the function will log the errors
+ * @returns true if there is no ops in progress
+ */
 export function checkOps(log = true) {
   let noOpsInProgress = true;
   const metrics = Deno.metrics();
@@ -50,6 +60,11 @@ export function checkOps(log = true) {
   return noOpsInProgress;
 }
 
+/**
+ * Sanitize the state of the application
+ * @param [log=true] If true, the function will log the errors
+ * @returns true il sanitize is OK.
+ */
 export function sanitize(log = true) {
   const noOpenedRessource = checkResources(log);
   const noOpsInProgress = checkOps(log);
