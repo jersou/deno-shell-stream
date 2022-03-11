@@ -22,6 +22,8 @@ scripts:
     - genhtml -o .cov_profile/html .cov_profile/cov_profile.lcov
 
   pre-commit:
-    - deno fmt --ignore="vendor,npm" --check
-    - deno lint --ignore="vendor,npm"
-    - deno test -A --ignore="vendor,npm" --no-check
+    - ./pre-commit.ts
+
+  intall-pre-commit-hook:
+    - echo -e '#!/bin/sh\n./pre-commit.ts\n' > ".git/hooks/pre-commit"
+    - chmod +x ".git/hooks/pre-commit"

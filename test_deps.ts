@@ -13,3 +13,8 @@ export {
   bgGreen,
   bgRed,
 } from "https://deno.land/std@0.128.0/fmt/colors.ts";
+
+export {
+  dirname,
+  fromFileUrl,
+} from "https://deno.land/std@0.128.0/path/mod.ts";

@@ -86,33 +86,55 @@ Deno.test("Stream.logJson().log().logWithTimestamp()", async () => {
 });
 
 Deno.test("Stream.toFile", async () => {
-  const inputArray = ["line1", "line2", "line3"];
-  // TODO use Deno.makeTempDir()/file
+  const tmpPath = await Deno.makeTempFile();
   try {
-    await Deno.remove("tmp/", { recursive: true });
-  } catch (_) {
-    //
+    const inputArray = ["line1", "line2", "line3"];
+    await Stream.fromArray(inputArray).toFile(tmpPath);
+    const out = await Deno.readTextFile(tmpPath);
+    assertEquals(out, "line1\nline2\nline3");
+  } finally {
+    await Deno.remove(tmpPath);
   }
-  await Deno.mkdir("tmp", { recursive: true });
-  await Stream.fromArray(inputArray)
-    .toFile("tmp/tmp-runStream-toFile");
-  const out = await Deno.readTextFile("tmp/tmp-runStream-toFile");
-  assertEquals(out, "line1\nline2\nline3");
+});
+
+Deno.test("Stream.toFile from same file", async () => {
+  Stream.setVerbose(true);
+  const tmpPath = await Deno.makeTempFile();
+  await Deno.writeTextFile(tmpPath, "line1\nline2\nline3");
+  try {
+    await Stream.fromFile(tmpPath).replaceAll("line", "test").toFile(tmpPath);
+    const out = await Deno.readTextFile(tmpPath);
+    assertEquals(out, "test1\ntest2\ntest3");
+  } finally {
+    await Deno.remove(tmpPath);
+  }
+});
+
+Deno.test("Stream.toFile from same file openFile", async () => {
+  Stream.setVerbose(true);
+  const tmpPath = await Deno.makeTempFile();
+  await Deno.writeTextFile(tmpPath, "line1\nline2\nline3");
+  try {
+    const fsFile = await Deno.open(tmpPath, { read: true, write: true });
+    await Stream.fromFile(tmpPath).replaceAll("line", "test").toFile(fsFile);
+    const out = await Deno.readTextFile(tmpPath);
+    assertEquals(out, "test1\ntest2\ntest3");
+  } finally {
+    await Deno.remove(tmpPath);
+  }
 });
 
 Deno.test("Stream.toFile opened", async () => {
-  const inputArray = ["line1", "line2", "line3"];
-  // TODO use Deno.makeTempDir()/file
+  const tmpPath = await Deno.makeTempFile();
   try {
-    await Deno.remove("tmp/", { recursive: true });
-  } catch (_) {
-    //
+    const inputArray = ["line1", "line2", "line3"];
+    const file = await Deno.create(tmpPath);
+    await Stream.fromArray(inputArray).toFile(file);
+    const out = await Deno.readTextFile(tmpPath);
+    assertEquals(out, "line1\nline2\nline3");
+  } finally {
+    await Deno.remove(tmpPath);
   }
-  await Deno.mkdir("tmp", { recursive: true });
-  const file = await Deno.create("tmp/tmp-runStream-toFile");
-  await Stream.fromArray(inputArray).toFile(file);
-  const out = await Deno.readTextFile("tmp/tmp-runStream-toFile");
-  assertEquals(out, "line1\nline2\nline3");
 });
 
 Deno.test("Stream.toBytes", async () => {
@@ -128,30 +150,25 @@ Deno.test("Stream.toString", async () => {
   assertEquals(out, "test1\n");
 });
 Deno.test("Stream.toFile", async () => {
-  // TODO use Deno.makeTempDir()/file
+  const tmpPath = await Deno.makeTempFile();
   try {
-    await Deno.remove("tmp/", { recursive: true });
-  } catch (_) {
-    //
+    await Stream.fromFile("test-data/file-1").toFile(tmpPath);
+    const out = await Deno.readTextFile(tmpPath);
+    assertEquals(out, "test1\n");
+  } finally {
+    await Deno.remove(tmpPath);
   }
-  await Deno.mkdir("tmp", { recursive: true });
-  await Stream.fromFile("test-data/file-1").toFile("tmp/fromFile-toFile");
-  const out = await Deno.readTextFile("tmp/fromFile-toFile");
-  assertEquals(out, "test1\n");
 });
 Deno.test("Stream.toFile", async () => {
-  // TODO use Deno.makeTempDir()/file
+  const tmpPath = await Deno.makeTempFile();
   try {
-    await Deno.remove("tmp/", { recursive: true });
-  } catch (_) {
-    //
+    const file = await Deno.createSync(tmpPath);
+    await Stream.fromFile("test-data/file-1").toFile(file);
+    const out = await Deno.readTextFile(tmpPath);
+    assertEquals(out, "test1\n");
+  } finally {
+    await Deno.remove(tmpPath);
   }
-  await Deno.mkdir("tmp", { recursive: true });
-  const file = await Deno.createSync("tmp/fromFile-toFile");
-  await Stream.fromFile("test-data/file-1")
-    .toFile(file);
-  const out = await Deno.readTextFile("tmp/fromFile-toFile");
-  assertEquals(out, "test1\n");
 });
 
 Deno.test("Stream.cut", async () => {
@@ -161,43 +178,47 @@ Deno.test("Stream.cut", async () => {
 });
 
 Deno.test("Stream.replace", async () => {
-  const inputArray = ["line1", "line2", "line3"];
+  const inputArray = ["line1", "line2line", "line3"];
   const out = await Stream.fromArray(inputArray)
     .replace("line", "test")
     .toArray();
-  assertEquals(out, ["test1", "test2", "test3"]);
+  assertEquals(out, ["test1", "test2line", "test3"]);
+});
+
+Deno.test("Stream.replaceAll", async () => {
+  const inputArray = ["line1", "line2line", "line3"];
+  const out = await Stream.fromArray(inputArray)
+    .replaceAll("line", "test")
+    .toArray();
+  assertEquals(out, ["test1", "test2test", "test3"]);
 });
 
 Deno.test("Stream.tee", async () => {
-  const inputArray = ["line1", "line2", "line3"];
-  // TODO use Deno.makeTempDir()/file
+  const tmpPath = await Deno.makeTempFile();
   try {
-    await Deno.remove("tmp/", { recursive: true });
-  } catch (_) {
-    //
+    const inputArray = ["line1", "line2", "line3"];
+    const out = await Stream.fromArray(inputArray).tee(tmpPath).toArray();
+    assertEquals(out, ["line1", "line2", "line3"]);
+    const out2 = await Deno.readTextFile(tmpPath);
+    assertEquals(out2, "line1\nline2\nline3");
+  } finally {
+    await Deno.remove(tmpPath);
   }
-  await Deno.mkdir("tmp", { recursive: true });
-  const out = await Stream.fromArray(inputArray).tee("tmp/tee-File").toArray();
-  assertEquals(out, ["line1", "line2", "line3"]);
-  const out2 = await Deno.readTextFile("tmp/tee-File");
-  assertEquals(out2, "line1\nline2\nline3");
 });
 
 Deno.test("Stream.tee", async () => {
-  // TODO use Deno.makeTempDir()/file
+  const tmpPath = await Deno.makeTempFile();
   try {
-    await Deno.remove("tmp/", { recursive: true });
-  } catch (_) {
-    //
+    const out = await Stream
+      .fromFile("test-data/file-1")
+      .tee(tmpPath)
+      .toString();
+    assertEquals(out, "test1\n");
+    const out2 = await Deno.readTextFile(tmpPath);
+    assertEquals(out2, "test1\n");
+  } finally {
+    await Deno.remove(tmpPath);
   }
-  await Deno.mkdir("tmp", { recursive: true });
-  const out = await Stream
-    .fromFile("test-data/file-1")
-    .tee("tmp/tee-File-2")
-    .toString();
-  assertEquals(out, "test1\n");
-  const out2 = await Deno.readTextFile("tmp/tee-File-2");
-  assertEquals(out2, "test1\n");
 });
 
 Deno.test("Stream.head", async () => {

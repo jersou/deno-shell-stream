@@ -7,7 +7,7 @@
 export function parseCmdString(cmdOrStr: string[] | string): string[] {
   return cmdOrStr instanceof Array ? cmdOrStr : cmdOrStr
     .trim()
-    .match(/"(\\"|[^"])*"|'(\\'|[^'])*'|[^ "']+/g)!
+    .match(/((?:"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|[^ "']+)+)/g)!
     .map((p) =>
       p.match(/^"((\\"|[^"])*)"$/)
         ? p.replace(/^"((\\"|[^"])*)"$/, "$1")

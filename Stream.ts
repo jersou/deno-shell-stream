@@ -7,9 +7,6 @@ import { walkToStream } from "./utils/walkToStream.ts";
 import { WalkEntry, WalkOptions } from "./deps.ts";
 import { promiseToStream } from "./utils/PromiseToStream.ts";
 
-// TODO doc readme
-// TODO JSDoc examples
-
 /**
  *  Stream is a static class that is used to create streams.
  */
@@ -18,14 +15,13 @@ export abstract class Stream {
    * Create a FileStream from a process stdout
    * @param {string[] | string} cmdOrStr A string or array of strings that
    * represents the command to run.
-   * The string is split by this regex to create the run command :
-   * `/"(\\"|[^"])*"|'(\\'|[^'])*'|[^ "']+/g`
    *
-   * the future wait() throw an error if the exit code !== 0, except if option.allowFail === true
+   * The future wait() call throw an error if the exit code !== 0, except if
+   * option.allowFail === true
    * @param {RunOptions} [opt] options
    * @returns A RunStream object.
    * ```ts
-   * import { Stream } from "https://deno.land/x/shell_stream@v1.0.10/mod.ts";
+   * import { Stream } from "https://deno.land/x/shell_stream@v1.0.11/mod.ts";
    *
    * let kernelName = await Stream
    *   .fromRun("uname --kernel-name")
@@ -205,8 +201,6 @@ export const read = Stream.fromFile;
  * `waitRun` is an alias of `Stream.fromRun(cmdOrStr, opt).wait()`
  * @param {string[] | string} cmdOrStr A string or array of strings that
  * represents the command to run.
- * The string is split by this regex to create the run command :
- * `/"(\\"|[^"])*"|'(\\'|[^'])*'|[^ "']+/g`
  * @param {RunOptions} [opt] options
  * @returns A promise of RunStream.
  */
@@ -217,8 +211,6 @@ export function waitRun(cmdOrStr: string[] | string, opt?: RunOptions) {
  * `runOk` is an alias of `Stream.fromRun(cmdOrStr, opt).success()`
  * @param {string[] | string} cmdOrStr A string or array of strings that
  * represents the command to run.
- * The string is split by this regex to create the run command :
- * `/"(\\"|[^"])*"|'(\\'|[^'])*'|[^ "']+/g`
  * @param {RunOptions} [opt] RunOptions
  * @returns A promise of boolean, true if the process was successful
  */
@@ -229,8 +221,6 @@ export function runOk(cmdOrStr: string[] | string, opt?: RunOptions) {
  * `runKo` is an alias of `Stream.fromRun(cmdOrStr, opt).fail()`
  * @param {string[] | string} cmdOrStr A string or array of strings that
  * represents the command to run.
- * The string is split by this regex to create the run command :
- * `/"(\\"|[^"])*"|'(\\'|[^'])*'|[^ "']+/g`
  * @param {RunOptions} [opt] RunOptions
  * @returns A promise of boolean, true if the process has failed
  */
@@ -241,8 +231,6 @@ export function runKo(cmdOrStr: string[] | string, opt?: RunOptions) {
  `runToString` is an alias of `Stream.fromRun(cmdOrStr, opt).fail()`
  @param {string[] | string} cmdOrStr A string or array of strings that
  represents the command to run.
- The string is split by this regex to create the run command :
- `/"(\\"|[^"])*"|'(\\'|[^'])*'|[^ "']+/g`
  * @param {RunOptions} [opt] RunOptions
  * @returns A promise of the stdout as string.
  */

@@ -41,8 +41,6 @@ export class RunStream extends LineStream<string> {
   /**
    @param {string[] | string} cmdOrStr A string or array of strings that
    represents the command to run.
-   The string is split by this regex to create the run command :
-   `/"(\\"|[^"])*"|'(\\'|[^'])*'|[^ "']+/g`
    * @param {RunOptions | undefined} [opt] options
    * @param {LineStream<unknown> | undefined} [parent] The parent stream.
    */

@@ -6,7 +6,7 @@ Shell pipe/redirects.
 
 It has zero 3rd party dependencies and don't internally run sh or bash commands.
 
-Deno Doc : https://doc.deno.land/https://deno.land/x/shell_stream@v1.0.10/mod.ts
+Deno Doc : https://doc.deno.land/https://deno.land/x/shell_stream@v1.0.11/mod.ts
 
 ## Quick examples
 
@@ -15,7 +15,7 @@ import {
   run,
   runToString,
   Stream,
-} from "https://deno.land/x/shell_stream@v1.0.10/mod.ts";
+} from "https://deno.land/x/shell_stream@v1.0.11/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.128.0/fmt/colors.ts";
 
 console.log(await runToString("uname --kernel-name")); // → Linux
@@ -52,7 +52,7 @@ See more examples in `example.ts` file.
 
 - `Stream.fromRun(cmd: string[] | string, opt?:` [RunOptions](#RunOptions) `)`:
   generate stream from the process. If cmd is a string, it will be parsed to
-  array (regex used to split : `/"(\\"|[^"])*"|'(\\'|[^'])*'|[^ "']*/g`).
+  array.
 - `Stream.fromFile(file: Deno.FsFile | string)`: generate a stream from the
   file.
 - `Stream.fromDir(path: string)`: generate a stream of `Deno.DirEntry` from dir.
@@ -87,13 +87,12 @@ See more examples in `example.ts` file.
 - `map(mapFunction: MapFunction<T, U>)` : transform the stream with the return
   of mapFunction
 - `replace(searchValue: string | RegExp, replacer: string)` : transform the
-  stream with the replace result.
+  stream with the "replace" result.
 - `replaceAll(searchValue: string | RegExp, replacer: string)` : transform the
   stream with the replaceAll result.
 - `run(cmdOrStr: string[] | string, opt: RunOptions = {})` : generate a stream
   with the current stream as the stdin of the new process. If cmd is a string,
-  it will be parsed to array (regex used to split :
-  `/"(\\"|[^"])*"|'(\\'|[^'])*'|[^ "']*/g`).
+  it will be parsed to array.
 - `sort(compareFn?: CompareFn)` : transform the stream, sort the stream.
 - `sponge()` : keep stream unchanged, soaks up all its input before re-emit all.
 - `tail(max = 1)` : transform the stream, keep only last `count` lines.
