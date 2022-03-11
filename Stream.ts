@@ -20,10 +20,12 @@ export abstract class Stream {
    * represents the command to run.
    * The string is split by this regex to create the run command :
    * `/"(\\"|[^"])*"|'(\\'|[^'])*'|[^ "']+/g`
+   *
+   * the future wait() throw an error if the exit code !== 0, except if option.allowFail === true
    * @param {RunOptions} [opt] options
    * @returns A RunStream object.
    * ```ts
-   * import { Stream } from "https://deno.land/x/shell_stream@v1.0.8/mod.ts";
+   * import { Stream } from "https://deno.land/x/shell_stream@v1.0.10/mod.ts";
    *
    * let kernelName = await Stream
    *   .fromRun("uname --kernel-name")

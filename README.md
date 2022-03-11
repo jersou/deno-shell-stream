@@ -6,7 +6,7 @@ Shell pipe/redirects.
 
 It has zero 3rd party dependencies and don't internally run sh or bash commands.
 
-Deno Doc : https://doc.deno.land/https://deno.land/x/shell_stream@v1.0.8/mod.ts
+Deno Doc : https://doc.deno.land/https://deno.land/x/shell_stream@v1.0.10/mod.ts
 
 ## Quick examples
 
@@ -15,7 +15,7 @@ import {
   run,
   runToString,
   Stream,
-} from "https://deno.land/x/shell_stream@v1.0.8/mod.ts";
+} from "https://deno.land/x/shell_stream@v1.0.10/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.128.0/fmt/colors.ts";
 
 console.log(await runToString("uname --kernel-name")); // → Linux
@@ -88,6 +88,8 @@ See more examples in `example.ts` file.
   of mapFunction
 - `replace(searchValue: string | RegExp, replacer: string)` : transform the
   stream with the replace result.
+- `replaceAll(searchValue: string | RegExp, replacer: string)` : transform the
+  stream with the replaceAll result.
 - `run(cmdOrStr: string[] | string, opt: RunOptions = {})` : generate a stream
   with the current stream as the stdin of the new process. If cmd is a string,
   it will be parsed to array (regex used to split :
@@ -147,13 +149,14 @@ Extends [Deno.RunOptions](https://doc.deno.land/builtin/stable#Deno.RunOptions)
 
 ```
 export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
-  throwIfRunFail?: boolean;
+  allowFail?: boolean;
   exitCodeOnFail?: number;
 };
 ```
 
-- throwIfRunFail: if the process exit code !== 0, throw error
+- allowFail: throw an error if the process exit code !== 0.
 - exitCodeOnFail: if the process exit code !== 0, immediately exit from Deno
+  with this exit code
 
 ## Development
 

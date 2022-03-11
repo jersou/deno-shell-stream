@@ -11,6 +11,10 @@ import { TailTransform } from "../transform/TailTransform.ts";
 import { SpongeTransform } from "../transform/SpongeTransform.ts";
 import { UniqTransform } from "../transform/UniqTransform.ts";
 import { CompareFn, SortTransform } from "../transform/SortTransform.ts";
+import { FileStream } from "../file/FileStream.ts";
+import { arrayToStream } from "../utils/ArrayToStream.ts";
+import { Stream } from "../Stream.ts";
+import { promiseToStream } from "../utils/PromiseToStream.ts";
 
 export type TapFunction<T> = (line: T) => unknown;
 export type LogTransformFunction<T> = (line: T) => string;
@@ -143,14 +147,37 @@ export class LineStream<T> {
    * @returns promise of itself.
    */
   async toFile(file: Deno.FsFile | string) {
-    let fsFile;
-    if (typeof file === "string") {
-      fsFile = await Deno.create(file);
+    // check if a parent is a fromFile with the same path
+    const firstStream = this.getParents()[0];
+    // FIXME "instanceof FileStream" fail
+    const firstStreamFile =
+      (firstStream as unknown as { file?: Deno.FsFile | string })["file"];
+    if (firstStreamFile && firstStreamFile === file) {
+      if (Stream.verbose) {
+        console.log(
+          "The output file is the same as the input, wait the end on the input stream before write the file",
+        );
+      }
+      const bytes = await this.toBytes();
+      let fsFile;
+      if (typeof file === "string") {
+        fsFile = await Deno.create(file);
+      } else {
+        fsFile = file;
+      }
+      await fsFile.write(bytes);
+      fsFile.close();
+      return this;
     } else {
-      fsFile = file;
+      let fsFile;
+      if (typeof file === "string") {
+        fsFile = await Deno.create(file);
+      } else {
+        fsFile = file;
+      }
+      await this.toByteReadableStream().pipeTo(fsFile.writable);
+      return await this.wait();
     }
-    await this.toByteReadableStream().pipeTo(fsFile.writable);
-    return await this.wait();
   }
 
   /**
@@ -194,6 +221,12 @@ export class LineStream<T> {
 
   replace(searchValue: string | RegExp, replacer: string) {
     return this.map((line: T) => String(line).replace(searchValue, replacer));
+  }
+
+  replaceAll(searchValue: string | RegExp, replacer: string) {
+    return this.map((line: T) =>
+      String(line).replaceAll(searchValue, replacer)
+    );
   }
 
   tee(path: string): LineStream<T | string> {

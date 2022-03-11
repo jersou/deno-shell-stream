@@ -4,7 +4,7 @@ import {
   run,
   runToString,
   Stream,
-} from "https://deno.land/x/shell_stream@v1.0.8/mod.ts";
+} from "https://deno.land/x/shell_stream@v1.0.10/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.128.0/fmt/colors.ts";
 
 let rootLine = await Stream
