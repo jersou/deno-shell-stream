@@ -351,6 +351,9 @@ export class LineStream<T> {
     return !await this.success();
   }
 
+  /**
+   * apply the transform function to have a promise, emit the promise result
+   */
   mapAwait<U>(mapFunction: MapFunction<T, Promise<U>>): LineStream<U> {
     return this.transform(new MapAwaitTransform<T, U>(mapFunction));
   }

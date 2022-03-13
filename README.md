@@ -6,7 +6,8 @@ Shell pipe/redirects.
 
 It has zero 3rd party dependencies and don't internally run sh or bash commands.
 
-Deno Doc : https://doc.deno.land/https://deno.land/x/shell_stream@v1.0.13/mod.ts
+→ Deno Doc :
+https://doc.deno.land/https://deno.land/x/shell_stream@v1.0.13/mod.ts
 
 ## Quick examples
 
@@ -104,6 +105,17 @@ See more examples in `example.ts` file.
   with the transformStream.
 - `uniq()` : transform the stream, keep only lines that are different from
   previous line.
+- `mapAwait(mapFunction: MapFunction<T, Promise<U>>)` : apply the transform
+  function to have a promise, emit the promise result
+- `mapAwaitParallel(mapFunction: MapFunction<T, Promise<U>>, max: number)`
+  :Consume a stream of element, apply a function on it to have promises, pause
+  the consumption if there are "max" pending promise
+- `xargsN1(cmdOrStr: string[] | string, opt?: RunOptions)` :Like `xargs -n 1`,
+  run a process with input element as last argument of cmd. Alias for
+  `mapAwait((e) => waitRun([...cmd, String(e)], opt))`.
+- `xargsN1P(cmdOrStr: string[] | string, max: number, opt?: RunOptions)` : Like
+  `xargs -n 1 -P max`, run a process with input element as last argument of cmd.
+  Alias for `mapAwaitParallel((e) => waitRun([...cmd, String(e)], opt), max)`
 
 ### Endpoint Operators
 
