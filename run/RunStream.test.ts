@@ -234,3 +234,14 @@ Deno.test("Stream.success() fail", async () => {
   await assertRejects(async () => await stream.success());
   await getRunStream(stream.parent)?.process?.close();
 });
+
+Deno.test("runStream stderr", async () => {
+  const outStream = new RunStream(`deno eval "console.error('is err')"`);
+  const out = await outStream.log().toString();
+  assertEquals(out, "");
+  const errStream = new RunStream(`deno eval "console.error('is err')"`, {
+    useStderr: true,
+  });
+  const err = await errStream.log().toString();
+  assertEquals(err, "is err");
+});

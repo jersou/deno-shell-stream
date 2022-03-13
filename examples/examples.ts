@@ -4,9 +4,9 @@ import {
   run,
   runToString,
   Stream,
-} from "https://deno.land/x/shell_stream@v1.0.13/mod.ts";
+} from "https://deno.land/x/shell_stream/mod.ts";
 import { bgBlue, bgRed } from "https://deno.land/std@0.128.0/fmt/colors.ts";
-import { waitRun } from "./Stream.ts";
+import { waitRun } from "../Stream.ts";
 
 let rootLine = await Stream
   .fromRun("cat /etc/passwd")

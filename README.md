@@ -6,8 +6,7 @@ Shell pipe/redirects.
 
 It has zero 3rd party dependencies and don't internally run sh or bash commands.
 
-→ Deno Doc :
-https://doc.deno.land/https://deno.land/x/shell_stream@v1.0.13/mod.ts
+→ Deno Doc : https://doc.deno.land/https://deno.land/x/shell_stream/mod.ts
 
 ## Quick examples
 
@@ -16,7 +15,7 @@ import {
   run,
   runToString,
   Stream,
-} from "https://deno.land/x/shell_stream@v1.0.13/mod.ts";
+} from "https://deno.land/x/shell_stream/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.128.0/fmt/colors.ts";
 
 console.log(await runToString("uname --kernel-name")); // → Linux
@@ -47,7 +46,7 @@ console.log(await run("deno --version").tail(2).toArray());
 // → [ "v8 9.9.115.7", "typescript 4.5.2" ]
 ```
 
-See more examples in `example.ts` file.
+See more examples in `examples/` directory.
 
 ### Startpoint Operators
 
@@ -107,13 +106,13 @@ See more examples in `example.ts` file.
   previous line.
 - `mapAwait(mapFunction: MapFunction<T, Promise<U>>)` : apply the transform
   function to have a promise, emit the promise result
-- `mapAwaitParallel(mapFunction: MapFunction<T, Promise<U>>, max: number)`
+- `mapAwaitParallel(mapFunction: MapFunction<T, Promise<U>>, max?: number)`
   :Consume a stream of element, apply a function on it to have promises, pause
   the consumption if there are "max" pending promise
 - `xargsN1(cmdOrStr: string[] | string, opt?: RunOptions)` :Like `xargs -n 1`,
   run a process with input element as last argument of cmd. Alias for
   `mapAwait((e) => waitRun([...cmd, String(e)], opt))`.
-- `xargsN1P(cmdOrStr: string[] | string, max: number, opt?: RunOptions)` : Like
+- `xargsN1P(cmdOrStr: string[] | string, max?: number, opt?: RunOptions)` : Like
   `xargs -n 1 -P max`, run a process with input element as last argument of cmd.
   Alias for `mapAwaitParallel((e) => waitRun([...cmd, String(e)], opt), max)`
 
@@ -162,12 +161,14 @@ Extends [Deno.RunOptions](https://doc.deno.land/builtin/stable#Deno.RunOptions)
 export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
   allowFail?: boolean;
   exitCodeOnFail?: number;
+  useStderr?: boolean;
 };
 ```
 
 - allowFail: throw an error if the process exit code !== 0.
 - exitCodeOnFail: if the process exit code !== 0, immediately exit from Deno
   with this exit code
+- useStderr: use stderr instead of stdout
 
 ## Development
 

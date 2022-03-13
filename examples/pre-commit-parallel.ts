@@ -1,8 +1,8 @@
 #!/usr/bin/env -S deno run -A
-import { bgGreen, bgRed, dirname, fromFileUrl } from "./test_deps.ts";
-import { run, setCwd, Stream } from "./Stream.ts";
-import { black } from "./deps.ts";
-import { RunOptions, RunStream } from "./run/RunStream.ts";
+import { bgGreen, bgRed, dirname, fromFileUrl } from "../test_deps.ts";
+import { run, setCwd, Stream } from "../Stream.ts";
+import { black } from "../deps.ts";
+import { RunOptions, RunStream } from "../run/RunStream.ts";
 
 const optStdOut: RunOptions = { allowFail: true, stdout: "null" };
 const optStdErr: RunOptions = { ...optStdOut, useStderr: true };

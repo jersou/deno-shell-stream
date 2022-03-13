@@ -41,4 +41,3 @@ await build({
 });
 
 await Deno.copyFile("./README-nodejs.md", "./npm/README.md");
-await Deno.copyFile("./npm_examples.js", "./npm/examples.js");

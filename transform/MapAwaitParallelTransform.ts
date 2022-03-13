@@ -11,7 +11,7 @@ export class MapAwaitParallelTransform<I, O> extends TransformStream<I, O> {
 
   constructor(
     public mapFunction: MapFunction<I, Promise<O>>,
-    public max: number,
+    public max?: number,
   ) {
     super();
     this.readable = new ReadableStream<O>({
@@ -30,7 +30,7 @@ export class MapAwaitParallelTransform<I, O> extends TransformStream<I, O> {
   }
 
   async enqueue(chunk: I) {
-    if (this.pendingPromises.length === this.max) {
+    if (this.max && this.pendingPromises.length === this.max) {
       const racePromises = this.pendingPromises.map((e) => e.promise);
       const id = await Promise.race([this.deferredClose, ...racePromises]);
       const index = this.pendingPromises.findIndex((el) => el.id === id);

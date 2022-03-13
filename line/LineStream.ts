@@ -97,7 +97,7 @@ export class LineStream<T> {
    * Logs the lines to the console
    * Use the transform function if specified to modify the line before the log
    * ```ts
-   * import { Stream } from "https://deno.land/x/shell_stream@v1.0.13/mod.ts";
+   * import { Stream } from "https://deno.land/x/shell_stream/mod.ts";
    * await Stream.FromArray(["1", "2", "3"]).log().wait();
    * await Stream.FromArray(["1", "2", "3"]).log(bgRed).wait();
    * ```
@@ -373,7 +373,7 @@ export class LineStream<T> {
    *   .catch(console.error);
    * ```
    */
-  mapAwaitParallel<U>(mapFunction: MapFunction<T, Promise<U>>, max: number) {
+  mapAwaitParallel<U>(mapFunction: MapFunction<T, Promise<U>>, max?: number) {
     return this.transform(
       new MapAwaitParallelTransform<T, U>(mapFunction, max),
     );
@@ -412,7 +412,7 @@ export class LineStream<T> {
    * console.log(array.map((r) => r.processStatus?.code));
    * ```
    */
-  xargsN1P(cmdOrStr: string[] | string, max: number, opt?: RunOptions) {
+  xargsN1P(cmdOrStr: string[] | string, max?: number, opt?: RunOptions) {
     const cmd = parseCmdString(cmdOrStr);
     return this.mapAwaitParallel((e) => waitRun([...cmd, String(e)], opt), max);
   }

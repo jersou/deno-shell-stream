@@ -3,7 +3,9 @@ import { LineStream } from "../line/LineStream.ts";
 import { assert, TextLineStream } from "../deps.ts";
 import { Stream } from "../Stream.ts";
 import { RunError } from "./RunError.ts";
+import { Buffer } from "https://deno.land/std@0.128.0/io/buffer.ts";
 
+// TODO opt to read stderr
 /**
  * Get the RunStream from a Stream, if it's an instance of RunStream.
  * @param {LineStream<unknown> | undefined} stream LineStream<unknown> |
@@ -23,9 +25,11 @@ export function getRunStream(
 export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
   allowFail?: boolean;
   exitCodeOnFail?: number;
+  useStderr?: boolean;
 };
+export type RunningOptions = Pick<Deno.RunOptions, "stdout" | "stderr">;
 
-/* LineStream that runs a process and output its stdout as LineStream */
+/* LineStream that runs a process and output its output as LineStream */
 export class RunStream extends LineStream<string> {
   /* the command of the process. */
   processCmd: string[];
@@ -34,7 +38,7 @@ export class RunStream extends LineStream<string> {
   /* the exit status of the process */
   processStatus?: Deno.ProcessStatus;
   /* option used by the start() method */
-  runningOpt?: { stdout: RunOptions["stdout"] };
+  runningOpt?: RunningOptions;
   isClosed = false;
   /* The current working directory used by the process */
   cwd: string;
@@ -56,8 +60,8 @@ export class RunStream extends LineStream<string> {
   }
 
   /**
-   * convert the stdout to stream of lines
-   * @returns A ReadableStream that emits each line of the process stdout
+   * convert the output of the process to stream of lines
+   * @returns A ReadableStream that emits each line of the process output
    */
   getLineReadableStream(): ReadableStream<string> {
     if (!this.linesStream) {
@@ -71,11 +75,11 @@ export class RunStream extends LineStream<string> {
 
   /**
    * If the process is not running, start it. If the stream has child, the
-   * stdout run option is set to "piped"
-   * @param [opt] { stdout: RunOptions["stdout"] }
+   * stdout/stderr run option is set to "piped"
+   * @param [opt] { stdout?: RunOptions["stdout"], stderr?: RunOptions["stderr"] }
    * @returns The stream itself.
    */
-  start(opt?: { stdout: RunOptions["stdout"] }) {
+  start(opt?: RunningOptions) {
     if (!this.process) {
       this.runningOpt = opt;
       if (this.parent) {
@@ -113,29 +117,43 @@ export class RunStream extends LineStream<string> {
         this.process = Deno.run(fullOpt);
       }
     } else if (opt) {
-      assert(
-        this.runningOpt?.stdout === "piped",
-        `Already running and the opt param is not empty. Use start({ stdout: "piped" })`,
-      );
+      if (this.opt?.useStderr) {
+        assert(
+          this.runningOpt?.stderr === "piped",
+          `Already running and the opt param is not empty. Use start({ stderr: "piped" })`,
+        );
+      } else {
+        assert(
+          this.runningOpt?.stdout === "piped",
+          `Already running and the opt param is not empty. Use start({ stdout: "piped" })`,
+        );
+      }
     }
     return this;
   }
 
   /**
-   * @returns A promise of the stdout process as string
+   * @returns A promise of the output of the process as string
    */
   async toString() {
     return new TextDecoder().decode(await this.toBytes());
   }
 
   /**
-   * @returns A promise of the stdout process as Uint8Array
+   * @returns A promise of the output of the process as Uint8Array
    */
   async toBytes() {
-    this.start({ stdout: "piped" });
-    const ret = await this.process!.output();
+    const buffer = new Buffer();
+    const reader = this.toByteReadableStream().getReader();
+    let res;
+    while (!res?.done) {
+      res = await reader.read();
+      if (res.value) {
+        await buffer.write(res.value);
+      }
+    }
     await this.wait();
-    return ret;
+    return buffer.bytes();
   }
 
   /**
@@ -180,15 +198,20 @@ export class RunStream extends LineStream<string> {
   }
 
   /**
-   * @returns the stdout readable of the process
+   * @returns the output readable of the process
    */
   toByteReadableStream(): ReadableStream<Uint8Array> {
-    this.start({ stdout: "piped" });
-    return this.process!.stdout!.readable;
+    if (this.opt?.useStderr) {
+      this.start({ stderr: "piped" });
+      return this.process!.stderr!.readable;
+    } else {
+      this.start({ stdout: "piped" });
+      return this.process!.stdout!.readable;
+    }
   }
 
   /**
-   * Save the stdout of the process in the file
+   * Save the output of the process in the file
    * @param {Deno.FsFile | string} file file to write
    * @returns promise of itself.
    */
