@@ -11,7 +11,12 @@ import { TailTransform } from "../transform/TailTransform.ts";
 import { SpongeTransform } from "../transform/SpongeTransform.ts";
 import { UniqTransform } from "../transform/UniqTransform.ts";
 import { CompareFn, SortTransform } from "../transform/SortTransform.ts";
-import { Stream } from "../Stream.ts";
+import { Stream, waitRun } from "../Stream.ts";
+import { MapAwaitTransform } from "../transform/MapAwaitTransform.ts";
+import { parseCmdString } from "../utils/parseCmdString.ts";
+import {
+  MapAwaitParallelTransform,
+} from "../transform/MapAwaitParallelTransform.ts";
 
 export type TapFunction<T> = (line: T) => unknown;
 export type LogTransformFunction<T> = (line: T) => string;
@@ -74,7 +79,7 @@ export class LineStream<T> {
   }
 
   /* transform the stream with the return of mapFunction */
-  map<U>(mapFunction: MapFunction<T, U>) {
+  map<U>(mapFunction: MapFunction<T, U>): LineStream<U> {
     return this.transform<U>(new MapTransform(mapFunction));
   }
 
@@ -92,7 +97,7 @@ export class LineStream<T> {
    * Logs the lines to the console
    * Use the transform function if specified to modify the line before the log
    * ```ts
-   * import { Stream } from "https://deno.land/x/shell_stream@v1.0.11/mod.ts";
+   * import { Stream } from "https://deno.land/x/shell_stream@v1.0.12/mod.ts";
    * await Stream.FromArray(["1", "2", "3"]).log().wait();
    * await Stream.FromArray(["1", "2", "3"]).log(bgRed).wait();
    * ```
@@ -345,4 +350,76 @@ export class LineStream<T> {
   async fail() {
     return !await this.success();
   }
+
+  mapAwait<U>(mapFunction: MapFunction<T, Promise<U>>): LineStream<U> {
+    return this.transform(new MapAwaitTransform<T, U>(mapFunction));
+  }
+
+  /**
+   * Consume a stream of element, apply a function on it to have promises,
+   * pause the consumption if there are "max" pending promise
+   * ```ts
+   * Stream.fromArray([
+   *     "npm run lint",
+   *     "npm run prettier-check",
+   *     "npm run ts-check",
+   *     "npm run test"
+   *   ])
+   *   .mapAwaitParallel(waitRun, 2) // ~= xargs -n 1 -P 2 bash -c
+   *   .wait()
+   *   .catch(console.error);
+   * ```
+   */
+  mapAwaitParallel<U>(mapFunction: MapFunction<T, Promise<U>>, max: number) {
+    return this.transform(
+      new MapAwaitParallelTransform<T, U>(mapFunction, max),
+    );
+  }
+  /**
+   * Like `xargs -n 1`, run a process with input element as last argument of cmd.
+   * Alias for `mapAwait((e) => waitRun([...cmd, String(e)], opt))`.
+   * ```ts
+   * await Stream
+   *   .fromArray(["exit 0", "exit 1", "exit 2", "exit 0"])
+   *   .log((n) => bgRed(String(n)))
+   *   .xargsN1("bash -c", { allowFail: true })
+   *   .log((n) => bgBlue(n.processCmd.join(" ") + " = " + n.processStatus?.success))
+   *   .wait();
+   * ```
+   */
+  xargsN1(cmdOrStr: string[] | string, opt?: RunOptions) {
+    const cmd = parseCmdString(cmdOrStr);
+    return this.mapAwait((e) => waitRun([...cmd, String(e)], opt));
+  }
+
+  /**
+   * Like `xargs -n 1 -P max`, run a process with input element as last argument
+   * of cmd.
+   * Alias for `mapAwaitParallel((e) => waitRun([...cmd, String(e)], opt), max)`
+   * ```ts
+   * const array = await Stream
+   *   .fromArray([
+   *     "sleep 0.5 && exit 0",
+   *     "sleep 0.4 && exit 1",
+   *     "sleep 0.3 && exit 2",
+   *     "sleep 0.1 && exit 3",
+   *   ])
+   *   .xargsN1P("bash -c", 2, { allowFail: true })
+   *   .toArray();
+   * console.log(array.map((r) => r.processStatus?.code));
+   * ```
+   */
+  xargsN1P(cmdOrStr: string[] | string, max: number, opt?: RunOptions) {
+    const cmd = parseCmdString(cmdOrStr);
+    return this.mapAwaitParallel((e) => waitRun([...cmd, String(e)], opt), max);
+  }
+
+  // xargs(cmdOrStr: string[] | string, opt?: RunOptions): LineStream<string> {
+  //   const cmd = parseCmdString(cmdOrStr);
+  //   const readablePromise = this.toArray().then((array) =>
+  //     run([...cmd, ...array.map((e) => String(e))], opt)
+  //       .getLineReadableStream()
+  //   );
+  //   return new LineStream(this, promiseToStream(readablePromise));
+  // }
 }

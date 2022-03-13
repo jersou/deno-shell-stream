@@ -275,3 +275,44 @@ Deno.test("Stream.toBytes", async () => {
     new Uint8Array([108, 105, 110, 101, 49, 10, 108, 105, 110, 101, 50]),
   );
 });
+
+Deno.test("xargsN1", async () => {
+  const array = await Stream
+    .fromArray(["exit 0", "exit 1", "exit 2", "exit 0"])
+    .xargsN1("bash -c", { allowFail: true })
+    .log((n) =>
+      bgBlue(n.processCmd.join(" ") + " = " + n.processStatus?.success)
+    )
+    .toArray();
+  assertEquals(
+    array.map((r) => r.processStatus?.code),
+    [0, 1, 2, 0],
+  );
+});
+
+Deno.test("xargsN1P", async () => {
+  const array = await Stream
+    .fromArray([
+      "sleep 0.5 && exit 0",
+      "sleep 0.4 && exit 1",
+      "sleep 0.3 && exit 2",
+      "sleep 0.1 && exit 3",
+    ])
+    .xargsN1P("bash -c", 2, { allowFail: true })
+    .log((n) =>
+      bgBlue(n.processCmd.join(" ") + " = " + n.processStatus?.success)
+    )
+    .toArray();
+  assertEquals(
+    array.map((r) => r.processStatus?.code),
+    [1, 0, 3, 2],
+  );
+});
+
+// Deno.test("xargs", async () => {
+//   const array = await Stream
+//     .fromArray(["echo 2"])
+//     .xargs("bash -c")
+//     .toString();
+//   assertEquals(array, "2");
+// });

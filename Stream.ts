@@ -21,7 +21,7 @@ export abstract class Stream {
    * @param {RunOptions} [opt] options
    * @returns A RunStream object.
    * ```ts
-   * import { Stream } from "https://deno.land/x/shell_stream@v1.0.11/mod.ts";
+   * import { Stream } from "https://deno.land/x/shell_stream@v1.0.12/mod.ts";
    *
    * let kernelName = await Stream
    *   .fromRun("uname --kernel-name")

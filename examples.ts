@@ -4,8 +4,9 @@ import {
   run,
   runToString,
   Stream,
-} from "https://deno.land/x/shell_stream@v1.0.11/mod.ts";
-import { bgBlue } from "https://deno.land/std@0.128.0/fmt/colors.ts";
+} from "https://deno.land/x/shell_stream@v1.0.12/mod.ts";
+import { bgBlue, bgRed } from "https://deno.land/std@0.128.0/fmt/colors.ts";
+import { waitRun } from "./Stream.ts";
 
 let rootLine = await Stream
   .fromRun("cat /etc/passwd")
@@ -51,3 +52,18 @@ const exitCodes = stream
   .map((s) => s?.processStatus?.code);
 console.log({ exitCodes });
 // → { exitCodes: [ undefined, 13, undefined, undefined, 0 ] }
+
+const streamP = Stream
+  .fromArray([1, 2, 3, 4])
+  .log((n) => bgRed(String(n)))
+  .mapAwaitParallel(
+    (e) => waitRun("zenity --question --text=pause" + e, { allowFail: true }),
+    2,
+  )
+  .log((n) =>
+    bgBlue(n.processCmd.join(" ") + " = " + n.processStatus?.success)
+  );
+const array = await streamP.toArray();
+console.log(streamP);
+console.log(array);
+console.log(array.map((r) => r.processStatus?.code));

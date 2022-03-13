@@ -6,7 +6,7 @@ Shell pipe/redirects.
 
 It has zero 3rd party dependencies and don't internally run sh or bash commands.
 
-Deno Doc : https://doc.deno.land/https://deno.land/x/shell_stream@v1.0.11/mod.ts
+Deno Doc : https://doc.deno.land/https://deno.land/x/shell_stream@v1.0.12/mod.ts
 
 ## Quick examples
 
@@ -15,7 +15,7 @@ import {
   run,
   runToString,
   Stream,
-} from "https://deno.land/x/shell_stream@v1.0.11/mod.ts";
+} from "https://deno.land/x/shell_stream@v1.0.12/mod.ts";
 import { bgBlue } from "https://deno.land/std@0.128.0/fmt/colors.ts";
 
 console.log(await runToString("uname --kernel-name")); // → Linux

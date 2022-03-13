@@ -2,6 +2,7 @@ import { parseCmdString } from "../utils/parseCmdString.ts";
 import { LineStream } from "../line/LineStream.ts";
 import { assert, TextLineStream } from "../deps.ts";
 import { Stream } from "../Stream.ts";
+import { RunError } from "./RunError.ts";
 
 /**
  * Get the RunStream from a Stream, if it's an instance of RunStream.
@@ -162,8 +163,9 @@ export class RunStream extends LineStream<string> {
             console.warn(
               "[RunStream] allowFail===false but checkSuccess is requested",
             );
-            throw new Error(
+            throw new RunError(
               `Fail, process exit code : ${this.processStatus?.code}`,
+              this,
             );
           }
         } else if (!this.opt?.allowFail) {
