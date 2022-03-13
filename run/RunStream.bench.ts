@@ -7,7 +7,7 @@ import {
 } from "https://deno.land/std@0.128.0/testing/bench.ts";
 
 import type { BenchmarkRunResult } from "https://deno.land/std@0.128.0/testing/bench.ts";
-import { FromRun } from "https://deno.land/x/shell_stream@v1.0.12/mod.ts";
+import { FromRun } from "https://deno.land/x/shell_stream@v1.0.13/mod.ts";
 
 import { sanitize } from "../utils/sanitize.ts";
 
