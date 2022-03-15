@@ -309,6 +309,25 @@ Deno.test("xargsN1P", async () => {
   );
 });
 
+Deno.test("Stream.fromArray.run", async () => {
+  const inputArray = ["line1", "line2", "line3"];
+  const out = await Stream
+    .fromArray(inputArray)
+    .run("cat")
+    .grep("line2")
+    .toArray();
+  assertEquals(out, ["line2"]);
+});
+Deno.test("Stream.fromArray.run", async () => {
+  const inputArray = "line1\nline2\nline3";
+  const out = await Stream
+    .fromString(inputArray)
+    .run("cat")
+    .grep("line2")
+    .toArray();
+  assertEquals(out, ["line2"]);
+});
+
 // Deno.test("xargs", async () => {
 //   const array = await Stream
 //     .fromArray(["echo 2"])

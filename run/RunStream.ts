@@ -43,6 +43,8 @@ export class RunStream extends LineStream<string> {
   /* The current working directory used by the process */
   cwd: string;
 
+  pipeToEndPromise?: Promise<void>;
+
   /**
    @param {string[] | string} cmdOrStr A string or array of strings that
    represents the command to run.
@@ -99,7 +101,9 @@ export class RunStream extends LineStream<string> {
           });
         }
         this.process = Deno.run(fullOpt);
-        parentStream.pipeTo(this.process.stdin!.writable);
+        this.pipeToEndPromise = parentStream.pipeTo(
+          this.process.stdin!.writable,
+        );
       } else {
         Stream.incProcessCount();
         const fullOpt: Deno.RunOptions = {
@@ -165,6 +169,7 @@ export class RunStream extends LineStream<string> {
     if (!this.isClosed) {
       this.start();
       await this.parent?.wait(opt);
+      await this.pipeToEndPromise;
       if (!this.processStatus) {
         this.processStatus = await this.process!.status();
       }

@@ -73,7 +73,9 @@ export class LineStream<T> {
 
   /* wait the end of parents, and consume all element of the current stream */
   async wait(opt?: { checkSuccess?: boolean }): Promise<this> {
-    await this.getLineReadableStream().pipeTo(new WritableStream<T>());
+    if (!this.getLineReadableStream().locked) {
+      await this.getLineReadableStream().pipeTo(new WritableStream<T>());
+    }
     await this.parent?.wait(opt);
     return this;
   }

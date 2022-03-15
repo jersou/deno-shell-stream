@@ -130,7 +130,7 @@ See more examples in `examples/` directory.
   stream is closed at end of the iterable.
 - `toString(): Promise<string>` : the stream is closed and converted to String.
 - `getLineReadableStream(): ReadableStream<T>` : return the Stream of elements,
-  split stdout/file by line if the stream is from Run/File.
+  split the output by line if the stream is from Run/File.
 - `success(): Promise<boolean>` : the stream is closed and the success state is
   returned (all parents RunStream are checked).
 - `fail(): Promise<boolean>` : the stream is closed and the fail state is

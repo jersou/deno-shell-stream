@@ -12,7 +12,7 @@ import { promiseToStream } from "./utils/PromiseToStream.ts";
  */
 export abstract class Stream {
   /**
-   * Create a FileStream from a process stdout
+   * Create a FileStream from a process stdout/stderr
    * @param {string[] | string} cmdOrStr A string or array of strings that
    * represents the command to run.
    *
@@ -232,7 +232,7 @@ export function runKo(cmdOrStr: string[] | string, opt?: RunOptions) {
  @param {string[] | string} cmdOrStr A string or array of strings that
  represents the command to run.
  * @param {RunOptions} [opt] RunOptions
- * @returns A promise of the stdout as string.
+ * @returns A promise of the stdout/stderr as string.
  */
 export function runToString(cmdOrStr: string[] | string, opt?: RunOptions) {
   return Stream.fromRun(cmdOrStr, opt).toString();
