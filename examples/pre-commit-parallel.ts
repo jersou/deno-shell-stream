@@ -1,30 +1,32 @@
 /* usage :
  * ```ts
- * import { runPreCommit } from "https://deno.land/x/shell_stream@v1.0.15/examples/pre-commit-parallel.ts";
+ * import { runPreCommit } from "https://deno.land/x/shell_stream@v1.0.16/examples/pre-commit-parallel.ts";
  * import { fromFileUrl, normalize } from "https://deno.land/std@0.128.0/path/mod.ts";
+ * import { setCwd } from "https://deno.land/x/shell_stream@v1.0.16/Stream.ts";
+ * setCwd(dirname(fromFileUrl(import.meta.url)));
  * await runPreCommit([
  *   { cmd: `deno fmt --check --ignore="vendor,npm"`, useStderr: true },
  *   { cmd: `deno lint --ignore="vendor,npm"`, useStderr: true },
  *   { cmd: `deno test -A --ignore="vendor,npm"`, useStderr: false },
- * ], normalize(fromFileUrl(import.meta.url) + "/.."));
+ * ]);
  * ```
+ * The commands are run only if there are staged file in their cwd
  */
-import { normalize } from "https://deno.land/std@0.128.0/path/mod.ts";
-import {
-  run,
-  RunStream,
-  setCwd,
-  Stream,
-} from "https://deno.land/x/shell_stream@v1.0.14/mod.ts";
-import {
-  RunOptions,
-} from "https://deno.land/x/shell_stream@v1.0.14/run/RunStream.ts";
 import {
   bgBlue,
   bgGreen,
   bgRed,
   black,
 } from "https://deno.land/std@0.128.0/fmt/colors.ts";
+import {
+  run,
+  runKo,
+  RunOptions,
+  RunStream,
+  sanitize,
+  Stream,
+} from "/data/Projets/Logiciels/deno/ShellStreamV2/mod.ts";
+
 import {
   default as ProgressBar,
 } from "https://deno.land/x/progress@v1.2.5/mod.ts";
@@ -58,25 +60,41 @@ export function onSuccess() {
   Deno.exit(0);
 }
 
+async function pathHasDiff(path: string) {
+  return await runKo(
+    `git diff --cached --exit-code -- ${path} `,
+    { stderr: "null", stdout: "null" },
+  );
+}
+
+type RunPreCommitData = {
+  cwd?: string;
+  diffPath?: string;
+  cmd: string[] | string;
+  useStderr?: boolean;
+};
+
 export async function runPreCommit(
-  commands: { cmd: string[] | string; useStderr?: boolean }[],
-  cwd?: string,
+  runData: RunPreCommitData[],
+  checkGitDiff = true,
 ) {
-  if (cwd) {
-    setCwd(normalize(cwd));
+  const runs = [];
+  for (const data of runData) {
+    if (!checkGitDiff || await pathHasDiff(data.diffPath ?? data.cwd ?? ".")) {
+      const optStdOut: RunOptions = {
+        allowFail: true,
+        stdout: "null",
+        cwd: data.cwd,
+      };
+      const optStdErr: RunOptions = { ...optStdOut, useStderr: true };
+      runs.push(run(data.cmd, data.useStderr ? optStdErr : optStdOut));
+    }
   }
 
-  const optStdOut: RunOptions = { allowFail: true, stdout: "null" };
-  const optStdErr: RunOptions = { ...optStdOut, useStderr: true };
-  const runs = commands.map((cmdData) =>
-    run(cmdData.cmd, cmdData.useStderr ? optStdErr : optStdOut)
-  );
-
+  Stream.resetProcessCount();
   const progress = new ProgressBar({ title: "progress:", interval: 0 });
-  Stream.subscribeProcessEvent(({ processDone, processCount }) => {
-    progress.render(processDone, {
-      total: Math.max(processCount, runs.length),
-    });
+  Stream.subscribeProcessEvent(({ processDone }) => {
+    progress.render(processDone, { total: runs.length });
   });
 
   await Stream.fromArray(runs)
@@ -84,7 +102,7 @@ export async function runPreCommit(
       stream: s,
       out: await s.log().toString().then((out) => {
         console.error();
-        blue(" → " + s.processCmd.join(" ") + " OK");
+        blue(` → ${s.processCmd.join(" ")} From ${s.opt?.cwd ?? ""} OK !`);
         return out;
       }),
     }))
@@ -92,4 +110,5 @@ export async function runPreCommit(
     .map((streamData) => onError(streamData))
     .wait();
   onSuccess();
+  sanitize();
 }

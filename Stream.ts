@@ -144,6 +144,10 @@ export abstract class Stream {
       })
     );
   }
+  static resetProcessCount() {
+    Stream.processCount = 0;
+    Stream.processDone = 0;
+  }
   /**
    * Increment the process count and send a process event
    */
