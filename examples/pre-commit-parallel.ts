@@ -25,7 +25,7 @@ import {
   RunStream,
   sanitize,
   Stream,
-} from "/data/Projets/Logiciels/deno/ShellStreamV2/mod.ts";
+} from "https://deno.land/x/shell_stream@v1.0.19/mod.ts";
 
 import {
   default as ProgressBar,
