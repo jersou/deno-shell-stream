@@ -1,6 +1,6 @@
 /* usage :
  * ```ts
- * import { runPreCommit } from "https://deno.land/x/shell_stream@v1.0.16/examples/pre-commit-parallel.ts";
+ * import { runPreCommit } from "https://deno.land/x/shell_stream@v1.0.18/examples/pre-commit-parallel.ts";
  * import { fromFileUrl, normalize } from "https://deno.land/std@0.128.0/path/mod.ts";
  * import { setCwd } from "https://deno.land/x/shell_stream@v1.0.16/Stream.ts";
  * setCwd(dirname(fromFileUrl(import.meta.url)));
@@ -60,9 +60,9 @@ export function onSuccess() {
   Deno.exit(0);
 }
 
-async function pathHasDiff(path: string) {
+async function pathHasDiff(path: string, stagedCheck = true) {
   return await runKo(
-    `git diff --cached --exit-code -- ${path} `,
+    `git diff ${stagedCheck ? "--cached" : ""} --exit-code -- ${path} `,
     { stderr: "null", stdout: "null" },
   );
 }
@@ -74,13 +74,21 @@ type RunPreCommitData = {
   useStderr?: boolean;
 };
 
+export type RunPreCommitOption = {
+  checkGitDiff?: boolean;
+  stagedCheck?: boolean;
+};
+
 export async function runPreCommit(
   runData: RunPreCommitData[],
-  checkGitDiff = true,
+  opt?: RunPreCommitOption,
 ) {
   const runs = [];
   for (const data of runData) {
-    if (!checkGitDiff || await pathHasDiff(data.diffPath ?? data.cwd ?? ".")) {
+    if (
+      (opt?.checkGitDiff === false) ||
+      await pathHasDiff(data.diffPath ?? data.cwd ?? ".", opt?.stagedCheck)
+    ) {
       const optStdOut: RunOptions = {
         allowFail: true,
         stdout: "null",
