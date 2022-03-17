@@ -13,4 +13,4 @@ await runPreCommit([
   { cmd: `deno fmt --check --ignore="vendor,npm"`, useStderr: true },
   { cmd: `deno lint --ignore="vendor,npm"`, useStderr: true },
   { cmd: `deno test -A --ignore="vendor,npm"`, useStderr: false },
-]);
+], { checkGitDiff: Deno.env.get("CHECK_GIT_DIFF") !== "false" });

@@ -1,0 +1,13 @@
+{
+  "tasks": {
+    "test": "deno test -A --ignore=vendor,npm",
+    "test-watch": "deno test -A --watch --unstable --ignore=vendor,npm",
+    "lint": "deno lint --ignore=vendor,npm",
+    "fmt": "deno fmt --ignore=vendor,npm",
+    "build-npm": "deno run -A build_npm.ts",
+    "vendor": "rm -rf vendor && deno vendor mod.ts test_deps.ts deps.ts",
+    "gen-cov": "deno run -A gen-cov.ts",
+    "pre-commit": "deno run -A pre-commit.ts",
+    "pre-commit-skip-git-check": "CHECK_GIT_DIFF=false deno run -A pre-commit.ts"
+  }
+}
