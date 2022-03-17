@@ -12,20 +12,8 @@
  * ```
  * The commands are run only if there are staged file in their cwd
  */
-import {
-  bgBlue,
-  bgGreen,
-  bgRed,
-  black,
-} from "https://deno.land/std@0.130.0/fmt/colors.ts";
-import {
-  run,
-  runKo,
-  RunOptions,
-  RunStream,
-  sanitize,
-  Stream,
-} from "https://deno.land/x/shell_stream@v1.0.19/mod.ts";
+import { bgBlue, bgGreen, bgRed, black } from "../deps.ts";
+import { run, runKo, RunOptions, RunStream, sanitize, Stream } from "../mod.ts";
 
 import {
   default as ProgressBar,
@@ -71,13 +59,17 @@ type RunPreCommitData = {
   cwd?: string;
   diffPath?: string;
   cmd: string[] | string;
-  useStderr?: boolean;
 };
 
 export type RunPreCommitOption = {
   checkGitDiff?: boolean;
   stagedCheck?: boolean;
+  liveLog?: boolean;
 };
+
+export function getTimeStr() {
+  return new Date().toISOString().substring(11, 23);
+}
 
 export async function runPreCommit(
   runData: RunPreCommitData[],
@@ -89,13 +81,16 @@ export async function runPreCommit(
       (opt?.checkGitDiff === false) ||
       await pathHasDiff(data.diffPath ?? data.cwd ?? ".", opt?.stagedCheck)
     ) {
-      const optStdOut: RunOptions = {
-        allowFail: true,
-        stdout: "null",
+      const runOptions: RunOptions = {
         cwd: data.cwd,
+        allowFail: true,
+        output: "merged",
+        mergedTransform: {
+          stdout: (s) => `[${getTimeStr()}] ${s}`,
+          stderr: (s) => `[${bgRed(getTimeStr())}] ${s}`,
+        },
       };
-      const optStdErr: RunOptions = { ...optStdOut, useStderr: true };
-      runs.push(run(data.cmd, data.useStderr ? optStdErr : optStdOut));
+      runs.push(run(data.cmd, runOptions));
     }
   }
 
@@ -108,11 +103,13 @@ export async function runPreCommit(
   await Stream.fromArray(runs)
     .mapAwaitParallel(async (s) => ({
       stream: s,
-      out: await s.log().toString().then((out) => {
-        console.error();
-        blue(` → ${s.processCmd.join(" ")} From ${s.opt?.cwd ?? ""} OK !`);
-        return out;
-      }),
+      out: await (opt?.liveLog ? s.log() : s)
+        .toString()
+        .then((out) => {
+          console.error();
+          blue(` → ${s.processCmd.join(" ")} From ${s.opt?.cwd ?? ""} OK !`);
+          return out.trim();
+        }),
     }))
     .filter((streamData) => streamData.stream.processStatus?.success !== true)
     .map((streamData) => onError(streamData))
