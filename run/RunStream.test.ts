@@ -240,8 +240,42 @@ Deno.test("runStream stderr", async () => {
   const out = await outStream.log().toString();
   assertEquals(out, "");
   const errStream = new RunStream(`deno eval "console.error('     ')"`, {
-    useStderr: true,
+    output: "stderr",
   });
   const err = await errStream.log().toString();
   assertEquals(err, "     ");
+});
+
+Deno.test("Stream.getStdOutAndStdErr()", async () => {
+  const stream = Stream
+    .fromRun(`deno eval "console.log('out');console.error('err');"`);
+  const outputs = stream.getStdOutAndStdErr();
+  assertEquals(await outputs.stdout.toString(), "out\n");
+  assertEquals(await outputs.stderr.toString(), "err\n");
+});
+
+Deno.test("Stream.merged", async () => {
+  const stream = Stream
+    .fromRun(`deno eval "console.log('out');console.error('err');"`, {
+      output: "merged",
+    });
+  assertEquals(await stream.toString(), "out\nerr\n");
+});
+
+Deno.test("Stream mergedTransform", async () => {
+  const stream = Stream
+    .fromRun(
+      `deno eval "console.log('out\\nii'); console.error('err');"`,
+      {
+        output: "merged",
+        mergedTransform: {
+          stdout: (s) => `[stdout] ${s}`,
+          stderr: (s) => `[stderr] ${s}`,
+        },
+      },
+    );
+  assertEquals(
+    await stream.toString(),
+    `[stdout] out\n[stdout] ii\n[stderr] err\n[stderr] \n[stdout] \n`,
+  );
 });

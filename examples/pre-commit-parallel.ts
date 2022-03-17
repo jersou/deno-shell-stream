@@ -1,7 +1,7 @@
 /* usage :
  * ```ts
  * import { runPreCommit } from "https://deno.land/x/shell_stream@v1.0.18/examples/pre-commit-parallel.ts";
- * import { fromFileUrl, normalize } from "https://deno.land/std@0.128.0/path/mod.ts";
+ * import { fromFileUrl, normalize } from "https://deno.land/std@0.130.0/path/mod.ts";
  * import { setCwd } from "https://deno.land/x/shell_stream@v1.0.16/Stream.ts";
  * setCwd(dirname(fromFileUrl(import.meta.url)));
  * await runPreCommit([
@@ -17,7 +17,7 @@ import {
   bgGreen,
   bgRed,
   black,
-} from "https://deno.land/std@0.128.0/fmt/colors.ts";
+} from "https://deno.land/std@0.130.0/fmt/colors.ts";
 import {
   run,
   runKo,

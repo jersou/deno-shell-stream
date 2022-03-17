@@ -16,7 +16,7 @@ import {
   runToString,
   Stream,
 } from "https://deno.land/x/shell_stream/mod.ts";
-import { bgBlue } from "https://deno.land/std@0.128.0/fmt/colors.ts";
+import { bgBlue } from "https://deno.land/std@0.130.0/fmt/colors.ts";
 
 console.log(await runToString("uname --kernel-name")); // → Linux
 

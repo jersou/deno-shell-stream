@@ -308,7 +308,7 @@ export function assertNotEquals(
     expectedString = "[Cannot display]";
   }
   if (!msg) {
-    msg = `actual: ${actualString} expected: ${expectedString}`;
+    msg = `actual: ${actualString} expected not to be: ${expectedString}`;
   }
   throw new AssertionError(msg);
 }
@@ -323,21 +323,11 @@ export function assertNotEquals(
  * assertStrictEquals(1, 2)
  * ```
  */
-export function assertStrictEquals(
-  actual: unknown,
-  expected: unknown,
-  msg?: string,
-): void;
 export function assertStrictEquals<T>(
-  actual: T,
+  actual: unknown,
   expected: T,
   msg?: string,
-): void;
-export function assertStrictEquals(
-  actual: unknown,
-  expected: unknown,
-  msg?: string,
-): void {
+): asserts actual is T {
   if (actual === expected) {
     return;
   }
@@ -446,6 +436,48 @@ export function assertAlmostEquals(
       `actual: "${f(actual)}" expected to be close to "${f(expected)}": \
 delta "${f(delta)}" is greater than "${f(tolerance)}"`,
   );
+}
+
+// deno-lint-ignore no-explicit-any
+type AnyConstructor = new (...args: any[]) => any;
+type GetConstructorType<T extends AnyConstructor> = T extends // deno-lint-ignore no-explicit-any
+new (...args: any) => infer C ? C
+  : never;
+
+/**
+ * Make an assertion that `obj` is an instance of `type`.
+ * If not then throw.
+ */
+export function assertInstanceOf<T extends AnyConstructor>(
+  actual: unknown,
+  expectedType: T,
+  msg = "",
+): asserts actual is GetConstructorType<T> {
+  if (!msg) {
+    const expectedTypeStr = expectedType.name;
+
+    let actualTypeStr = "";
+    if (actual === null) {
+      actualTypeStr = "null";
+    } else if (actual === undefined) {
+      actualTypeStr = "undefined";
+    } else if (typeof actual === "object") {
+      actualTypeStr = actual.constructor?.name ?? "Object";
+    } else {
+      actualTypeStr = typeof actual;
+    }
+
+    if (expectedTypeStr == actualTypeStr) {
+      msg = `Expected object to be an instance of "${expectedTypeStr}".`;
+    } else if (actualTypeStr == "function") {
+      msg =
+        `Expected object to be an instance of "${expectedTypeStr}" but was not an instanced object.`;
+    } else {
+      msg =
+        `Expected object to be an instance of "${expectedTypeStr}" but was "${actualTypeStr}".`;
+    }
+  }
+  assert(actual instanceof expectedType, msg);
 }
 
 /**

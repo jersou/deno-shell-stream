@@ -4,9 +4,9 @@ import { assertEquals } from "../test_deps.ts";
 import {
   bench,
   runBenchmarks,
-} from "https://deno.land/std@0.128.0/testing/bench.ts";
+} from "https://deno.land/std@0.130.0/testing/bench.ts";
 
-import type { BenchmarkRunResult } from "https://deno.land/std@0.128.0/testing/bench.ts";
+import type { BenchmarkRunResult } from "https://deno.land/std@0.130.0/testing/bench.ts";
 import { FromRun } from "https://deno.land/x/shell_stream@v0.1.13/mod.ts";
 
 import { sanitize } from "../utils/sanitize.ts";

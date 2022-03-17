@@ -222,7 +222,10 @@ export class LineStream<T> {
    * @returns A promise of output of the stream, as string
    */
   async toString(): Promise<string> {
-    return (await this.toArray()).join("\n");
+    const decoder = new TextDecoder();
+    return (await this.toArray())
+      .map((v) => v instanceof Uint8Array ? decoder.decode(v) : v)
+      .join("\n");
   }
 
   /**

@@ -1,9 +1,14 @@
 import { parseCmdString } from "../utils/parseCmdString.ts";
 import { LineStream } from "../line/LineStream.ts";
-import { assert, TextLineStream } from "../deps.ts";
+import {
+  assert,
+  Buffer,
+  mergeReadableStreams,
+  TextLineStream,
+} from "../deps.ts";
 import { Stream } from "../Stream.ts";
 import { RunError } from "./RunError.ts";
-import { Buffer } from "https://deno.land/std@0.128.0/io/buffer.ts";
+import { MapTransform } from "../transform/MapTransform.ts";
 
 // TODO opt to read stderr
 /**
@@ -25,7 +30,11 @@ export function getRunStream(
 export type RunOptions = Omit<Deno.RunOptions, "cmd"> & {
   allowFail?: boolean;
   exitCodeOnFail?: number;
-  useStderr?: boolean;
+  output?: "stdout" | "stderr" | "merged";
+  mergedTransform?: {
+    stdout?: (s: string) => string;
+    stderr?: (s: string) => string;
+  };
 };
 export type RunningOptions = Pick<Deno.RunOptions, "stdout" | "stderr">;
 
@@ -121,12 +130,13 @@ export class RunStream extends LineStream<string> {
         this.process = Deno.run(fullOpt);
       }
     } else if (opt) {
-      if (this.opt?.useStderr) {
+      if (this.opt?.output === "stderr" || this.opt?.output === "merged") {
         assert(
           this.runningOpt?.stderr === "piped",
           `Already running and the opt param is not empty. Use start({ stderr: "piped" })`,
         );
-      } else {
+      }
+      if (this.opt?.output === "stdout" || this.opt?.output === "merged") {
         assert(
           this.runningOpt?.stdout === "piped",
           `Already running and the opt param is not empty. Use start({ stdout: "piped" })`,
@@ -179,7 +189,7 @@ export class RunStream extends LineStream<string> {
 
       if (!this.processStatus?.success) {
         if (this.opt?.exitCodeOnFail !== undefined) {
-          Deno.exit(this.opt?.exitCodeOnFail);
+          Deno.exit(this.opt.exitCodeOnFail);
         }
         if (opt?.checkSuccess) {
           if (this.opt?.allowFail === false) {
@@ -206,13 +216,36 @@ export class RunStream extends LineStream<string> {
    * @returns the output readable of the process
    */
   toByteReadableStream(): ReadableStream<Uint8Array> {
-    if (this.opt?.useStderr) {
-      this.start({ stderr: "piped" });
-      return this.process!.stderr!.readable;
-    } else {
-      this.start({ stdout: "piped" });
-      return this.process!.stdout!.readable;
+    switch (this.opt?.output) {
+      case undefined:
+      case "stdout":
+        this.start({ stdout: "piped" });
+        return this.process!.stdout!.readable;
+      case "stderr":
+        this.start({ stderr: "piped" });
+        return this.process!.stderr!.readable;
+      case "merged": {
+        this.start({ stdout: "piped", stderr: "piped" });
+        return mergeReadableStreams(
+          transformReadable(
+            this.process!.stdout!.readable,
+            this.opt?.mergedTransform?.stdout,
+          ),
+          transformReadable(
+            this.process!.stderr!.readable,
+            this.opt?.mergedTransform?.stderr,
+          ),
+        );
+      }
     }
+  }
+
+  getStdOutAndStdErr() {
+    this.start({ stdout: "piped", stderr: "piped" });
+    return {
+      stdout: new LineStream(this, this.process!.stdout!.readable),
+      stderr: new LineStream(this, this.process!.stderr!.readable),
+    };
   }
 
   /**
@@ -230,4 +263,18 @@ export class RunStream extends LineStream<string> {
     await this.toByteReadableStream().pipeTo(fsFile.writable);
     return await this.wait();
   }
+}
+export function transformReadable(
+  readable: ReadableStream<Uint8Array>,
+  transformer?: (s: string) => string,
+) {
+  return transformer
+    ? readable
+      .pipeThrough(new TextDecoderStream())
+      .pipeThrough(new TextLineStream())
+      .pipeThrough(
+        new MapTransform((s) => transformer(s) + "\n"),
+      )
+      .pipeThrough(new TextEncoderStream())
+    : readable;
 }

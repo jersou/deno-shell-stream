@@ -77,6 +77,9 @@ Deno.test("Stream.subscribeProcessEvent", async () => {
     { processCount: 2, processDone: 1 },
     { processCount: 2, processDone: 2 },
   ]);
+  Stream.resetProcessCount();
+  assertEquals(Stream.processCount, 0);
+  assertEquals(Stream.processDone, 0);
 });
 
 Deno.test("waitRun", async () => {

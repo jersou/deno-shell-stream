@@ -1,5 +1,5 @@
 import { build } from "https://deno.land/x/dnt@0.21.1/mod.ts";
-import { copy } from "https://deno.land/std@0.128.0/fs/copy.ts";
+import { copy } from "https://deno.land/std@0.130.0/fs/copy.ts";
 import { Stream } from "./Stream.ts";
 
 await Stream.fromRun(["bash", "-c", "type node"]).wait();

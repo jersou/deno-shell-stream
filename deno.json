@@ -8,6 +8,7 @@
     "vendor": "rm -rf vendor && deno vendor mod.ts test_deps.ts deps.ts",
     "gen-cov": "deno run -A gen-cov.ts",
     "pre-commit": "deno run -A pre-commit.ts",
-    "pre-commit-skip-git-check": "CHECK_GIT_DIFF=false deno run -A pre-commit.ts"
+    "pre-commit-skip-git-check": "CHECK_GIT_DIFF=false deno run -A pre-commit.ts",
+    "ci": "deno fmt --check --ignore=vendor,npm && deno lint --ignore=vendor,npm && deno test -A --ignore=vendor,npm"
   }
 }
