@@ -14,38 +14,38 @@ import { sanitize } from "../utils/sanitize.ts";
 //            ┌────────────────────────┬───────┬──────────┐
 //            │       1 000 lines      │    ms │ relative │
 //            ├────────────────────────┼───────┼──────────┤
-//            │ bash grep              │     8 │        1 │
-//            │ Stream V1 run(grep)    │    33 │     4.25 │
-//            │ Stream V1 grep()       │    20 │     2.56 │
-//            │ Stream V2 run(grep)    │    10 │     1.26 │
-//            │ Stream V2 grep()       │     9 │     1.19 │
+//            │ bash grep              │     5 │        1 │
+//            │ Stream V1 run(grep)    │    20 │     3.71 │
+//            │ Stream V1 grep()       │    12 │     2.14 │
+//            │ Stream V2 run(grep)    │     7 │     1.23 │
+//            │ Stream V2 grep()       │     7 │     1.24 │
 //            └────────────────────────┴───────┴──────────┘
 //            ┌────────────────────────┬───────┬──────────┐
 //            │      10 000 lines      │    ms │ relative │
 //            ├────────────────────────┼───────┼──────────┤
-//            │ bash grep              │     7 │        1 │
-//            │ Stream V1 run(grep)    │    30 │      4.2 │
-//            │ Stream V1 grep()       │    22 │     2.97 │
-//            │ Stream V2 run(grep)    │     9 │     1.19 │
-//            │ Stream V2 grep()       │    32 │     4.47 │
+//            │ bash grep              │     5 │        1 │
+//            │ Stream V1 run(grep)    │    18 │     3.38 │
+//            │ Stream V1 grep()       │    13 │     2.38 │
+//            │ Stream V2 run(grep)    │     8 │     1.29 │
+//            │ Stream V2 grep()       │    20 │     3.59 │
 //            └────────────────────────┴───────┴──────────┘
 //            ┌────────────────────────┬───────┬──────────┐
 //            │      100 000 lines     │    ms │ relative │
 //            ├────────────────────────┼───────┼──────────┤
-//            │ bash grep              │    10 │        1 │
-//            │ Stream V1 run(grep)    │  1852 │   179.96 │
-//            │ Stream V1 grep()       │   645 │    62.73 │
-//            │ Stream V2 run(grep)    │    15 │      1.5 │
-//            │ Stream V2 grep()       │   226 │    21.97 │
+//            │ bash grep              │     6 │        1 │
+//            │ Stream V1 run(grep)    │   991 │   175.66 │
+//            │ Stream V1 grep()       │   332 │    58.84 │
+//            │ Stream V2 run(grep)    │     7 │     1.25 │
+//            │ Stream V2 grep()       │   126 │    22.31 │
 //            └────────────────────────┴───────┴──────────┘
 //            ┌────────────────────────┬───────┬──────────┐
 //            │    1 000 000 lines     │    ms │ relative │
 //            ├────────────────────────┼───────┼──────────┤
-//            │ bash grep              │    32 │        1 │
-//            │ Stream V1 run(grep)    │ 19633 │    604.6 │
-//            │ Stream V1 grep()       │  6907 │    212.7 │
-//            │ Stream V2 run(grep)    │    48 │     1.49 │
-//            │ Stream V2 grep()       │  1989 │    61.27 │
+//            │ bash grep              │    21 │        1 │
+//            │ Stream V1 run(grep)    │ 10064 │   486.08 │
+//            │ Stream V1 grep()       │  3338 │   161.23 │
+//            │ Stream V2 run(grep)    │    33 │     1.61 │
+//            │ Stream V2 grep()       │  1069 │    51.65 │
 //            └────────────────────────┴───────┴──────────┘
 const assertData = [
   { inputLinesLength: 1_000, expectedLineLength: 19 },
