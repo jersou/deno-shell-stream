@@ -31,7 +31,7 @@ export function onError(streamData: { stream: RunStream; out: string }) {
   err("                                                                 ");
   err("                                                                 ");
   err("");
-  const cwd = streamData.stream.cwd;
+  const cwd = streamData.stream.opt?.cwd || streamData.stream.cwd;
   const cmd = streamData.stream.processCmd.join(" ");
   err(`Error on "${cwd}", while : "${cmd}"`);
   Deno.exit(1);
