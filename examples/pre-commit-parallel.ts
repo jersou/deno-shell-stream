@@ -50,9 +50,11 @@ export function onSuccess() {
   Deno.exit(0);
 }
 
-async function pathHasDiff(path: string, stagedCheck = true) {
+async function pathHasDiff(path: string, stagedCheck = true, diffRef = "") {
   return await runKo(
-    `git diff ${stagedCheck ? "--cached" : ""} --exit-code -- ${path} `,
+    `git diff ${
+      stagedCheck ? "--cached" : ""
+    } --exit-code ${diffRef} -- ${path} `,
     { stderr: "null", stdout: "null" },
   );
 }
@@ -67,6 +69,8 @@ export type RunPreCommitOption = {
   checkGitDiff?: boolean;
   stagedCheck?: boolean;
   liveLog?: boolean;
+  diffRef?: string;
+  maxParallel?: number;
 };
 
 export function getTimeStr() {
@@ -81,7 +85,11 @@ export async function runPreCommit(
   for (const data of runData) {
     if (
       (opt?.checkGitDiff === false) ||
-      await pathHasDiff(data.diffPath ?? data.cwd ?? ".", opt?.stagedCheck)
+      await pathHasDiff(
+        data.diffPath ?? data.cwd ?? ".",
+        opt?.stagedCheck,
+        opt?.diffRef ?? "",
+      )
     ) {
       const runOptions: RunOptions = {
         cwd: data.cwd,
@@ -112,7 +120,7 @@ export async function runPreCommit(
           blue(` → ${s.processCmd.join(" ")} From ${s.opt?.cwd ?? ""} OK !`);
           return out.trim();
         }),
-    }))
+    }), opt?.maxParallel)
     .filter((streamData) => streamData.stream.processStatus?.success !== true)
     .map((streamData) => onError(streamData))
     .wait();
