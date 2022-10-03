@@ -22,6 +22,7 @@ export type TapFunction<T> = (line: T) => unknown;
 export type LogTransformFunction<T> = (line: T) => string;
 
 export class LineStream<T> {
+  promisesToWaitOnClose: Promise<unknown>[] = [];
   /**
    * It takes a parent stream and a child stream, and returns a new stream that is
    * the parent stream with the child stream attached to it
@@ -77,6 +78,9 @@ export class LineStream<T> {
       await this.getLineReadableStream().pipeTo(new WritableStream<T>());
     }
     await this.parent?.wait(opt);
+    if (this.promisesToWaitOnClose.length) {
+      await Promise.all(this.promisesToWaitOnClose);
+    }
     return this;
   }
 
@@ -205,7 +209,7 @@ export class LineStream<T> {
       const fsFile = await Deno.create(file);
       await fsFile.write(bytes);
       fsFile.close();
-      return this;
+      return this.wait();
     } else {
       let fsFile;
       if (typeof file === "string") {
@@ -214,7 +218,7 @@ export class LineStream<T> {
         fsFile = file;
       }
       await this.toByteReadableStream().pipeTo(fsFile.writable);
-      return await this.wait();
+      return this.wait();
     }
   }
 
@@ -299,11 +303,16 @@ export class LineStream<T> {
     if (this.linesStream) {
       const streams = this.linesStream.tee();
       this.linesStream = streams[0];
-      new LineStream(this, streams[1]).toFile(path).then();
+      const promise = new LineStream(undefined, streams[1])
+        .toFile(path);
+      this.promisesToWaitOnClose.push(promise);
       return this;
     } else {
       const streams = this.toByteReadableStream().tee();
-      Deno.create(path).then((file) => streams[1].pipeTo(file.writable).then());
+      this.promisesToWaitOnClose.push(
+        Deno.create(path)
+          .then((file) => streams[1].pipeTo(file.writable)),
+      );
       return new LineStream(
         this,
         streams[0].pipeThrough(new TextDecoderStream()),

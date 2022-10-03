@@ -10,7 +10,7 @@ import { setCwd } from "./Stream.ts";
 setCwd(dirname(fromFileUrl(import.meta.url)));
 
 await runPreCommit([
-  { cmd: `deno fmt --check --ignore="vendor,npm"` },
-  { cmd: `deno lint --ignore="vendor,npm"` },
-  { cmd: `deno test -A --ignore="vendor,npm"` },
+  { cmd: `deno fmt --check --ignore=vendor,npm,tmp,tmp.ts` },
+  { cmd: `deno lint --ignore=vendor,npm,tmp,tmp.ts` },
+  { cmd: `deno test -A --ignore=vendor,npm,tmp,tmp.ts` },
 ], { checkGitDiff: Deno.env.get("CHECK_GIT_DIFF") !== "false" });

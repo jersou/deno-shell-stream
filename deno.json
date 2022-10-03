@@ -1,10 +1,10 @@
 {
   "tasks": {
     "build-npm": "deno run -A build_npm.ts",
-    "ci": "deno fmt --check --ignore=vendor,npm && deno lint --ignore=vendor,npm && deno test -A --ignore=vendor,npm",
+    "ci": "deno fmt --check --ignore=vendor,npm,tmp,tmp.ts && deno lint --ignore=vendor,npm,tmp,tmp.ts && deno test -A --ignore=vendor,npm,tmp,tmp.ts",
     "fmt": "deno fmt --ignore=vendor,npm,.cov_profile",
     "gen-cov": "deno run -A gen-cov.ts",
-    "lint": "deno lint --ignore=vendor,npm,.cov_profile",
+    "lint": "deno lint --ignore=vendor,npm,.cov_profile,tmp,tmp.ts",
     "pre-commit": "deno run -A pre-commit.ts",
     "pre-commit-skip-git-check": "CHECK_GIT_DIFF=false deno run -A pre-commit.ts",
     "test": "deno test -A --ignore=vendor,npm,.cov_profile",
