@@ -275,7 +275,9 @@ Deno.test("Stream mergedTransform", async () => {
       },
     );
   assertEquals(
-    await stream.toString(),
-    `[stdout] out\n[stdout] ii\n[stderr] err\n[stderr] \n[stdout] \n`,
+    (await stream.toString()).split("\n").sort(),
+    `[stdout] out\n[stdout] ii\n[stderr] err\n[stderr] \n[stdout] \n`.split(
+      "\n",
+    ).sort(),
   );
 });

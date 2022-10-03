@@ -200,7 +200,7 @@ Deno.test("Stream.tee", async () => {
     const out = await Stream.fromArray(inputArray).tee(tmpPath).toArray();
     assertEquals(out, ["line1", "line2", "line3"]);
     const out2 = await Deno.readTextFile(tmpPath);
-    assertEquals(out2, "line1\nline2\nline3");
+    assertEquals(out2, "line1\nline2\nline3\n");
   } finally {
     await Deno.remove(tmpPath);
   }
