@@ -16,7 +16,7 @@ import {
   runToString,
   Stream,
 } from "https://deno.land/x/shell_stream/mod.ts";
-import { bgBlue } from "https://deno.land/std@0.130.0/fmt/colors.ts";
+import { bgBlue } from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
 console.log(await runToString("uname --kernel-name")); // → Linux
 
@@ -62,7 +62,7 @@ See more examples in `examples/` directory.
 - `Stream.fromString(str: string)`: generate a stream from string
 - `Stream.fromWalk(path: string, opt?: WalkOptions)`: generate a stream of file
   path from dir, using [walk](https://deno.land/std/fs#walk), see
-  [WalkOptions](https://doc.deno.land/https/deno.land/std@0.114.0/fs/walk.ts#WalkOptions).
+  [WalkOptions](https://doc.deno.land/https/deno.land/std@0.158.0/fs/walk.ts#WalkOptions).
 
 ### Intermediate Operators
 

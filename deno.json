@@ -9,6 +9,6 @@
     "pre-commit-skip-git-check": "CHECK_GIT_DIFF=false deno run -A pre-commit.ts",
     "test": "deno test -A --ignore=vendor,npm,.cov_profile",
     "test-watch": "deno test -A --watch --unstable --ignore=vendor,npm",
-    "vendor": "rm -rf vendor && deno vendor mod.ts test_deps.ts deps.ts"
+    "vendor": "rm -rf vendor; deno vendor --config .empty-config.json --force mod.ts test_deps.ts deps.ts; echo '{\n}' > .empty-config.json"
   }
 }

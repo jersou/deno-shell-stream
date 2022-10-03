@@ -13,11 +13,11 @@
  *          C	3	6	9
  * ```
  */
-import { Stream } from "https://deno.land/x/shell_stream@v1.0.15/mod.ts";
+import { Stream } from "https://deno.land/x/shell_stream@v1.1.0/mod.ts";
 import {
   bgBrightBlue,
   bgBrightGreen,
-} from "https://deno.land/std@0.130.0/fmt/colors.ts";
+} from "https://deno.land/std@0.158.0/fmt/colors.ts";
 
 const array = await Stream
   .fromRun("xsel --clipboard")

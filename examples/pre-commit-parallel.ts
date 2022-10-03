@@ -1,8 +1,8 @@
 /* usage :
  * ```ts
- * import { runPreCommit } from "https://deno.land/x/shell_stream@v1.0.18/examples/pre-commit-parallel.ts";
- * import { fromFileUrl, normalize } from "https://deno.land/std@0.130.0/path/mod.ts";
- * import { setCwd } from "https://deno.land/x/shell_stream@v1.0.16/Stream.ts";
+ * import { runPreCommit } from "https://deno.land/x/shell_stream@v1.1.0/examples/pre-commit-parallel.ts";
+ * import { fromFileUrl, normalize } from "https://deno.land/std@0.158.0/path/mod.ts";
+ * import { setCwd } from "https://deno.land/x/shell_stream@v1.1.0/Stream.ts";
  * setCwd(dirname(fromFileUrl(import.meta.url)));
  * await runPreCommit([
  *   { cmd: `deno fmt --check --ignore="vendor,npm"`, useStderr: true },
@@ -17,7 +17,7 @@ import { run, runKo, RunOptions, RunStream, sanitize, Stream } from "../mod.ts";
 
 import {
   default as ProgressBar,
-} from "https://deno.land/x/progress@v1.2.5/mod.ts";
+} from "https://deno.land/x/progress@v1.2.8/mod.ts";
 
 export function onError(streamData: { stream: RunStream; out: string }) {
   const err = (s: string) => console.error(bgRed(black(s)));
