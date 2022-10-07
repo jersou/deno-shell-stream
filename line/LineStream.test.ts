@@ -1,6 +1,7 @@
-import { assertEquals } from "../test_deps.ts";
+import { assertEquals, bgGreen } from "../test_deps.ts";
 import { Stream } from "../Stream.ts";
 import { bgBlue } from "../test_deps.ts";
+import { black } from "../deps.ts";
 
 Deno.test("LineStream toArray", async () => {
   const inputArray = ["line1", "line2", "line3"];
@@ -293,11 +294,12 @@ Deno.test("xargsN1", async () => {
 Deno.test("xargsN1P", async () => {
   const array = await Stream
     .fromArray([
-      "sleep 0.5 && exit 0",
-      "sleep 0.4 && exit 1",
-      "sleep 0.3 && exit 2",
-      "sleep 0.1 && exit 3",
+      "echo 0 && sleep 0.5 && echo → 0 && exit 0",
+      "echo 1 && sleep 0.4 && echo → 1 && exit 1",
+      "echo 2 && sleep 0.3 && echo → 2 && exit 2",
+      "echo 3 && sleep 0.1 && echo → 3 && exit 3",
     ])
+    .log((m) => bgGreen(black(m)))
     .xargsN1P("bash -c", 2, { allowFail: true })
     .log((n) =>
       bgBlue(n.processCmd.join(" ") + " = " + n.processStatus?.success)
