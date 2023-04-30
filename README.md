@@ -8,7 +8,8 @@ It has zero 3rd party dependencies and don't internally run sh or bash commands.
 
 → Deno Doc : https://doc.deno.land/https://deno.land/x/shell_stream/mod.ts
 
-**Note : you might be more interested in this project : https://github.com/dsherret/dax**
+**Note : you might be more interested in this project :
+https://github.com/dsherret/dax**
 
 ## Quick examples
 
